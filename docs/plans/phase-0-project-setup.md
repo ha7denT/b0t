@@ -1,5 +1,16 @@
 # Phase 0 — Project Setup Implementation Plan
 
+> **STATUS: COMPLETE (2026-04-30).** This plan has been fully executed. It is preserved as a historical record. The unchecked checkboxes below are an artefact of the project's "plans are immutable historical documents" convention — they were not updated post-execution. For current state, see [`../IMPLEMENTATION.md`](../IMPLEMENTATION.md).
+>
+> **Three deviations from this written plan were taken during execution, all documented in `docs/IMPLEMENTATION.md`:**
+> 1. **Task 3** scaffolded the Xcode project programmatically via `xcodegen` (with `project.yml` as the source of truth) rather than the manual Xcode IDE flow described below. Steps 5.1, 6.1 in the plan that were marked `[USER]` were also handled by xcodegen edits.
+> 2. **Font swap landed mid-plan:** Berkeley Mono → IoskeleyMono NL (open-source). Affected `docs/prd.md` §12 Q6, `docs/design_document.md` §3.4, `CLAUDE.md`, and the b0tDesign module's `CLAUDE.md`.
+> 3. **CI runner is `macos-latest`,** not `macos-15` as the plan specifies — Xcode 26 wasn't reliably on `macos-15` images. The plan's own contingency note anticipated this fallback.
+>
+> **Original plan content preserved below for reference.** Read in conjunction with `IMPLEMENTATION.md` for current state.
+>
+> ---
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Stand up the b0t Xcode project, Swift package, Claude Code harness, CI, and tooling so that subsequent phases can land code against a clean, buildable, testable baseline.
