@@ -49,4 +49,19 @@ final class MarkdownSplitterTests: XCTestCase {
         let result = try MarkdownSplitter.split(text)
         XCTAssertNotNil(result.frontmatterRange, "BOM should be tolerated")
     }
+
+    func test_split_closerAtEOF_noTrailingNewline() throws {
+        let text = "---\nkey: value\n---"
+        let result = try MarkdownSplitter.split(text)
+        XCTAssertEqual(result.frontmatterRange.map { String(text[$0]) }, "key: value")
+        XCTAssertEqual(String(text[result.proseRange]), "")
+        XCTAssertNil(result.parseError)
+    }
+
+    func test_split_dashLikeContentInFrontmatterDoesNotPrematurelyClose() throws {
+        let text = "---\nfoo: ---bar\nbaz: 1\n---\nbody\n"
+        let result = try MarkdownSplitter.split(text)
+        XCTAssertEqual(result.frontmatterRange.map { String(text[$0]) }, "foo: ---bar\nbaz: 1")
+        XCTAssertEqual(String(text[result.proseRange]), "body\n")
+    }
 }

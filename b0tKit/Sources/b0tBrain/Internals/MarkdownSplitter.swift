@@ -76,12 +76,10 @@ internal enum MarkdownSplitter {
                 // Map indices from `stripped` back to `text` (BOM-aware).
                 let fmStart = mapIndex(bodyStart, from: stripped, to: text)
                 let fmEnd = mapIndex(closeRange.lowerBound, from: stripped, to: text)
-                let proseStart: String.Index = {
-                    let afterClose = stripped.index(after: closeRange.upperBound)
-                    return after == stripped.endIndex
-                        ? mapIndex(stripped.endIndex, from: stripped, to: text)
-                        : mapIndex(afterClose, from: stripped, to: text)
-                }()
+                let proseStart: String.Index =
+                    after == stripped.endIndex
+                    ? mapIndex(stripped.endIndex, from: stripped, to: text)
+                    : mapIndex(stripped.index(after: closeRange.upperBound), from: stripped, to: text)
                 // The frontmatter region is the body strictly between delimiters.
                 // We trim a single trailing newline if the body ends with one,
                 // so callers see the YAML content without the closing `\n`.
