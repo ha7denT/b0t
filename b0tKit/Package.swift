@@ -14,16 +14,30 @@ let package = Package(
         .library(name: "b0tAudio", targets: ["b0tAudio"]),
         .library(name: "b0tDesign", targets: ["b0tDesign"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.1.0")
+    ],
     targets: [
         .target(name: "b0tCore", dependencies: ["b0tBrain"]),
-        .target(name: "b0tBrain"),
+        .target(
+            name: "b0tBrain",
+            dependencies: [
+                .product(name: "Yams", package: "Yams")
+            ]
+        ),
         .target(name: "b0tSkills", dependencies: ["b0tBrain"]),
         .target(name: "b0tFace", dependencies: ["b0tDesign"]),
         .target(name: "b0tAudio"),
         .target(name: "b0tDesign"),
 
         .testTarget(name: "b0tCoreTests", dependencies: ["b0tCore"]),
-        .testTarget(name: "b0tBrainTests", dependencies: ["b0tBrain"]),
+        .testTarget(
+            name: "b0tBrainTests",
+            dependencies: ["b0tBrain"],
+            resources: [
+                .copy("Fixtures")
+            ]
+        ),
         .testTarget(name: "b0tSkillsTests", dependencies: ["b0tSkills"]),
         .testTarget(name: "b0tFaceTests", dependencies: ["b0tFace"]),
         .testTarget(name: "b0tAudioTests", dependencies: ["b0tAudio"]),
