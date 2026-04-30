@@ -2,7 +2,7 @@ import SwiftUI
 import b0tCore
 
 struct ContentView: View {
-    @State private var bundleStatus: String = "checking…"
+    @State private var bundleStatus: String = "stand by."
 
     var body: some View {
         VStack(spacing: 8) {
@@ -25,9 +25,9 @@ struct ContentView: View {
             withExtension: "md",
             subdirectory: "default-bot/identity"
         ) else {
-            return "missing"
+            return "not found."
         }
-        return "found at \(url.lastPathComponent)"
+        return "bundled. \(url.lastPathComponent)"
     }
 }
 
