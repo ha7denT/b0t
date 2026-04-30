@@ -1,0 +1,95 @@
+# b0t
+
+A personal AI companion app for iOS. On-device, markdown-driven, single user, single device.
+
+The user's b0t lives as a directory of plain markdown files in their Documents folder. The Foundation Models framework animates those files. The app is a body for files the user owns.
+
+## Philosophy in one paragraph
+
+Most AI companions are services — you rent a personality, you rent a memory. b0t inverts that. Your b0t is yours. Its identity, memory, and skills are markdown files you can open, edit, share, and version. The model is small, local, and free. The aesthetic is cassette-futurism — a personal device issued by a fictional small electronics firm circa 1986. The experience is honest about what the system is: a 3B-parameter local model running a heartbeat loop over markdown files. No claims of sentience, no smoke and mirrors.
+
+## Read first
+
+Before any task that touches design, architecture, or copy:
+
+1. `docs/design_document.md` — the why. Philosophy, aesthetic, the four pillars.
+2. `docs/prd.md` — the what and how. Implementation spec, phased rollout, component-level requirements.
+3. `docs/decisions/` — settled architectural decisions (ADRs). Each one is short.
+4. `default-bot/` — the canonical b0t that ships with the app. Markdown content read into the bundle at build time.
+
+Before any task touching user-facing copy:
+
+5. `docs/references/voice-and-copy-guide.md` — the voice rules. Apply ruthlessly to every string the user might see.
+
+## Project structure
+
+```
+b0t/
+├── CLAUDE.md                  # this file
+├── README.md                  # human-facing project intro
+├── .claude/
+│   ├── commands/              # custom slash commands
+│   └── settings.json          # MCP config, hooks
+├── docs/
+│   ├── design_document.md     # philosophy and aesthetic
+│   ├── prd.md                 # implementation spec
+│   ├── decisions/             # ADRs — settled, append-only
+│   ├── specs/                 # forthcoming feature specs
+│   └── references/            # voice guide, aesthetic notes, framework notes
+├── default-bot/               # the b0t that ships with the app (markdown only)
+│   ├── identity/
+│   ├── memory/
+│   ├── skills/
+│   ├── heartbeat/
+│   └── face/
+├── assets/                    # raw design assets (pre-build)
+│   ├── face-parts/            # pixel art atlases
+│   ├── palettes/              # 12 curated palettes
+│   ├── sounds/                # UI sound library
+│   ├── fonts/                 # Berkeley Mono, Söhne (licensed)
+│   └── icons/                 # system glyphs
+├── b0t.xcodeproj              # Xcode project (created in Phase 0)
+├── b0tKit/                    # Swift Package — shared logic
+├── b0tApp/                    # iOS target
+├── Resources/                 # built from default-bot/ and assets/
+└── Tests/
+```
+
+## Conventions
+
+- **Surface ambiguity, do not silently resolve.** If the PRD and design doc disagree, ask Jamee. If a spec is incomplete, ask. Do not invent.
+- **One concern per commit.** Atomic, reversible. Reference the PRD section or ADR in the commit message.
+- **Tests are not optional.** Every new public API in `b0tKit` ships with tests. UI views ship with snapshot tests where feasible.
+- **Voice and copy guide applies to every string the user might see** — error messages, button labels, settings, tooltips, alerts, App Store metadata. Run every string through `docs/references/voice-and-copy-guide.md`.
+- **Privacy is non-negotiable.** No new network calls, no telemetry, no third-party SDKs that phone home. Audit any new dependency for network behaviour before inclusion.
+- **Aesthetic is non-negotiable.** Cassette-futurism. Pixel art with painterly lighting. No glassmorphism, no gradients, no clinical-modern type, no whimsy. See design doc §3.
+
+## Build and test
+
+Two MCP servers are configured (see `.claude/settings.json`):
+- **Apple Xcode MCP** (`xcrun mcpbridge`) — `RenderPreview`, `DocumentationSearch`, file ops, Swift REPL.
+- **XcodeBuildMCP** — builds, tests, simulators, real devices, LLDB, UI automation.
+
+Slash commands:
+- `/build` — XcodeBuildMCP build to default simulator
+- `/test` — XcodeBuildMCP run all tests
+- `/preview <view>` — Apple MCP render of a SwiftUI view
+- `/fix-build` — build with reasoning, propose and apply fixes
+- `/implement <feature>` — PRD-driven feature implementation
+- `/audit` — App Store submission readiness audit
+
+## Open questions
+
+See `docs/prd.md` §12 for outstanding decisions awaiting Jamee's input. Do not silently resolve any item marked Open.
+
+## Definition of done — for any task
+
+1. Code compiles with no warnings.
+2. Tests cover the new behaviour and pass.
+3. UI changes verified with `RenderPreview`.
+4. Voice-and-copy guide followed for any user-facing string.
+5. Cassette-futurism aesthetic respected for any visual change.
+6. Privacy posture preserved.
+7. Performance impact understood.
+8. CLAUDE.md or relevant doc updated if the change affects how future tasks should be approached.
+9. PR description references the relevant PRD section and any closed open-questions.
