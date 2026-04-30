@@ -4,15 +4,15 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 ## Current state
 
-- **Phase:** 0 — project setup
-- **Status:** in progress (final acceptance pending)
-- **Plan:** [phase-0-project-setup.md](plans/phase-0-project-setup.md)
+- **Phase:** 1 — markdown brain (no LLM)
+- **Status:** not started
+- **Plan:** (forthcoming — will live at `docs/plans/phase-1-*.md`)
 
 ## Phase ledger
 
 | # | Phase | Plan | Status |
 |---|---|---|---|
-| 0 | Project setup | [phase-0](plans/phase-0-project-setup.md) | in progress |
+| 0 | Project setup | [phase-0](plans/phase-0-project-setup.md) | complete (2026-04-30) |
 | 1 | Markdown brain (no LLM) | — | not started |
 | 2 | Foundation Models loop | — | not started |
 | 3 | Skill bridges | — | not started |
