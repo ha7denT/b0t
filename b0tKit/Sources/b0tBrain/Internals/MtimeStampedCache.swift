@@ -6,7 +6,7 @@ import Foundation
 ///
 /// `NSCache` is itself thread-safe (Apple-documented). The cache is only
 /// ever accessed from inside `BotStore`'s actor isolation, so the
-/// `@unchecked Sendable` on `CacheBox` is contained — it never escapes.
+/// `@unchecked Sendable` on `MtimeStampedCache` is contained — it never escapes.
 internal final class MtimeStampedCache: @unchecked Sendable {
     private let storage = NSCache<NSURL, CacheBox>()
 
