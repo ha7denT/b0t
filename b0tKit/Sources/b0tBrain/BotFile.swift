@@ -132,3 +132,129 @@ private func relocate(
     let offset = sourceText.distance(from: sourceText.startIndex, to: index)
     return destText.index(destStart, offsetBy: offset)
 }
+
+extension BotFile {
+    /// Sets a frontmatter key to a new value. If the key exists, its value
+    /// text is surgically replaced. If not, a new line is appended directly
+    /// before the closing `---`.
+    ///
+    /// On a file with `parseError == .frontmatterInvalidYAML(_)`, this is a
+    /// no-op — we cannot surgically splice without a trustworthy parse.
+    public func settingFrontmatter(_ key: String, to value: YAMLValue) -> BotFile {
+        if case .frontmatterInvalidYAML = parseError { return self }
+
+        let emitted = emitYAMLValueInline(value)
+
+        if let entry = entries.first(where: { $0.key == key }) {
+            // Replace the value text in place.
+            var newText = originalText
+            newText.replaceSubrange(entry.valueRange, with: emitted)
+            return reparsed(after: newText)
+        }
+
+        // Append before the closing delimiter — only meaningful if we have
+        // a frontmatter region. If we don't, create one.
+        if let bodyRange = frontmatterBodyRange {
+            // Insert "<key>: <value>\n" at bodyRange.upperBound (which is the
+            // position just before the closing `\n---`).
+            var newText = originalText
+            let appendage: String = {
+                // If the body is empty, no leading newline; else newline-prefixed.
+                if bodyRange.lowerBound == bodyRange.upperBound {
+                    return "\(key): \(emitted)\n"
+                }
+                return "\n\(key): \(emitted)"
+            }()
+            newText.insert(contentsOf: appendage, at: bodyRange.upperBound)
+            return reparsed(after: newText)
+        }
+
+        // No frontmatter region — synthesise one at the start.
+        var newText = "---\n\(key): \(emitted)\n---\n"
+        newText.append(originalText)
+        return reparsed(after: newText)
+    }
+
+    /// Removes a frontmatter key. Spans the line including its full value
+    /// range (which covers multi-line literal blocks) plus the trailing
+    /// newline that separates entries.
+    public func removingFrontmatter(_ key: String) -> BotFile {
+        if case .frontmatterInvalidYAML = parseError { return self }
+
+        guard let entry = entries.first(where: { $0.key == key }) else {
+            return self
+        }
+
+        // The line starts at `<key>` and runs through entry.valueRange.upperBound.
+        // We need to find the line start: walk back from valueRange.lowerBound
+        // until we hit the start of text or a `\n`.
+        let valueStart = entry.valueRange.lowerBound
+        var lineStart = valueStart
+        while lineStart > originalText.startIndex {
+            let prev = originalText.index(before: lineStart)
+            if originalText[prev] == "\n" { break }
+            lineStart = prev
+        }
+
+        // Line end: include one trailing newline if present.
+        let valueEnd = entry.valueRange.upperBound
+        let lineEnd: String.Index = {
+            if valueEnd < originalText.endIndex && originalText[valueEnd] == "\n" {
+                return originalText.index(after: valueEnd)
+            }
+            return valueEnd
+        }()
+
+        var newText = originalText
+        newText.removeSubrange(lineStart..<lineEnd)
+        return reparsed(after: newText)
+    }
+
+    /// Re-parses `newText` to produce a fresh `BotFile`. Mutation primitives
+    /// use this rather than hand-rolling consistent state.
+    fileprivate func reparsed(after newText: String) -> BotFile {
+        // The re-parse must succeed in the no-op-on-broken case, but if a
+        // mutation produced syntactically invalid YAML somehow (it shouldn't),
+        // we soft-fail per spec.
+        if let reparsed = try? BotFile(fileURL: fileURL, text: newText) {
+            return reparsed
+        }
+        return self
+    }
+
+    /// Emits a YAML value as a single-line scalar/flow expression suitable
+    /// for splicing into frontmatter. Strings that contain reserved YAML
+    /// characters are double-quoted.
+    fileprivate func emitYAMLValueInline(_ value: YAMLValue) -> String {
+        switch value {
+        case .null: return "null"
+        case .bool(let b): return b ? "true" : "false"
+        case .int(let i): return String(i)
+        case .double(let d): return String(d)
+        case .string(let s): return needsQuoting(s) ? "\"\(escape(s))\"" : s
+        case .array(let arr):
+            return "[\(arr.map { emitYAMLValueInline($0) }.joined(separator: ", "))]"
+        case .dictionary(let pairs):
+            let inner =
+                pairs
+                .map { "\($0.0): \(emitYAMLValueInline($0.1))" }
+                .joined(separator: ", ")
+            return "{\(inner)}"
+        }
+    }
+
+    private func needsQuoting(_ s: String) -> Bool {
+        if s.isEmpty { return true }
+        let reserved: Set<Character> = [
+            ":", "#", "&", "*", "!", "|", ">", "'", "\"", "%", "@", "`", ",", "[", "]", "{", "}",
+        ]
+        return s.contains(where: { reserved.contains($0) || $0 == "\n" })
+            || s.first == " " || s.last == " "
+    }
+
+    private func escape(_ s: String) -> String {
+        s.replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+            .replacingOccurrences(of: "\n", with: "\\n")
+    }
+}
