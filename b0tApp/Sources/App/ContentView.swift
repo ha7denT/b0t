@@ -20,11 +20,13 @@ struct ContentView: View {
     }
 
     private func checkDefaultBotBundled() -> String {
-        guard let url = Bundle.main.url(
-            forResource: "core",
-            withExtension: "md",
-            subdirectory: "default-bot/identity"
-        ) else {
+        guard
+            let url = Bundle.main.url(
+                forResource: "core",
+                withExtension: "md",
+                subdirectory: "default-bot/identity"
+            )
+        else {
             return "not found."
         }
         return "bundled. \(url.lastPathComponent)"

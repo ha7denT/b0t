@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import b0tAudio
 
 final class b0tAudioTests: XCTestCase {

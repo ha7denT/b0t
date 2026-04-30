@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import b0tBrain
 
 final class b0tBrainTests: XCTestCase {

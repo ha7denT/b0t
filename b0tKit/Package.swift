@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "b0tKit",
     platforms: [
-        .iOS("26.0"),
+        .iOS("26.0")
     ],
     products: [
         .library(name: "b0tCore", targets: ["b0tCore"]),
