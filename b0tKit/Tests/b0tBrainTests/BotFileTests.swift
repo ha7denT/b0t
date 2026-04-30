@@ -206,4 +206,70 @@ final class BotFileTests: XCTestCase {
         let mutated = file.appendingProseSection(heading: "h", body: "b")
         XCTAssertEqual(mutated.prose, "## h\n\nb\n")
     }
+
+    // MARK: - Round-trip guarantees (spec §6.5)
+
+    private static let canonicalSample = """
+        ---
+        name: b0t-01
+        enabled: true
+        verbosity: 3
+        muted_calendars: [work, family]
+        ---
+        # core
+
+        prose body that
+        spans multiple lines.
+        """
+
+    func test_roundTrip_readWriteIsByteIdentical() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: Self.canonicalSample)
+        XCTAssertEqual(file.originalText, Self.canonicalSample)
+    }
+
+    func test_roundTrip_singleFieldChange_onlyChangedBytesDiffer() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: Self.canonicalSample)
+        let mutated = file.settingFrontmatter("verbosity", to: .int(7))
+        let expected = Self.canonicalSample.replacingOccurrences(of: "verbosity: 3", with: "verbosity: 7")
+        XCTAssertEqual(mutated.originalText, expected)
+    }
+
+    func test_roundTrip_setSameValue_isByteIdentical() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: Self.canonicalSample)
+        let mutated = file.settingFrontmatter("verbosity", to: .int(3))
+        XCTAssertEqual(mutated.originalText, Self.canonicalSample)
+    }
+
+    func test_roundTrip_setNewKey_thenChange_writesOnce() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: Self.canonicalSample)
+        let once = file.settingFrontmatter("new_key", to: .string("first"))
+        let twice = once.settingFrontmatter("new_key", to: .string("second"))
+        XCTAssertEqual(twice.frontmatter["new_key"], .string("second"))
+        // Count occurrences of "new_key:" — must be exactly 1.
+        let occurrences = twice.originalText.components(separatedBy: "new_key:").count - 1
+        XCTAssertEqual(occurrences, 1)
+    }
+
+    func test_roundTrip_replaceProseWithSameContent_isByteIdentical() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: Self.canonicalSample)
+        let mutated = file.replacingProse(with: file.prose)
+        XCTAssertEqual(mutated.originalText, Self.canonicalSample)
+    }
+
+    func test_roundTrip_preservesYAMLComments() throws {
+        let text = """
+            ---
+            # leading comment
+            name: b0t-01
+            enabled: true
+            ---
+            body
+            """
+        let file = try BotFile(fileURL: url("a.md"), text: text)
+        let mutated = file.settingFrontmatter("enabled", to: .bool(false))
+        XCTAssertTrue(
+            mutated.originalText.contains("# leading comment"),
+            "leading comment should survive a value change on a different key"
+        )
+    }
 }
