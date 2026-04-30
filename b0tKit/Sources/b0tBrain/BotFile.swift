@@ -276,3 +276,24 @@ extension BotFile {
             .replacingOccurrences(of: "\n", with: "\\n")
     }
 }
+
+extension BotFile {
+    /// Replaces the prose region wholesale. Frontmatter is untouched.
+    public func replacingProse(with newProse: String) -> BotFile {
+        var newText = originalText
+        newText.replaceSubrange(proseRange, with: newProse)
+        return reparsed(after: newText)
+    }
+
+    /// Appends a markdown section at the end of prose:
+    ///
+    ///     <prose>
+    ///     ## <heading>
+    ///
+    ///     <body>
+    public func appendingProseSection(heading: String, body: String) -> BotFile {
+        let appendage = "\n## \(heading)\n\n\(body)\n"
+        let newProse = String(originalText[proseRange]) + appendage
+        return replacingProse(with: newProse)
+    }
+}

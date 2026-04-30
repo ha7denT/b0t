@@ -157,4 +157,28 @@ final class BotFileTests: XCTestCase {
             mutated.originalText, text,
             "no-op set on commented entry must preserve comment")
     }
+
+    // MARK: - Mutations: prose
+
+    func test_replacingProse_substitutesProseRegionOnly() throws {
+        let text = "---\nname: b0t-01\n---\n# old\n"
+        let file = try BotFile(fileURL: url("a.md"), text: text)
+        let mutated = file.replacingProse(with: "# new\n")
+        XCTAssertEqual(mutated.originalText, "---\nname: b0t-01\n---\n# new\n")
+        XCTAssertEqual(mutated.frontmatter["name"], .string("b0t-01"))
+    }
+
+    func test_replacingProse_onFileWithoutFrontmatter() throws {
+        let text = "# only prose\n"
+        let file = try BotFile(fileURL: url("a.md"), text: text)
+        let mutated = file.replacingProse(with: "replaced\n")
+        XCTAssertEqual(mutated.originalText, "replaced\n")
+    }
+
+    func test_appendingProseSection_addsHeadingAndBody() throws {
+        let text = "---\nk: v\n---\n# old\n"
+        let file = try BotFile(fileURL: url("a.md"), text: text)
+        let mutated = file.appendingProseSection(heading: "new section", body: "some text")
+        XCTAssertTrue(mutated.prose.hasSuffix("\n## new section\n\nsome text\n"))
+    }
 }
