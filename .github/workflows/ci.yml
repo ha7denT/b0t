@@ -36,5 +36,6 @@ jobs:
 
       - name: swift-format lint --strict
         run: |
-          find b0tApp b0tKit -name '*.swift' -print0 \
+          find b0tApp b0tKit \( -name .build -o -name .swiftpm \) -prune \
+            -o -name '*.swift' -print0 \
             | xargs -0 swift format lint --strict --configuration .swift-format
