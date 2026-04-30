@@ -17,6 +17,10 @@ settings:
     DEVELOPMENT_TEAM: P2VY4WT259
     CODE_SIGN_STYLE: Automatic
 
+packages:
+  b0tKit:
+    path: b0tKit
+
 targets:
   b0t:
     type: application
@@ -25,6 +29,19 @@ targets:
     sources:
       - path: b0tApp/Sources
       - path: b0tApp/Resources
+    dependencies:
+      - package: b0tKit
+        product: b0tCore
+      - package: b0tKit
+        product: b0tBrain
+      - package: b0tKit
+        product: b0tSkills
+      - package: b0tKit
+        product: b0tFace
+      - package: b0tKit
+        product: b0tAudio
+      - package: b0tKit
+        product: b0tDesign
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.toppeross.b0t
