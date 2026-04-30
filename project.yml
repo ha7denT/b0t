@@ -1,0 +1,36 @@
+name: b0t
+
+options:
+  bundleIdPrefix: com.toppeross
+  deploymentTarget:
+    iOS: "26.0"
+  developmentLanguage: en
+  groupSortPosition: top
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+    DEVELOPMENT_TEAM: P2VY4WT259
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  b0t:
+    type: application
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: b0tApp/Sources
+      - path: b0tApp/Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.toppeross.b0t
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ENABLE_PREVIEWS: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_EMIT_LOC_STRINGS: YES
+        GENERATE_INFOPLIST_FILE: YES
