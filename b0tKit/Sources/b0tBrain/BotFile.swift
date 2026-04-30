@@ -292,8 +292,11 @@ extension BotFile {
     ///
     ///     <body>
     public func appendingProseSection(heading: String, body: String) -> BotFile {
-        let appendage = "\n## \(heading)\n\n\(body)\n"
-        let newProse = String(originalText[proseRange]) + appendage
+        let existing = String(originalText[proseRange])
+        let trimmed = existing.reversed().drop(while: { $0 == "\n" || $0 == "\r" })
+        let stripped = String(trimmed.reversed())
+        let separator = stripped.isEmpty ? "" : "\n\n"
+        let newProse = stripped + separator + "## \(heading)\n\n\(body)\n"
         return replacingProse(with: newProse)
     }
 }

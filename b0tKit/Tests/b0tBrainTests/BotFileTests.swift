@@ -179,6 +179,31 @@ final class BotFileTests: XCTestCase {
         let text = "---\nk: v\n---\n# old\n"
         let file = try BotFile(fileURL: url("a.md"), text: text)
         let mutated = file.appendingProseSection(heading: "new section", body: "some text")
-        XCTAssertTrue(mutated.prose.hasSuffix("\n## new section\n\nsome text\n"))
+        XCTAssertEqual(mutated.prose, "# old\n\n## new section\n\nsome text\n")
+        XCTAssertEqual(
+            mutated.originalText,
+            "---\nk: v\n---\n# old\n\n## new section\n\nsome text\n"
+        )
+    }
+
+    func test_appendingProseSection_proseWithoutTrailingNewline_normalisesSeparator() throws {
+        let text = "---\nk: v\n---\n# old"
+        let file = try BotFile(fileURL: url("a.md"), text: text)
+        let mutated = file.appendingProseSection(heading: "h", body: "b")
+        XCTAssertEqual(mutated.prose, "# old\n\n## h\n\nb\n")
+    }
+
+    func test_appendingProseSection_proseWithMultipleTrailingNewlines_normalisesSeparator() throws {
+        let text = "---\nk: v\n---\n# old\n\n\n"
+        let file = try BotFile(fileURL: url("a.md"), text: text)
+        let mutated = file.appendingProseSection(heading: "h", body: "b")
+        XCTAssertEqual(mutated.prose, "# old\n\n## h\n\nb\n")
+    }
+
+    func test_appendingProseSection_emptyProse_omitsLeadingSeparator() throws {
+        let text = "---\nk: v\n---\n"
+        let file = try BotFile(fileURL: url("a.md"), text: text)
+        let mutated = file.appendingProseSection(heading: "h", body: "b")
+        XCTAssertEqual(mutated.prose, "## h\n\nb\n")
     }
 }
