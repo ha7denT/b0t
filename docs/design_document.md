@@ -214,9 +214,9 @@ These layers share palette, grid, and underlying logic. Transitions between them
 
 ### 3.4 Type
 
-- **Brain layer (`.md` files):** **Berkeley Mono.** Period-feeling, sharply drawn, readable at small sizes. Used for all markdown viewing and editing, frontmatter parameters, and all monospaced UI elements.
+- **Brain layer (`.md` files):** **IoskeleyMono NL.** Open-source monospace built for technical text — sharply drawn, readable at small sizes, ligature-free (the "NL" suffix). Used for all markdown viewing and editing, frontmatter parameters, and all monospaced UI elements.
 - **Chat:** **Söhne.** Humanist sans-serif with the right amount of warmth — present but never sterile. Used for the b0t's conversation and the user's input.
-- **System UI labels:** Berkeley Mono small caps, sparingly used, for organ labels and status indicators (Cobb/Lumon influence).
+- **System UI labels:** IoskeleyMono NL small caps, sparingly used, for organ labels and status indicators (Cobb/Lumon influence).
 - **The b0t's name, when shown:** pixel art rendered, custom per b0t.
 
 ### 3.5 Colour

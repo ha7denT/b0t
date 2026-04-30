@@ -46,7 +46,7 @@ b0t/
 │   ├── face-parts/            # pixel art atlases
 │   ├── palettes/              # 12 curated palettes
 │   ├── sounds/                # UI sound library
-│   ├── fonts/                 # Berkeley Mono, Söhne (licensed)
+│   ├── fonts/                 # IoskeleyMono NL (open-source), Söhne (licensed)
 │   └── icons/                 # system glyphs
 ├── b0t.xcodeproj              # Xcode project (created in Phase 0)
 ├── b0tKit/                    # Swift Package — shared logic

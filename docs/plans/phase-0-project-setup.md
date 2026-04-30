@@ -1125,7 +1125,7 @@ Design tokens, palettes, fonts, and shared SwiftUI views.
 
 - `Palette` — 12 curated palettes (no RGB picker — see PRD non-negotiable #9).
 - `Token` namespace — colours, spacings, type ramps.
-- `Font` — Berkeley Mono (brain layer) and Söhne (chat).
+- `Font` — IoskeleyMono NL (brain layer) and Söhne (chat).
 - Shared views: `OrganLabel`, `StatusGlow`, `PhosphorWire`, etc. (added as Phase 4 lands).
 
 ## Patterns

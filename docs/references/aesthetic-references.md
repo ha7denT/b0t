@@ -86,7 +86,7 @@ If no, cut it.
 
 ## notes for the design system
 
-- **Type:** Berkeley Mono (brain), Söhne (chat). No exceptions in v1.
+- **Type:** IoskeleyMono NL (brain), Söhne (chat). No exceptions in v1.
 - **Colour:** warm darks (never pure black), phosphor accents (warm hues only — amber, green, cream, never blue), curated palettes only (no RGB picker).
 - **Motion:** restraint. Idle is never static, but it's quiet. Activity is meaningful.
 - **Sound:** OP-1 / classic Mac sensibility, never chiptune, never modern UI sounds.

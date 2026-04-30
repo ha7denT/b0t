@@ -551,7 +551,7 @@ These are explicitly open. Do not silently fill them in.
 | 3 | Face rigging tool. | Phase 4 | **Resolved** — SpriteKit + SwiftUI |
 | 4 | Pixel art assets. | Phase 4 | **Resolved** — provided by Jamee (kit + custom) |
 | 5 | Curated palette count. | Phase 6 | **Resolved** — 12 palettes in v1 |
-| 6 | Type choices. | Phase 4 | **Resolved** — Berkeley Mono (brain), Söhne (chat). Confirm license costs. |
+| 6 | Type choices. | Phase 4 | **Resolved** — IoskeleyMono NL (brain, open-source), Söhne (chat). |
 | 7 | Sound design source. | Phase 8 | **Resolved** — internal |
 | 8 | Mail framework access vs `MFMailComposeViewController`. | Phase 3 | Open |
 | 9 | Notes integration approach. | Phase 3 | **Resolved** — fall back to Shortcuts integration or skip skill in v1 |
