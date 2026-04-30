@@ -58,6 +58,14 @@ internal enum FrontmatterParser {
         }
 
         let entries = locateEntries(in: text, keysInOrder: keyOrder)
+        guard entries.count == orderedPairs.count,
+            zip(entries, orderedPairs).allSatisfy({ $0.key == $1.0 })
+        else {
+            throw ParseError.invalidYAML(
+                message:
+                    "byte-range scan disagrees with parser — frontmatter has unsupported key shape (e.g., quoted key with colon)"
+            )
+        }
         let zipped = zip(entries, orderedPairs).map { entry, pair in
             Entry(key: entry.key, valueRange: entry.valueRange, parsedValue: pair.1)
         }

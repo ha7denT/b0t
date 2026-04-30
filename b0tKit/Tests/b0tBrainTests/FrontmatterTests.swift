@@ -70,4 +70,24 @@ final class FrontmatterTests: XCTestCase {
         XCTAssertEqual(entry.key, "key")
         XCTAssertEqual(String(yaml[entry.valueRange]), "hello world")
     }
+
+    func test_parser_quotedKeyWithColon_isRejectedNotMisaligned() {
+        // A quoted key containing a colon — Yams accepts it, but our line
+        // scanner can't recover the key text. The guard should throw rather
+        // than silently misalign byte ranges.
+        let yaml = "\"weird: key\": value1\nname: value2"
+        XCTAssertThrowsError(try FrontmatterParser.parse(yaml)) { error in
+            guard let parseError = error as? FrontmatterParser.ParseError else {
+                XCTFail("expected FrontmatterParser.ParseError, got \(error)")
+                return
+            }
+            switch parseError {
+            case .invalidYAML(let message):
+                XCTAssertTrue(
+                    message.contains("byte-range scan") || message.contains("unsupported key"),
+                    "expected misalignment-guard message, got \(message)"
+                )
+            }
+        }
+    }
 }
