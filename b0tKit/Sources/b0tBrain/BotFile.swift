@@ -143,6 +143,14 @@ extension BotFile {
     public func settingFrontmatter(_ key: String, to value: YAMLValue) -> BotFile {
         if case .frontmatterInvalidYAML = parseError { return self }
 
+        // No-op short-circuit: if the value already equals the parsed value of the
+        // existing entry, return self unchanged. This honours spec §6.5(3) for
+        // list values, multi-line literals, and entries with end-of-line comments
+        // — all of which would lossy-re-emit through emitYAMLValueInline.
+        if let entry = entries.first(where: { $0.key == key }), entry.parsedValue == value {
+            return self
+        }
+
         let emitted = emitYAMLValueInline(value)
 
         if let entry = entries.first(where: { $0.key == key }) {
@@ -230,7 +238,10 @@ extension BotFile {
         case .null: return "null"
         case .bool(let b): return b ? "true" : "false"
         case .int(let i): return String(i)
-        case .double(let d): return String(d)
+        case .double(let d):
+            if d.isNaN { return ".nan" }
+            if d.isInfinite { return d > 0 ? ".inf" : "-.inf" }
+            return String(d)
         case .string(let s): return needsQuoting(s) ? "\"\(escape(s))\"" : s
         case .array(let arr):
             return "[\(arr.map { emitYAMLValueInline($0) }.joined(separator: ", "))]"
@@ -248,8 +259,15 @@ extension BotFile {
         let reserved: Set<Character> = [
             ":", "#", "&", "*", "!", "|", ">", "'", "\"", "%", "@", "`", ",", "[", "]", "{", "}",
         ]
-        return s.contains(where: { reserved.contains($0) || $0 == "\n" })
-            || s.first == " " || s.last == " "
+        if s.contains(where: { reserved.contains($0) || $0 == "\n" || $0 == "\t" }) { return true }
+        if s.first == " " || s.last == " " { return true }
+        // Leading YAML indicator characters (only dangerous in first position).
+        if let first = s.first, "-?*&!|>%@`".contains(first) { return true }
+        // YAML 1.2 boolean and null keywords (case-insensitive).
+        if ["true", "false", "yes", "no", "null", "~"].contains(s.lowercased()) { return true }
+        // Strings that would parse as numbers must be quoted to preserve string type.
+        if Int(s) != nil || Double(s) != nil { return true }
+        return false
     }
 
     private func escape(_ s: String) -> String {

@@ -90,4 +90,71 @@ final class BotFileTests: XCTestCase {
         let mutated = file.removingFrontmatter("not-there")
         XCTAssertEqual(mutated.originalText, text)
     }
+
+    // MARK: - Mutation correctness regressions
+
+    func test_settingFrontmatter_stringStartingWithDash_isQuoted() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: "---\nk: original\n---\n")
+        let mutated = file.settingFrontmatter("k", to: .string("- item"))
+        XCTAssertEqual(
+            mutated.frontmatter["k"], .string("- item"),
+            "leading dash must be quoted; got: \(mutated.originalText)")
+    }
+
+    func test_settingFrontmatter_stringLikeBoolKeyword_isQuoted() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: "---\nk: original\n---\n")
+        let mutated = file.settingFrontmatter("k", to: .string("true"))
+        XCTAssertEqual(
+            mutated.frontmatter["k"], .string("true"),
+            "string 'true' must be quoted; got: \(mutated.originalText)")
+    }
+
+    func test_settingFrontmatter_stringLikeInteger_isQuoted() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: "---\nk: original\n---\n")
+        let mutated = file.settingFrontmatter("k", to: .string("12345"))
+        XCTAssertEqual(
+            mutated.frontmatter["k"], .string("12345"),
+            "numeric-looking string must be quoted; got: \(mutated.originalText)")
+    }
+
+    func test_settingFrontmatter_stringLikeNull_isQuoted() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: "---\nk: original\n---\n")
+        let mutated = file.settingFrontmatter("k", to: .string("null"))
+        XCTAssertEqual(mutated.frontmatter["k"], .string("null"))
+    }
+
+    func test_settingFrontmatter_doubleNaN_emitsCanonicalYAML() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: "---\nk: 0\n---\n")
+        let mutated = file.settingFrontmatter("k", to: .double(.nan))
+        XCTAssertTrue(
+            mutated.originalText.contains(".nan"),
+            "NaN must emit as .nan; got: \(mutated.originalText)")
+    }
+
+    func test_settingFrontmatter_doubleInfinity_emitsCanonicalYAML() throws {
+        let file = try BotFile(fileURL: url("a.md"), text: "---\nk: 0\n---\n")
+        let mutated = file.settingFrontmatter("k", to: .double(.infinity))
+        XCTAssertTrue(mutated.originalText.contains(".inf"))
+    }
+
+    func test_settingFrontmatter_sameListValue_isByteIdenticalNoop() throws {
+        let text = "---\nquiet_hours: [22:00, 06:30]\n---\n# body\n"
+        let file = try BotFile(fileURL: url("a.md"), text: text)
+        let original = try XCTUnwrap(file.frontmatter["quiet_hours"])
+        let mutated = file.settingFrontmatter("quiet_hours", to: original)
+        XCTAssertEqual(
+            mutated.originalText, text,
+            "no-op set must preserve original bytes per §6.5(3)")
+    }
+
+    func test_settingFrontmatter_sameScalarValue_isByteIdenticalNoop() throws {
+        let text = "---\nname: b0t-01  # the user's b0t\nenabled: true\n---\n"
+        let file = try BotFile(fileURL: url("a.md"), text: text)
+        let mutated = file.settingFrontmatter(
+            "name", to: try XCTUnwrap(file.frontmatter["name"])
+        )
+        XCTAssertEqual(
+            mutated.originalText, text,
+            "no-op set on commented entry must preserve comment")
+    }
 }
