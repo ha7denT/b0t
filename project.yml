@@ -29,6 +29,9 @@ targets:
     sources:
       - path: b0tApp/Sources
       - path: b0tApp/Resources
+      - path: default-bot
+        type: folder
+        buildPhase: resources
     dependencies:
       - package: b0tKit
         product: b0tCore

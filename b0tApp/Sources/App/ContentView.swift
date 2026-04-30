@@ -2,6 +2,8 @@ import SwiftUI
 import b0tCore
 
 struct ContentView: View {
+    @State private var bundleStatus: String = "checking…"
+
     var body: some View {
         VStack(spacing: 8) {
             Text("b0t")
@@ -9,8 +11,23 @@ struct ContentView: View {
             Text("module: \(b0tCorePlaceholder.identifier)")
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
+            Text("default-bot: \(bundleStatus)")
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.secondary)
         }
         .padding()
+        .task { bundleStatus = checkDefaultBotBundled() }
+    }
+
+    private func checkDefaultBotBundled() -> String {
+        guard let url = Bundle.main.url(
+            forResource: "core",
+            withExtension: "md",
+            subdirectory: "default-bot/identity"
+        ) else {
+            return "missing"
+        }
+        return "found at \(url.lastPathComponent)"
     }
 }
 

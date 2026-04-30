@@ -11,6 +11,7 @@
 		1C47AFBE1FC5D310794439C9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E91319360B3AF9F60F37C9 /* ContentView.swift */; };
 		35017C62846B82978924F904 /* b0tFace in Frameworks */ = {isa = PBXBuildFile; productRef = 196A7880D576DA8B5936303B /* b0tFace */; };
 		83579266A13A3AABBE751315 /* b0tSkills in Frameworks */ = {isa = PBXBuildFile; productRef = 0943B725594C26ACEE1FCD33 /* b0tSkills */; };
+		9E7FE541C355795463F2E047 /* default-bot in Resources */ = {isa = PBXBuildFile; fileRef = 933F2AE957C01B79FA72B32D /* default-bot */; };
 		A315E155CFA78CFB01DE92DF /* b0tAudio in Frameworks */ = {isa = PBXBuildFile; productRef = B94783E8348975DD05ED09EE /* b0tAudio */; };
 		A78B13C574B7EA676D887AB1 /* b0tApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419303501712CAB6314A7455 /* b0tApp.swift */; };
 		B89D3BA46042B0830DC9742E /* b0tBrain in Frameworks */ = {isa = PBXBuildFile; productRef = B6FE8E3C008A965D697C367F /* b0tBrain */; };
@@ -24,6 +25,7 @@
 		419303501712CAB6314A7455 /* b0tApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = b0tApp.swift; sourceTree = "<group>"; };
 		4697E672E444B47FF9B58EE0 /* b0tKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = b0tKit; path = b0tKit; sourceTree = SOURCE_ROOT; };
 		577740E81715D5E498229C81 /* b0t.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = b0t.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		933F2AE957C01B79FA72B32D /* default-bot */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "default-bot"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 				D6778C828E8E2A6D38884F7E /* Packages */,
 				248227FDAA1151AB83FEC8E4 /* Resources */,
 				EBA5485BECE85249B4C46B3E /* Sources */,
+				933F2AE957C01B79FA72B32D /* default-bot */,
 				D43C55E2693A8642B5881A5A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -167,6 +170,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C8AD557AF341DC4AFAF50D4E /* Assets.xcassets in Resources */,
+				9E7FE541C355795463F2E047 /* default-bot in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
