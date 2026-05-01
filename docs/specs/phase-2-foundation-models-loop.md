@@ -287,7 +287,7 @@ public enum EntryKind: Sendable, Equatable {
 ```swift
 public struct HeartbeatSchedule: Sendable, Equatable {
     public let bpm: Int                                  // 0 = scheduled beats off
-    public let quietHours: ClosedRange<TimeOfDay>?       // nil = no quiet hours
+    public let quietHours: ClosedRange<ClockTime>?       // nil = no quiet hours
     public let eventTriggers: Set<EventTriggerKind>
     public let mutable: Bool
 
@@ -295,6 +295,14 @@ public struct HeartbeatSchedule: Sendable, Equatable {
 
     public func isQuietHours(at date: Date) -> Bool
     public var bpmInterval: Duration? { get }            // nil when bpm == 0
+}
+
+/// HH:MM value type for quiet-hours boundaries. Named ClockTime to avoid
+/// colliding with the morning/afternoon/evening/night bucket TimeOfDay
+/// in §5.9 (both would otherwise live in the b0tCore namespace).
+public struct ClockTime: Sendable, Equatable, Hashable, Comparable {
+    public let hour: Int       // 0-23
+    public let minute: Int     // 0-59
 }
 
 public enum EventTriggerKind: String, Sendable, Equatable, CaseIterable {
