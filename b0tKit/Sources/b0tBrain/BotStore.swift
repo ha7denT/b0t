@@ -80,6 +80,19 @@ public actor BotStore {
         cache.set(target, file: file, mtime: mtime)
     }
 
+    /// Loads a b0t handle from a directory URL. The directory must exist;
+    /// individual files within are read on demand via `Bot`'s sub-namespaces.
+    public func load(at directoryURL: URL) async throws -> Bot {
+        var isDir: ObjCBool = false
+        guard
+            FileManager.default.fileExists(atPath: directoryURL.path, isDirectory: &isDir),
+            isDir.boolValue
+        else {
+            throw BotFileError.fileNotFound(directoryURL)
+        }
+        return Bot(rootURL: directoryURL, store: self)
+    }
+
     /// Manually invalidate a cached file. Use sparingly; mtime checks
     /// handle the common case automatically.
     public func invalidate(_ fileURL: URL) {

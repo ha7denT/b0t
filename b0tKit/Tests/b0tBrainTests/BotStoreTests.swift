@@ -210,4 +210,57 @@ final class BotStoreTests: XCTestCase {
             onDisk, "---\nk: original\n---\n",
             "original file must survive failed write atomically")
     }
+
+    // MARK: - Bot loading
+
+    private func makeCanonicalBotDir() throws -> URL {
+        let root = tmp.appendingPathComponent("b0t-test", isDirectory: true)
+        for sub in ["identity", "memory", "skills", "heartbeat", "face", "journal"] {
+            try FileManager.default.createDirectory(
+                at: root.appendingPathComponent(sub, isDirectory: true),
+                withIntermediateDirectories: true
+            )
+        }
+        try "---\nname: b0t-01\n---\n# core\n".write(
+            to: root.appendingPathComponent("identity/core.md"),
+            atomically: true, encoding: .utf8
+        )
+        try "---\nname: principles\n---\n# principles\n".write(
+            to: root.appendingPathComponent("identity/principles.md"),
+            atomically: true, encoding: .utf8
+        )
+        try "---\nskill_id: calendar\nenabled: true\n---\n# calendar\n".write(
+            to: root.appendingPathComponent("skills/calendar.md"),
+            atomically: true, encoding: .utf8
+        )
+        try "---\nskill_id: mail\nenabled: false\n---\n# mail\n".write(
+            to: root.appendingPathComponent("skills/mail.md"),
+            atomically: true, encoding: .utf8
+        )
+        return root
+    }
+
+    func test_load_returnsBotWithSections() async throws {
+        let root = try makeCanonicalBotDir()
+        let store = BotStore()
+        let bot = try await store.load(at: root)
+        XCTAssertEqual(bot.rootURL, root)
+        let core = try await bot.identity.core
+        XCTAssertEqual(core.frontmatter["name"], .string("b0t-01"))
+    }
+
+    func test_load_skillsAll_enumeratesDirectory() async throws {
+        let root = try makeCanonicalBotDir()
+        let store = BotStore()
+        let bot = try await store.load(at: root)
+        let skills = try await bot.skills.all
+        XCTAssertEqual(skills.count, 2)
+        let ids: Set<String> = Set(
+            skills.compactMap { file -> String? in
+                if case .string(let s) = file.frontmatter["skill_id"] { return s }
+                return nil
+            }
+        )
+        XCTAssertEqual(ids, ["calendar", "mail"])
+    }
 }
