@@ -1,0 +1,5 @@
+---
+key: : invalid:
+---
+
+# broken yaml
