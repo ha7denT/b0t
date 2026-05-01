@@ -49,7 +49,7 @@ If you're Claude Code: **[CLAUDE.md](CLAUDE.md)** is the routing document. Read 
 
 ## Status
 
-v1 is in early development. Phase 0 (project setup) is complete (April 2026): the Xcode project, Swift package skeleton, Claude Code harness, swift-format hook, and GitHub Actions CI all shipped. Phase 1 (markdown brain — file system, parsing, frontmatter, linking) is the next sequencing point. See `docs/IMPLEMENTATION.md` for the live cross-phase tracker.
+v1 is in early development. Phase 0 (project setup) shipped April 2026 — Xcode project, Swift package skeleton, Claude Code harness, swift-format hook, GitHub Actions CI. Phase 1 (markdown brain) shipped May 2026 — `b0tBrain` is feature-complete with lossless surgical-patch round-trip, mtime-stamped caching, soft-fail malformed-input handling, backlink computation, and first-launch provisioning; 78 tests pass including a production-default-bot integration test. Phase 2 (Foundation Models loop) is the next sequencing point. See `docs/IMPLEMENTATION.md` for the live cross-phase tracker.
 
 ## Contact
 
