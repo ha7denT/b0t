@@ -34,4 +34,10 @@ extension BotFile {
         if case .bool(let b) = frontmatter["enabled"] { return b }
         return true
     }
+
+    /// `b0t_name` key (identity/core.md). `nil` if absent.
+    public var botName: String? {
+        if case .string(let s) = frontmatter["b0t_name"] { return s }
+        return nil
+    }
 }

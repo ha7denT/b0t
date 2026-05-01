@@ -6,6 +6,12 @@ import Foundation
 /// a fixed `Date` configured per test. Used by `ConversationManager`,
 /// `HeartbeatManager`, `JournalWriter`, `MissedBeatDetector`, and
 /// `TimeAwarenessTool` so deterministic timestamps are possible in tests.
+///
+/// Note: distinct from Swift's standard library `Clock` protocol (the one
+/// used with `ContinuousClock` / `SuspendingClock`). This is a small
+/// `Date`-returning protocol scoped to b0tCore. Consumers inside the module
+/// reference `b0tCore.Clock` by default; outside callers may need to qualify
+/// the name if they also import `_Concurrency`.
 public protocol Clock: Sendable {
     func now() -> Date
 }

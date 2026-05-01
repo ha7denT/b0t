@@ -12,8 +12,8 @@ final class ContextAssemblerTests: XCTestCase {
 
         XCTAssertFalse(context.systemInstructions.isEmpty)
         XCTAssertTrue(
-            context.systemInstructions.contains("canonical-bot"),
-            "expected bot name in instructions"
+            context.systemInstructions.contains("b0t-fixture"),
+            "expected b0t_name from identity/core.md frontmatter in instructions"
         )
         XCTAssertTrue(context.loadedFiles.contains("identity/core.md"))
         XCTAssertTrue(context.loadedFiles.contains("identity/principles.md"))

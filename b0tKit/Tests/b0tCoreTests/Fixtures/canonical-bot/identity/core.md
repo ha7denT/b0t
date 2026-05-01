@@ -1,5 +1,5 @@
 ---
-name: b0t-fixture
+b0t_name: b0t-fixture
 mutable: true
 always_in_context: true
 ---

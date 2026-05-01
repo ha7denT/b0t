@@ -15,8 +15,8 @@ import b0tBrain
 /// Slice 7 (Task 28) extends `.heartbeat` to prepend a missed-beat note when
 /// `missedGap` exceeds `bpmInterval × 1.5`.
 ///
-/// Slice 10 (Task 37) implements the graduated overflow fallback for
-/// `.fallback(level:base:)` mode.
+/// Slice 10 (Task 36) implements the graduated overflow fallback as a private
+/// mechanism within this type (not a public `AssemblyMode` case).
 ///
 /// See spec §7.1, §7.2, §7.4.
 public struct ContextAssembler: Sendable {
@@ -40,9 +40,6 @@ public struct ContextAssembler: Sendable {
         case .heartbeat:
             // Slice 5 implements this branch.
             fatalError("heartbeat mode not implemented until Slice 5")
-        case .fallback:
-            // Slice 10 implements this branch.
-            fatalError("fallback mode not implemented until Slice 10")
         }
     }
 
@@ -53,9 +50,10 @@ public struct ContextAssembler: Sendable {
 
         let identityText = [identityCore.prose, identityPrinciples.prose].joined(separator: "\n\n")
         let memoryText = memoryCore.prose
+        let botName = identityCore.botName ?? bot.rootURL.lastPathComponent
 
         let systemInstructions = """
-            you are the b0t named '\(bot.rootURL.lastPathComponent)'.
+            you are the b0t named '\(botName)'.
 
             identity:
             \(identityText)
