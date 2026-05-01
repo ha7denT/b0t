@@ -56,7 +56,7 @@ public struct JournalWriter: Sendable {
 
 
             """
-        try initial.data(using: .utf8)!.write(to: url, options: .atomic)
+        try Data(initial.utf8).write(to: url, options: [.atomic])
     }
 
     /// The "YYYY-MM-DD" string for `date` in UTC.
@@ -64,6 +64,8 @@ public struct JournalWriter: Sendable {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .iso8601)
         return formatter.string(from: date)
     }
 
@@ -72,6 +74,8 @@ public struct JournalWriter: Sendable {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .iso8601)
         return formatter.string(from: date)
     }
 
@@ -83,6 +87,6 @@ public struct JournalWriter: Sendable {
         let existing = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
         let separator = existing.hasSuffix("\n\n") ? "" : (existing.hasSuffix("\n") ? "\n" : "\n\n")
         let combined = existing + separator + entry + "\n"
-        try combined.data(using: .utf8)!.write(to: url, options: .atomic)
+        try Data(combined.utf8).write(to: url, options: [.atomic])
     }
 }

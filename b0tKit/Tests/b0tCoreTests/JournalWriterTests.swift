@@ -34,9 +34,7 @@ final class JournalWriterTests: XCTestCase {
 
         let url = writer.journalURL(for: date)
         let content = try String(contentsOf: url, encoding: .utf8)
-        XCTAssertTrue(content.hasPrefix("---\n"))
-        XCTAssertTrue(content.contains("date: 2026-05-01\n"))
-        XCTAssertTrue(content.contains("---\n"))
+        XCTAssertEqual(content, "---\ndate: 2026-05-01\n---\n\n")
     }
 
     func test_secondAppend_doesNotReWriteFrontmatter() async throws {
