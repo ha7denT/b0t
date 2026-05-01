@@ -7,6 +7,14 @@ final class BotFileTests: XCTestCase {
         URL(fileURLWithPath: "/tmp/b0t-test/\(path)")
     }
 
+    private func fixtureURL(_ path: String) throws -> URL {
+        let base = try XCTUnwrap(
+            Bundle.module.url(forResource: "Fixtures", withExtension: nil),
+            "Fixtures bundle resource missing"
+        )
+        return base.appendingPathComponent(path)
+    }
+
     func test_parse_noFrontmatter() throws {
         let text = "# heading\nbody\n"
         let file = try BotFile(fileURL: url("a.md"), text: text)
@@ -271,5 +279,41 @@ final class BotFileTests: XCTestCase {
             mutated.originalText.contains("# leading comment"),
             "leading comment should survive a value change on a different key"
         )
+    }
+
+    // MARK: - Fixture-driven soft-fail tests
+
+    func test_fixture_brokenYAML_softFails() async throws {
+        let url = try fixtureURL("broken-frontmatter-bot/skills/broken-yaml.md")
+        let text = try String(contentsOf: url, encoding: .utf8)
+        let file = try BotFile(fileURL: url, text: text)
+        guard case .frontmatterInvalidYAML = file.parseError else {
+            return XCTFail(
+                "expected frontmatterInvalidYAML, got \(String(describing: file.parseError))"
+            )
+        }
+        XCTAssertTrue(file.frontmatter.keys.isEmpty)
+        XCTAssertTrue(file.prose.contains("broken yaml"))
+    }
+
+    func test_fixture_unterminatedFrontmatter_softFails() async throws {
+        let url = try fixtureURL("broken-frontmatter-bot/skills/unterminated.md")
+        let text = try String(contentsOf: url, encoding: .utf8)
+        let file = try BotFile(fileURL: url, text: text)
+        XCTAssertEqual(file.parseError, .frontmatterUnterminated(url))
+        XCTAssertTrue(file.prose.contains("prose"))
+    }
+
+    func test_fixture_canonicalBotCalendarLink_resolves() async throws {
+        let calendarURL = try fixtureURL("canonical-bot/skills/calendar.md")
+        let text = try String(contentsOf: calendarURL, encoding: .utf8)
+        let file = try BotFile(fileURL: calendarURL, text: text)
+        let links = BotLink.parse(prose: file.prose, sourceFileURL: calendarURL)
+        XCTAssertEqual(links.count, 1)
+        if case .botFile(let resolved) = links[0].resolution {
+            XCTAssertEqual(resolved.lastPathComponent, "reminders.md")
+        } else {
+            XCTFail("expected resolved botFile, got \(links[0].resolution)")
+        }
     }
 }
