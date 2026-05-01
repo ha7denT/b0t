@@ -9,7 +9,13 @@ final class StubLanguageModelClientTests: XCTestCase {
             XCTAssert(outputType == ConversationResponse.self)
             return ConversationResponse(text: "echo: hi")
         }
-        let context = AssembledContext(userPrompt: "hi")
+        let context = AssembledContext(
+            systemInstructions: "",
+            userPrompt: "hi",
+            tools: [],
+            budget: TokenBudget(estimated: 0, limit: 3500, breakdown: [:], didFallBackToDigest: false),
+            loadedFiles: []
+        )
         let response: ConversationResponse = try await stub.generate(
             context: context,
             generating: ConversationResponse.self
@@ -26,7 +32,15 @@ final class StubLanguageModelClientTests: XCTestCase {
         }
         do {
             let _: ConversationResponse = try await stub.generate(
-                context: AssembledContext(userPrompt: ""),
+                context: AssembledContext(
+                    systemInstructions: "",
+                    userPrompt: "",
+                    tools: [],
+                    budget: TokenBudget(
+                        estimated: 0, limit: 3500, breakdown: [:], didFallBackToDigest: false
+                    ),
+                    loadedFiles: []
+                ),
                 generating: ConversationResponse.self
             )
             XCTFail("expected throw")
@@ -42,7 +56,15 @@ final class StubLanguageModelClientTests: XCTestCase {
         let stub = StubLanguageModelClient { _, _ in throw Boom() }
         do {
             let _: ConversationResponse = try await stub.generate(
-                context: AssembledContext(userPrompt: ""),
+                context: AssembledContext(
+                    systemInstructions: "",
+                    userPrompt: "",
+                    tools: [],
+                    budget: TokenBudget(
+                        estimated: 0, limit: 3500, breakdown: [:], didFallBackToDigest: false
+                    ),
+                    loadedFiles: []
+                ),
                 generating: ConversationResponse.self
             )
             XCTFail("expected throw")

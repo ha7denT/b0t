@@ -31,7 +31,15 @@ public actor ConversationManager {
     }
 
     public func respond(to userPrompt: String) async throws -> ConversationResponse {
-        let context = AssembledContext(userPrompt: userPrompt)
+        let context = AssembledContext(
+            systemInstructions: "",
+            userPrompt: userPrompt,
+            tools: [],
+            budget: TokenBudget(
+                estimated: 0, limit: 3500, breakdown: [:], didFallBackToDigest: false
+            ),
+            loadedFiles: []
+        )
         return try await client.generate(
             context: context,
             generating: ConversationResponse.self
