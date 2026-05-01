@@ -38,6 +38,40 @@ public actor BotStore {
         return file
     }
 
+    /// Writes a `BotFile` atomically. The file's `originalText` is the source
+    /// of truth — the writer doesn't inspect `parseError` because mutations
+    /// are no-ops on broken-frontmatter files (BotFile §5.3, spec §6.4).
+    ///
+    /// The write goes through a sibling temp file (`<name>~`) and an atomic
+    /// rename via `FileManager.replaceItem` so a crash mid-write leaves the
+    /// original intact.
+    public func write(_ file: BotFile) async throws {
+        let target = file.fileURL
+        let tempURL = target.deletingLastPathComponent()
+            .appendingPathComponent(target.lastPathComponent + "~")
+
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        do {
+            try Data(file.originalText.utf8).write(to: tempURL, options: [.atomic])
+            // FileManager.replaceItem requires the destination to exist; if
+            // it doesn't, fall back to a plain move.
+            if FileManager.default.fileExists(atPath: target.path) {
+                _ = try FileManager.default.replaceItemAt(target, withItemAt: tempURL)
+            } else {
+                try FileManager.default.moveItem(at: tempURL, to: target)
+            }
+        } catch {
+            throw BotFileError.diskWriteFailed(
+                target, underlyingDescription: String(describing: error)
+            )
+        }
+
+        // Update the cache to reflect the new mtime.
+        let mtime = try currentMtime(target)
+        cache.set(target, file: file, mtime: mtime)
+    }
+
     /// Manually invalidate a cached file. Use sparingly; mtime checks
     /// handle the common case automatically.
     public func invalidate(_ fileURL: URL) {

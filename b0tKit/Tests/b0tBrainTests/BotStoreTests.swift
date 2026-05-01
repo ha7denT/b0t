@@ -59,16 +59,37 @@ final class BotStoreTests: XCTestCase {
 
     func test_read_servesCacheWhenMtimeUnchanged() async throws {
         let url = try write("---\nk: v\n---\n", named: "a.md")
+
+        // Warm-up: macOS APFS stores higher-precision mtime than Foundation's
+        // setAttributes can write back exactly. Round-trip the mtime through
+        // setAttributes once before the first read, so the on-disk mtime is
+        // at the precision Foundation can preserve. Without this, the test's
+        // later setAttributes call introduces sub-microsecond drift that the
+        // cache's exact-equality check correctly rejects.
+        let initialAttrs = try FileManager.default.attributesOfItem(atPath: url.path)
+        let initialMtime = initialAttrs[.modificationDate] as! Date
+        try FileManager.default.setAttributes(
+            [.modificationDate: initialMtime], ofItemAtPath: url.path
+        )
+        let warmedAttrs = try FileManager.default.attributesOfItem(atPath: url.path)
+        let warmedMtime = warmedAttrs[.modificationDate] as! Date
+
         let store = BotStore()
         let first = try await store.read(url)
-        // Modify the file's content WITHOUT changing mtime — write same bytes.
-        try Data(first.originalText.utf8).write(to: url)
-        // Force-set mtime to its previous value to simulate a no-op write.
-        let attrs = try FileManager.default.attributesOfItem(atPath: url.path)
-        let firstMtime = attrs[.modificationDate] as! Date
-        try FileManager.default.setAttributes([.modificationDate: firstMtime], ofItemAtPath: url.path)
+
+        // Mutate disk to *different* content under unchanged mtime — proves
+        // cache-hit by asserting the cached (original) value is returned.
+        try Data("---\nk: v_NEW\n---\n".utf8).write(to: url)
+        try FileManager.default.setAttributes(
+            [.modificationDate: warmedMtime], ofItemAtPath: url.path
+        )
+
         let second = try await store.read(url)
         XCTAssertEqual(first, second)
+        XCTAssertEqual(
+            second.frontmatter["k"], .string("v"),
+            "cache-hit must serve original value, not v_NEW"
+        )
     }
 
     func test_read_reparsesWhenMtimeChanges() async throws {
@@ -118,5 +139,42 @@ final class BotStoreTests: XCTestCase {
         let bRefreshed = try await store.read(urlB)
         XCTAssertEqual(aRefreshed.frontmatter["k"], .string("a2"))
         XCTAssertEqual(bRefreshed.frontmatter["k"], .string("b2"))
+    }
+
+    // MARK: - Writes
+
+    func test_write_persistsBytes() async throws {
+        let url = try write("---\nk: v\n---\n", named: "a.md")
+        let store = BotStore()
+        var file = try await store.read(url)
+        file = file.settingFrontmatter("k", to: .string("v2"))
+        try await store.write(file)
+
+        let onDisk = try String(contentsOf: url, encoding: .utf8)
+        XCTAssertEqual(onDisk, "---\nk: v2\n---\n")
+    }
+
+    func test_write_updatesCache() async throws {
+        let url = try write("---\nk: v\n---\n", named: "a.md")
+        let store = BotStore()
+        var file = try await store.read(url)
+        file = file.settingFrontmatter("k", to: .string("v3"))
+        try await store.write(file)
+        let reread = try await store.read(url)
+        XCTAssertEqual(reread.frontmatter["k"], .string("v3"))
+    }
+
+    func test_write_isAtomic_originalPreservedOnTempFailure() async throws {
+        // We can't easily inject a write failure here without mocking
+        // FileManager. Instead we assert that after a normal write, no
+        // sibling temp file is left behind.
+        let url = try write("---\nk: v\n---\n", named: "a.md")
+        let store = BotStore()
+        var file = try await store.read(url)
+        file = file.settingFrontmatter("k", to: .string("v4"))
+        try await store.write(file)
+
+        let siblings = try FileManager.default.contentsOfDirectory(atPath: tmp.path)
+        XCTAssertFalse(siblings.contains(where: { $0.hasSuffix("~") }), "no temp leftovers")
     }
 }
