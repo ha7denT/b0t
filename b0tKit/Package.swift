@@ -30,7 +30,17 @@ let package = Package(
         .target(name: "b0tAudio"),
         .target(name: "b0tDesign"),
 
-        .testTarget(name: "b0tCoreTests", dependencies: ["b0tCore"]),
+        .testTarget(
+            name: "b0tCoreTests",
+            dependencies: ["b0tCore"],
+            resources: [
+                .copy("Fixtures")
+            ]
+        ),
+        .testTarget(
+            name: "b0tCoreIntegrationTests",
+            dependencies: ["b0tCore"]
+        ),
         .testTarget(
             name: "b0tBrainTests",
             dependencies: ["b0tBrain"],
