@@ -116,4 +116,38 @@ public actor BotStore {
         }
         return mtime
     }
+
+    private var lastBacklinkIndex: (root: URL, index: BacklinkIndex)?
+
+    /// Returns links that target `fileURL` from anywhere in the bot.
+    /// Cached keyed by (botRoot, highest-mtime-in-tree).
+    public func backlinks(to fileURL: URL, in bot: Bot) async throws -> [BotLink] {
+        let currentHigh = try highWaterMtime(under: bot.rootURL)
+        if let cached = lastBacklinkIndex,
+            cached.root == bot.rootURL,
+            cached.index.highWaterMtime == currentHigh
+        {
+            return cached.index.backlinks(to: fileURL)
+        }
+        let fresh = try await BacklinkBuilder.build(botRoot: bot.rootURL, store: self)
+        lastBacklinkIndex = (bot.rootURL, fresh)
+        return fresh.backlinks(to: fileURL)
+    }
+
+    private func highWaterMtime(under root: URL) throws -> Date {
+        let fm = FileManager.default
+        guard
+            let enumerator = fm.enumerator(
+                at: root, includingPropertiesForKeys: [.contentModificationDateKey]
+            )
+        else {
+            return .distantPast
+        }
+        var hi: Date = .distantPast
+        for case let url as URL in enumerator where url.pathExtension.lowercased() == "md" {
+            let attrs = (try? fm.attributesOfItem(atPath: url.path)) ?? [:]
+            if let m = attrs[.modificationDate] as? Date, m > hi { hi = m }
+        }
+        return hi
+    }
 }
