@@ -10,6 +10,7 @@
 		1657F0033948CC6E58164B2F /* b0tCore in Frameworks */ = {isa = PBXBuildFile; productRef = DCAB6B34E6DCAB50BB736458 /* b0tCore */; };
 		1C47AFBE1FC5D310794439C9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E91319360B3AF9F60F37C9 /* ContentView.swift */; };
 		35017C62846B82978924F904 /* b0tFace in Frameworks */ = {isa = PBXBuildFile; productRef = 196A7880D576DA8B5936303B /* b0tFace */; };
+		3992D737C0B07C64F546F96F /* DebugBrainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A06500FFF84C51E4C2E4EB /* DebugBrainView.swift */; };
 		83579266A13A3AABBE751315 /* b0tSkills in Frameworks */ = {isa = PBXBuildFile; productRef = 0943B725594C26ACEE1FCD33 /* b0tSkills */; };
 		9E7FE541C355795463F2E047 /* default-bot in Resources */ = {isa = PBXBuildFile; fileRef = 933F2AE957C01B79FA72B32D /* default-bot */; };
 		A315E155CFA78CFB01DE92DF /* b0tAudio in Frameworks */ = {isa = PBXBuildFile; productRef = B94783E8348975DD05ED09EE /* b0tAudio */; };
@@ -26,6 +27,7 @@
 		4697E672E444B47FF9B58EE0 /* b0tKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = b0tKit; path = b0tKit; sourceTree = SOURCE_ROOT; };
 		577740E81715D5E498229C81 /* b0t.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = b0t.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		933F2AE957C01B79FA72B32D /* default-bot */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "default-bot"; sourceTree = SOURCE_ROOT; };
+		B7A06500FFF84C51E4C2E4EB /* DebugBrainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugBrainView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +54,14 @@
 			);
 			name = Resources;
 			path = b0tApp/Resources;
+			sourceTree = "<group>";
+		};
+		73479DB07AE9C131ED556ED6 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				B7A06500FFF84C51E4C2E4EB /* DebugBrainView.swift */,
+			);
+			path = Debug;
 			sourceTree = "<group>";
 		};
 		7F79E14CD36A9D012386FFCC = {
@@ -94,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				9FECAA7402C49FCC1F9F02B1 /* App */,
+				73479DB07AE9C131ED556ED6 /* Debug */,
 			);
 			name = Sources;
 			path = b0tApp/Sources;
@@ -182,6 +193,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1C47AFBE1FC5D310794439C9 /* ContentView.swift in Sources */,
+				3992D737C0B07C64F546F96F /* DebugBrainView.swift in Sources */,
 				A78B13C574B7EA676D887AB1 /* b0tApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

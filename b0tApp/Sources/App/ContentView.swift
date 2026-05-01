@@ -4,6 +4,10 @@ import b0tBrain
 struct ContentView: View {
     let bootstrap: Bootstrap
 
+    #if DEBUG
+        @State private var showDebugBrain = false
+    #endif
+
     var body: some View {
         VStack(spacing: 8) {
             Text("b0t")
@@ -11,8 +15,30 @@ struct ContentView: View {
             statusLine
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
+
+            #if DEBUG
+                if case .ready = bootstrap {
+                    Button("debug brain") { showDebugBrain = true }
+                        .font(.system(.caption, design: .monospaced))
+                        .padding(.top, 16)
+                }
+            #endif
         }
         .padding()
+        #if DEBUG
+            .sheet(isPresented: $showDebugBrain) {
+                if case .ready(let bot, let store) = bootstrap {
+                    NavigationStack {
+                        DebugBrainView(bot: bot, store: store)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("close") { showDebugBrain = false }
+                            }
+                        }
+                    }
+                }
+            }
+        #endif
     }
 
     @ViewBuilder
