@@ -4,16 +4,16 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 ## Current state
 
-- **Phase:** 1 — markdown brain (no LLM)
+- **Phase:** 2 — Foundation Models loop
 - **Status:** not started
-- **Plan:** (forthcoming — will live at `docs/plans/phase-1-*.md`)
+- **Plan:** (forthcoming — will live at `docs/plans/phase-2-*.md`)
 
 ## Phase ledger
 
 | # | Phase | Plan | Status |
 |---|---|---|---|
 | 0 | Project setup | [phase-0](plans/phase-0-project-setup.md) | complete (2026-04-30) |
-| 1 | Markdown brain (no LLM) | — | not started |
+| 1 | Markdown brain (no LLM) | [phase-1](plans/phase-1-markdown-brain.md) | complete (2026-05-01) |
 | 2 | Foundation Models loop | — | not started |
 | 3 | Skill bridges | — | not started |
 | 4 | Anatomical GUI (default face) | — | not started |
@@ -41,3 +41,11 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 - The `default-bot/` directory at the repo root is bundled into the iOS app via an xcodegen folder reference (`type: folder, buildPhase: resources`). Files added to `default-bot/` on disk land in the bundle on next build with no further action.
 - swift-format pre-commit hook lives at `.git/hooks/pre-commit` (not committed; git hooks live outside the working tree). A future onboarding script for new contributors is out of scope.
 - CI runner is `macos-latest` (not `macos-15` as the plan originally specified). The plan's own contingency note anticipated this — Xcode 26 isn't reliably on `macos-15` images, and `macos-latest` keeps us on whatever GitHub currently ships with. Re-evaluate if CI starts hitting toolchain mismatches.
+
+## Notes from Phase 1
+
+- Spec at `docs/specs/phase-1-markdown-brain.md` settled seven design questions during brainstorming (scope, lossless strategy, API typing, concurrency, malformed-input policy, cache invalidation, provisioning). Plan at `docs/plans/phase-1-markdown-brain.md` decomposed the spec into 22 TDD-shaped tasks.
+- Final shape: 78 tests passing across the b0tKit package suite, including a production-default-bot integration test that loads every shipped file and asserts `parseError == nil`.
+- Yams 5.x added as the only new SPM dependency. Privacy-audit clean (no network calls).
+- Several mid-implementation deviations and fix-up commits captured along the way: `MarkdownSplitter` EOF-closer crash fix, `FrontmatterParser` zip-misalignment guard, `BotFile` mutation correctness (leading YAML indicators, NaN/Infinity, no-op short-circuit), `BotFile.appendingProseSection` trailing-newline normalisation, `BotStore.write` real failure-injection test, `Bot.swift` case-insensitive `.md` filter, and a spec/code reconciliation on `BotStore.write`'s signature.
+- Manual simulator launch (the plan's Step 22.4 / "see 'active: b0t-01' on screen") deferred to Jamee — agent harness can't drive the simulator UI deterministically.
