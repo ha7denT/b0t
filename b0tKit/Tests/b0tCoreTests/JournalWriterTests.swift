@@ -59,6 +59,86 @@ final class JournalWriterTests: XCTestCase {
             "second ensure must be a no-op when file exists")
     }
 
+    func test_appendConversationTurn_writesByteExactOpenClawEntry() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T14:32:00Z")!
+        let writer = JournalWriter(bot: bot, store: store, clock: FixedClock(date))
+
+        let response = ConversationResponse(
+            text: "noted \u{2014} added to your memory",
+            mood: .attentive,
+            memoryObservations: [
+                MemoryObservation(
+                    about: "Jamee",
+                    what: "vendor call at 4pm",
+                    importance: .high
+                )
+            ]
+        )
+        let stateDelta = StateDelta(
+            writtenFiles: [bot.memory.recentURL]
+        )
+
+        try await writer.appendConversationTurn(
+            prompt: "remember I have a vendor call at 4",
+            response: response,
+            stateDelta: stateDelta,
+            turnNumber: 7
+        )
+
+        let url = writer.journalURL(for: date)
+        let content = try String(contentsOf: url, encoding: .utf8)
+
+        let expected = """
+            ---
+            date: 2026-05-01
+            ---
+
+            ## 14:32 \u{2014} turn 7
+
+            **observed:** user said: remember I have a vendor call at 4
+            **decided:** noted \u{2014} added to your memory
+            **mood:** attentive
+            **memory_observations:**
+            - (high) Jamee: vendor call at 4pm
+            **state_delta:** memory/recent.md
+
+            """
+        XCTAssertEqual(content, expected)
+    }
+
+    func test_appendConversationTurn_omitsOptionalSectionsWhenEmpty() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T09:15:00Z")!
+        let writer = JournalWriter(bot: bot, store: store, clock: FixedClock(date))
+
+        try await writer.appendConversationTurn(
+            prompt: "hi",
+            response: ConversationResponse(text: "hello"),
+            stateDelta: .empty,
+            turnNumber: 1
+        )
+
+        let content = try String(contentsOf: writer.journalURL(for: date), encoding: .utf8)
+        let expected = """
+            ---
+            date: 2026-05-01
+            ---
+
+            ## 09:15 \u{2014} turn 1
+
+            **observed:** user said: hi
+            **decided:** hello
+            **state_delta:** none
+
+            """
+        XCTAssertEqual(content, expected)
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

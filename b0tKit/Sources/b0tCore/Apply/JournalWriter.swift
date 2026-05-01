@@ -89,4 +89,58 @@ public struct JournalWriter: Sendable {
         let combined = existing + separator + entry + "\n"
         try Data(combined.utf8).write(to: url, options: [.atomic])
     }
+
+    public func appendConversationTurn(
+        prompt: String,
+        response: ConversationResponse,
+        stateDelta: StateDelta,
+        turnNumber: Int
+    ) async throws {
+        let date = clock.now()
+        let timeString = Self.timeString(for: date)
+        let stateDeltaText = Self.formatStateDelta(stateDelta, bot: bot)
+
+        var lines: [String] = [
+            "## \(timeString) \u{2014} turn \(turnNumber)",
+            "",
+            "**observed:** user said: \(prompt)",
+            "**decided:** \(response.text)",
+        ]
+
+        if let mood = response.mood {
+            lines.append("**mood:** \(mood.rawValue)")
+        }
+
+        if !response.memoryObservations.isEmpty {
+            lines.append("**memory_observations:**")
+            for obs in response.memoryObservations {
+                lines.append("- (\(obs.importance.rawValue)) \(obs.about): \(obs.what)")
+            }
+        }
+
+        lines.append("**state_delta:** \(stateDeltaText)")
+
+        let entry = lines.joined(separator: "\n")
+        try await appendRaw(entry, for: date)
+    }
+
+    static func formatStateDelta(_ delta: StateDelta, bot: Bot) -> String {
+        if delta.writtenFiles.isEmpty && delta.wouldNotifyText == nil {
+            return "none"
+        }
+        let pathPrefix = bot.rootURL.path
+        let relative = delta.writtenFiles.map { url -> String in
+            let path = url.path
+            if path.hasPrefix(pathPrefix) {
+                // Strip "<bot-root>/" prefix → e.g., "memory/recent.md"
+                return String(path.dropFirst(pathPrefix.count + 1))
+            }
+            return url.lastPathComponent
+        }.sorted()
+        var parts = relative
+        if let notify = delta.wouldNotifyText {
+            parts.append("would_notify: \(notify)")
+        }
+        return parts.joined(separator: ", ")
+    }
 }
