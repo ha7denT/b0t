@@ -263,4 +263,17 @@ final class BotStoreTests: XCTestCase {
         )
         XCTAssertEqual(ids, ["calendar", "mail"])
     }
+
+    func test_load_throwsWhenPathIsNotADirectory() async throws {
+        let url = try write("---\n---\n", named: "not-a-dir.md")
+        let store = BotStore()
+        do {
+            _ = try await store.load(at: url)
+            XCTFail("expected throw")
+        } catch BotFileError.fileNotFound(let failing) {
+            XCTAssertEqual(failing, url)
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+    }
 }

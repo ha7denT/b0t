@@ -23,7 +23,7 @@ internal func listMarkdownFiles(at directoryURL: URL, store: BotStore) async thr
     let fm = FileManager.default
     guard fm.fileExists(atPath: directoryURL.path) else { return [] }
     let names = try fm.contentsOfDirectory(atPath: directoryURL.path)
-        .filter { $0.hasSuffix(".md") }
+        .filter { $0.lowercased().hasSuffix(".md") }
         .sorted()
     var files: [BotFile] = []
     for name in names {
