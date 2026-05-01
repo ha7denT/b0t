@@ -164,10 +164,8 @@ final class BotStoreTests: XCTestCase {
         XCTAssertEqual(reread.frontmatter["k"], .string("v3"))
     }
 
-    func test_write_isAtomic_originalPreservedOnTempFailure() async throws {
-        // We can't easily inject a write failure here without mocking
-        // FileManager. Instead we assert that after a normal write, no
-        // sibling temp file is left behind.
+    func test_write_cleansUpTempFile() async throws {
+        // After a successful write, no <name>~ sibling should remain.
         let url = try write("---\nk: v\n---\n", named: "a.md")
         let store = BotStore()
         var file = try await store.read(url)
@@ -176,5 +174,40 @@ final class BotStoreTests: XCTestCase {
 
         let siblings = try FileManager.default.contentsOfDirectory(atPath: tmp.path)
         XCTAssertFalse(siblings.contains(where: { $0.hasSuffix("~") }), "no temp leftovers")
+    }
+
+    func test_write_originalPreservedWhenTempWriteFails() async throws {
+        let url = try write("---\nk: original\n---\n", named: "a.md")
+        let store = BotStore()
+        var file = try await store.read(url)
+        file = file.settingFrontmatter("k", to: .string("changed"))
+
+        // chmod the directory to read-only so the temp write fails.
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o500], ofItemAtPath: tmp.path
+        )
+        defer {
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o755], ofItemAtPath: tmp.path
+            )
+        }
+
+        do {
+            try await store.write(file)
+            XCTFail("expected throw")
+        } catch BotFileError.diskWriteFailed {
+            // expected
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+
+        // Restore perms and verify the original file survived intact.
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o755], ofItemAtPath: tmp.path
+        )
+        let onDisk = try String(contentsOf: url, encoding: .utf8)
+        XCTAssertEqual(
+            onDisk, "---\nk: original\n---\n",
+            "original file must survive failed write atomically")
     }
 }

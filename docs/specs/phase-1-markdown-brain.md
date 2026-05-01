@@ -91,7 +91,7 @@ public actor BotStore {
 
     public func load(at directoryURL: URL) async throws -> Bot
     public func read(_ fileURL: URL) async throws -> BotFile
-    public func write(_ file: BotFile, to fileURL: URL) async throws
+    public func write(_ file: BotFile) async throws
     public func backlinks(to fileURL: URL, in bot: Bot) async throws -> [BotLink]
     public func invalidate(_ fileURL: URL)
     public func invalidateAll()
@@ -297,7 +297,7 @@ Each returns a new `BotFile` whose `originalText` is the spliced result and whos
 
 ### 6.4 Atomic write
 
-`BotStore.write(_:to:)`:
+`BotStore.write(_:)`:
 
 1. Write `botFile.originalText` as UTF-8 to a sibling temp file in the same directory (e.g., `core.md~`).
 2. `fsync` the temp file.

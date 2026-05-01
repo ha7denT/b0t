@@ -45,11 +45,19 @@ public actor BotStore {
     /// The write goes through a sibling temp file (`<name>~`) and an atomic
     /// rename via `FileManager.replaceItem` so a crash mid-write leaves the
     /// original intact.
+    ///
+    /// For new files (no existing target), the fallback path is
+    /// `Data.write(to: temp, .atomic) + FileManager.moveItem` — both steps
+    /// individually atomic. The worst-case crash leaves only a sibling
+    /// temp file behind, never a partial target.
     public func write(_ file: BotFile) async throws {
         let target = file.fileURL
         let tempURL = target.deletingLastPathComponent()
             .appendingPathComponent(target.lastPathComponent + "~")
 
+        // `replaceItemAt` consumes tempURL on success; this defer is a no-op
+        // in that path (try? swallows the not-found). On any failure path it
+        // cleans up the orphaned temp.
         defer { try? FileManager.default.removeItem(at: tempURL) }
 
         do {
