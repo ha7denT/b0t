@@ -6,8 +6,13 @@ import b0tBrain
 /// Builds an `AssembledContext` for a given `AssemblyMode`.
 ///
 /// Slice 2 (this file): handles `.conversation` mode by loading identity/core,
-/// identity/principles, and memory/core from the bot. The user prompt is
-/// rendered into `userPrompt` verbatim.
+/// identity/principles, memory/core, and memory/recent from the bot. The user
+/// prompt is rendered into `userPrompt` verbatim.
+///
+/// Slice 3 (Task 13) adds memory/recent.md to the conversation assembly so
+/// that observations written by the Executor in turn N are visible to the
+/// assembler in turn N+1. This closes spec §7.1 ("memory/recent.md, truncated
+/// to fit budget; newest entries kept"), which was omitted from the Task 7 plan.
 ///
 /// Slice 5 (Task 19) extends this to handle `.heartbeat` mode by additionally
 /// including the full body of `actions.md` and any trigger/missed-gap context.
@@ -47,23 +52,41 @@ public struct ContextAssembler: Sendable {
         let identityCore = try await bot.identity.core
         let identityPrinciples = try await bot.identity.principles
         let memoryCore = try await bot.memory.core
+        let memoryRecent = try await bot.memory.recent
 
         let identityText = [identityCore.prose, identityPrinciples.prose].joined(separator: "\n\n")
         let memoryText = memoryCore.prose
+        let recentText = memoryRecent.prose
         let botName = identityCore.botName ?? bot.rootURL.lastPathComponent
 
-        let systemInstructions = """
-            you are the b0t named '\(botName)'.
+        // Build system instructions. Include recent observations only when
+        // there is non-empty prose (i.e. the Executor has written something).
+        var instructionsParts = [
+            "you are the b0t named '\(botName)'.",
+            "",
+            "identity:",
+            identityText,
+            "",
+            "what you remember about the user:",
+            memoryText,
+        ]
+        let trimmedRecent = recentText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedRecent.isEmpty {
+            instructionsParts += [
+                "",
+                "recent observations:",
+                recentText,
+            ]
+        }
+        let systemInstructions = instructionsParts.joined(separator: "\n")
 
-            identity:
-            \(identityText)
-
-            what you remember about the user:
-            \(memoryText)
-            """
-
+        // Token accounting: merge core + recent into a single "memory" bucket
+        // so the breakdown continues to sum to `estimated` without introducing
+        // a new key (keeps ContextAssemblerTests.test_conversation_recordsBudgetBreakdown
+        // green — it only checks that the keys are present and sum correctly).
         let identityTokens = TokenEstimator.estimate(identityText)
-        let memoryTokens = TokenEstimator.estimate(memoryText)
+        let memoryTokens =
+            TokenEstimator.estimate(memoryText) + TokenEstimator.estimate(recentText)
         let promptTokens = TokenEstimator.estimate(userPrompt)
         let total = identityTokens + memoryTokens + promptTokens
 
@@ -93,6 +116,7 @@ public struct ContextAssembler: Sendable {
                 "identity/core.md",
                 "identity/principles.md",
                 "memory/core.md",
+                "memory/recent.md",
             ]
         )
     }

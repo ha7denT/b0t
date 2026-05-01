@@ -6,7 +6,7 @@ import XCTest
 
 final class ConversationManagerTests: XCTestCase {
     func test_respond_buildsAssembledContextFromBot_passesToClient() async throws {
-        let bot = try await loadCanonicalBot()
+        let bot = try await loadCanonicalBotInTempCopy()
         let store = BotStore()
         let stub = StubLanguageModelClient { context, _ in
             // Real context now: instructions reference the bot, prompt carries the user message.
@@ -24,10 +24,59 @@ final class ConversationManagerTests: XCTestCase {
         XCTAssertEqual(response.text, "echo: hello")
     }
 
-    private func loadCanonicalBot() async throws -> Bot {
-        let fixturesURL = Bundle.module.resourceURL!
-            .appendingPathComponent("Fixtures/canonical-bot")
+    func test_respond_appliesMemoryObservations_persistsAcrossTurns() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
         let store = BotStore()
-        return try await store.load(at: fixturesURL)
+
+        // Swift 6 strict concurrency: the Handler closure is @Sendable, so we
+        // cannot capture a plain `var turn = 0`. Use a reference-type counter
+        // marked @unchecked Sendable (the mutation is serialised by the test's
+        // sequential await chain, so it is safe in practice).
+        final class TurnCounter: @unchecked Sendable { var n = 0 }
+        let counter = TurnCounter()
+
+        let stub = StubLanguageModelClient { context, _ in
+            counter.n += 1
+            if counter.n == 1 {
+                return ConversationResponse(
+                    text: "noted",
+                    memoryObservations: [
+                        MemoryObservation(
+                            about: "Jamee",
+                            what: "has a vendor call at 4pm",
+                            importance: .high
+                        )
+                    ]
+                )
+            } else {
+                // Second turn: assert the assembler picked up the observation
+                // from memory/recent.md (which was written by the first turn).
+                XCTAssertTrue(
+                    context.systemInstructions.contains("vendor call at 4pm"),
+                    "second turn's instructions should include the first turn's observation"
+                )
+                return ConversationResponse(text: "remembered")
+            }
+        }
+        let manager = ConversationManager(bot: bot, store: store, client: stub)
+
+        _ = try await manager.respond(to: "I have a vendor call at 4 today")
+        let second = try await manager.respond(to: "what's on my calendar?")
+        XCTAssertEqual(second.text, "remembered")
+    }
+
+    // MARK: – Helpers
+
+    /// Copies the read-only bundle fixture to a temp directory so tests that
+    /// mutate files (e.g. writing memory/recent.md) don't corrupt the bundle.
+    private func loadCanonicalBotInTempCopy() async throws -> Bot {
+        let source = Bundle.module.resourceURL!
+            .appendingPathComponent("Fixtures/canonical-bot")
+        let temp = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.copyItem(at: source, to: temp)
+        addTeardownBlock { try? FileManager.default.removeItem(at: temp) }
+        let store = BotStore()
+        return try await store.load(at: temp)
     }
 }

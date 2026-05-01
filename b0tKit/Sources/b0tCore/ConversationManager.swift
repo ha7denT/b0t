@@ -4,10 +4,10 @@ import b0tBrain
 
 /// Orchestrates a single user-turn flow: prompt → context → model → response.
 ///
-/// Slice 1 (this file): prompt is passed through as-is to the client.
-/// Slice 2 (Task 9): wraps `ContextAssembler.assemble(.conversation(...))`.
-/// Slice 3 (Task 14): applies `Executor` to memory observations.
-/// Slice 4 (Task 17): appends a journal entry per turn.
+/// Slice 1 introduced the actor and the prompt-passthrough placeholder.
+/// Slice 2 (Task 8) wraps `ContextAssembler.assemble(.conversation(...))`.
+/// Slice 3 (this commit) applies `Executor` to memory observations.
+/// Slice 4 (Task 17) will append a journal entry per turn.
 ///
 /// The manager is an `actor` so concurrent UI inputs are serialised — the
 /// caller doesn't have to coordinate. State that survives a single call
@@ -18,6 +18,7 @@ public actor ConversationManager {
     private let client: any LanguageModelClient
     private let clock: any Clock
     private let assembler: ContextAssembler
+    private let executor: Executor
 
     public init(
         bot: Bot,
@@ -30,15 +31,18 @@ public actor ConversationManager {
         self.client = client
         self.clock = clock
         self.assembler = ContextAssembler(bot: bot, store: store)
+        self.executor = Executor(bot: bot, store: store)
     }
 
     public func respond(to userPrompt: String) async throws -> ConversationResponse {
         let context = try await assembler.assemble(
             mode: .conversation(userPrompt: userPrompt)
         )
-        return try await client.generate(
+        let response = try await client.generate(
             context: context,
             generating: ConversationResponse.self
         )
+        _ = try await executor.apply(response)
+        return response
     }
 }
