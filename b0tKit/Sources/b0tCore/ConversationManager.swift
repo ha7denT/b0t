@@ -17,6 +17,7 @@ public actor ConversationManager {
     private let store: BotStore
     private let client: any LanguageModelClient
     private let clock: any Clock
+    private let assembler: ContextAssembler
 
     public init(
         bot: Bot,
@@ -28,17 +29,12 @@ public actor ConversationManager {
         self.store = store
         self.client = client
         self.clock = clock
+        self.assembler = ContextAssembler(bot: bot, store: store)
     }
 
     public func respond(to userPrompt: String) async throws -> ConversationResponse {
-        let context = AssembledContext(
-            systemInstructions: "",
-            userPrompt: userPrompt,
-            tools: [],
-            budget: TokenBudget(
-                estimated: 0, limit: 3500, breakdown: [:], didFallBackToDigest: false
-            ),
-            loadedFiles: []
+        let context = try await assembler.assemble(
+            mode: .conversation(userPrompt: userPrompt)
         )
         return try await client.generate(
             context: context,
