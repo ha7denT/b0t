@@ -11,7 +11,7 @@ import b0tBrain
 /// Slice 5 (Task 21) adds `apply(_ decision: TickDecision)` for heartbeat
 /// ticks — same observation logic, plus optional `wouldNotifyText` capture.
 ///
-/// Slice 6 (Task 26) adds notification budget enforcement.
+/// Slice 6 (Task 25) adds notification budget enforcement.
 ///
 /// Per spec §5.6, the Executor never posts real notifications in Phase 2.
 public struct Executor: Sendable {
@@ -67,15 +67,44 @@ public struct Executor: Sendable {
             writtenFiles.insert(recentURL)
         }
 
-        // Slice-5 heuristic for "would notify" capture: if the acted text begins
-        // with "post" or "notify" (case-insensitive), treat it as user-facing
-        // intent. Phase 4 replaces this heuristic with an explicit shouldNotify
-        // field on TickDecision.
         let lowered = decision.acted.lowercased()
-        let wouldNotify: String? =
-            (lowered.hasPrefix("post") || lowered.hasPrefix("notify")) ? decision.acted : nil
+        let isNotifyIntent = lowered.hasPrefix("post") || lowered.hasPrefix("notify")
+        var wouldNotify: String? = nil
+
+        if isNotifyIntent {
+            let budget = (try? await loadNotificationBudgetPerDay()) ?? 5
+            let used = (try? countWouldNotifyEntriesToday()) ?? 0
+            if used < budget {
+                wouldNotify = decision.acted
+            } else {
+                Self.logger.debug(
+                    "notification budget exhausted (\(used)/\(budget)); not capturing")
+            }
+        }
 
         return StateDelta(writtenFiles: writtenFiles, wouldNotifyText: wouldNotify)
+    }
+
+    private func loadNotificationBudgetPerDay() async throws -> Int {
+        let actions = try await bot.heartbeat.actions
+        return actions.frontmatter["notification_budget_per_day"]?.intValue ?? 5
+    }
+
+    private func countWouldNotifyEntriesToday() throws -> Int {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .iso8601)
+        let day = formatter.string(from: Date())
+        let url = bot.journal.directoryURL.appendingPathComponent("\(day).md")
+        let content = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        let lines = content.split(separator: "\n")
+        var count = 0
+        for line in lines where line.contains("would_notify:") {
+            count += 1
+        }
+        return count
     }
 
     private func prependObservations(

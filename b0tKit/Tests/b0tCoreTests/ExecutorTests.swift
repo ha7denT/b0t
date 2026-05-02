@@ -115,6 +115,57 @@ final class ExecutorTests: XCTestCase {
         XCTAssertNil(delta.wouldNotifyText)
     }
 
+    func test_apply_tickDecision_respectsNotificationBudget() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+
+        // canonical-bot's actions.md sets notification_budget_per_day: 5.
+        // Pre-populate today's journal with 5 'would_notify' entries to exhaust the budget.
+        let dayString = makeDayString(for: Date())
+        let journalURL = bot.journal.directoryURL.appendingPathComponent("\(dayString).md")
+        try FileManager.default.createDirectory(
+            at: bot.journal.directoryURL, withIntermediateDirectories: true
+        )
+        var preexisting = "---\ndate: \(dayString)\n---\n\n"
+        for i in 1...5 {
+            preexisting += """
+                ## 0\(i):00 \u{2014} heartbeat \(i)
+
+                **observed:** synthetic
+                **considered:** notify_user
+                **decided:** notify_user
+                **why:** synthetic
+                **acted:** post to chat: synthetic
+                **state_delta:** would_notify: post to chat: synthetic
+
+
+                """
+        }
+        try Data(preexisting.utf8).write(to: journalURL, options: [.atomic])
+
+        let executor = Executor(bot: bot, store: store)
+        let decision = TickDecision(
+            observed: "deadline approaching",
+            considered: ["pass", "notify_user"],
+            decided: "notify_user",
+            why: "deadline within 30 minutes",
+            acted: "post to chat: vendor call in 30 minutes"
+        )
+        let delta = try await executor.apply(decision)
+
+        // Budget exhausted — wouldNotifyText must NOT be captured.
+        XCTAssertNil(delta.wouldNotifyText, "budget exhausted, should not capture")
+    }
+
+    private func makeDayString(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .iso8601)
+        return formatter.string(from: date)
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture =
             Bundle.module.resourceURL!
