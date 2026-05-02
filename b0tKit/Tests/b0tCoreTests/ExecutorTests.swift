@@ -80,6 +80,41 @@ final class ExecutorTests: XCTestCase {
             "newest observation should appear first")
     }
 
+    func test_apply_tickDecision_capturesWouldNotifyText() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let executor = Executor(bot: bot, store: store)
+
+        let decision = TickDecision(
+            observed: "deadline approaching",
+            considered: ["pass", "notify_user"],
+            decided: "notify_user",
+            why: "deadline within 30 minutes",
+            acted: "post to chat: vendor call in 30 minutes",
+            mood: .attentive
+        )
+        let delta = try await executor.apply(decision)
+
+        XCTAssertEqual(delta.wouldNotifyText, "post to chat: vendor call in 30 minutes")
+    }
+
+    func test_apply_tickDecision_silentActedDoesNotCaptureNotify() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let executor = Executor(bot: bot, store: store)
+
+        let decision = TickDecision(
+            observed: "afternoon",
+            considered: ["pass"],
+            decided: "pass",
+            why: "nothing urgent",
+            acted: "noted silently"
+        )
+        let delta = try await executor.apply(decision)
+
+        XCTAssertNil(delta.wouldNotifyText)
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture =
             Bundle.module.resourceURL!

@@ -1,0 +1,56 @@
+import FoundationModels
+import XCTest
+
+@testable import b0tBrain
+@testable import b0tCore
+
+final class HeartbeatManagerTests: XCTestCase {
+    final class FixedClock: Clock, @unchecked Sendable {
+        var date: Date
+        init(_ date: Date) { self.date = date }
+        func now() -> Date { date }
+    }
+
+    func test_tick_manualTrigger_callsClient_returnsDecided() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let stub = StubLanguageModelClient { _, _ in
+            TickDecision(
+                observed: "afternoon",
+                considered: ["pass", "glance_calendar"],
+                decided: "pass",
+                why: "nothing urgent",
+                acted: "noted silently",
+                mood: .attentive
+            )
+        }
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T14:32:00Z")!
+        let manager = HeartbeatManager(
+            bot: bot,
+            store: store,
+            client: stub,
+            clock: FixedClock(date)
+        )
+
+        let result = try await manager.tick(trigger: .manual)
+
+        switch result {
+        case .decided(let d):
+            XCTAssertEqual(d.decided, "pass")
+            XCTAssertEqual(d.mood, .attentive)
+        case .suppressed, .errored:
+            XCTFail("expected .decided, got \(result)")
+        }
+    }
+
+    private func loadCanonicalBotInTempCopy() async throws -> Bot {
+        let fixture = Bundle.module.resourceURL!
+            .appendingPathComponent("Fixtures/canonical-bot")
+        let temp = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.copyItem(at: fixture, to: temp)
+        addTeardownBlock { try? FileManager.default.removeItem(at: temp) }
+        let store = BotStore()
+        return try await store.load(at: temp)
+    }
+}

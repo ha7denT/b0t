@@ -124,6 +124,36 @@ public struct JournalWriter: Sendable {
         try await appendRaw(entry, for: date)
     }
 
+    public func appendTick(
+        decision: TickDecision,
+        stateDelta: StateDelta,
+        beatNumber: Int
+    ) async throws {
+        // Real impl in Task 20.
+        _ = decision
+        _ = stateDelta
+        _ = beatNumber
+        throw NSError(
+            domain: "JournalWriter",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: "appendTick not yet implemented"]
+        )
+    }
+
+    public func appendSuppressed(
+        reason: SuppressionReason,
+        beatNumber: Int
+    ) async throws {
+        // Real impl in Slice 6 Task 24.
+        _ = reason
+        _ = beatNumber
+        throw NSError(
+            domain: "JournalWriter",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: "appendSuppressed not yet implemented"]
+        )
+    }
+
     static func formatStateDelta(_ delta: StateDelta, bot: Bot) -> String {
         if delta.writtenFiles.isEmpty && delta.wouldNotifyText == nil {
             return "none"

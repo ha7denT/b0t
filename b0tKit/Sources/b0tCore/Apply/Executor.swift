@@ -49,6 +49,35 @@ public struct Executor: Sendable {
         return StateDelta(writtenFiles: [recentURL])
     }
 
+    public func apply(_ decision: TickDecision) async throws -> StateDelta {
+        let persistable = decision.memoryObservations.filter { $0.importance != .low }
+        for observation in decision.memoryObservations where observation.importance == .low {
+            Self.logger.debug(
+                "memory observation (low, not persisted): \(observation.about) — \(observation.what)"
+            )
+        }
+
+        var writtenFiles: Set<URL> = []
+        if !persistable.isEmpty {
+            let recentURL = bot.memory.recentURL
+            let existing = try await bot.memory.recent
+            let newProse = prependObservations(persistable, to: existing.prose)
+            let updated = existing.replacingProse(with: newProse)
+            try await store.write(updated)
+            writtenFiles.insert(recentURL)
+        }
+
+        // Slice-5 heuristic for "would notify" capture: if the acted text begins
+        // with "post" or "notify" (case-insensitive), treat it as user-facing
+        // intent. Phase 4 replaces this heuristic with an explicit shouldNotify
+        // field on TickDecision.
+        let lowered = decision.acted.lowercased()
+        let wouldNotify: String? =
+            (lowered.hasPrefix("post") || lowered.hasPrefix("notify")) ? decision.acted : nil
+
+        return StateDelta(writtenFiles: writtenFiles, wouldNotifyText: wouldNotify)
+    }
+
     private func prependObservations(
         _ observations: [MemoryObservation], to existing: String
     ) -> String {
