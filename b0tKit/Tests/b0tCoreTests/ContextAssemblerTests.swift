@@ -45,6 +45,33 @@ final class ContextAssemblerTests: XCTestCase {
         XCTAssertNotNil(context.budget.breakdown["userPrompt"])
     }
 
+    func test_heartbeat_includesIdentityAndMemoryAndTriggerContext() async throws {
+        let bot = try await loadCanonicalBot()
+        let assembler = ContextAssembler(bot: bot, store: BotStore())
+        let context = try await assembler.assemble(
+            mode: .heartbeat(trigger: .scheduled, missedGap: nil)
+        )
+
+        XCTAssertTrue(context.systemInstructions.contains("b0t-fixture"))
+        XCTAssertTrue(context.loadedFiles.contains("identity/core.md"))
+        XCTAssertTrue(context.loadedFiles.contains("identity/principles.md"))
+        XCTAssertTrue(context.loadedFiles.contains("memory/core.md"))
+        XCTAssertTrue(
+            context.userPrompt.contains("scheduled"),
+            "heartbeat prompt should render the trigger kind"
+        )
+    }
+
+    func test_heartbeat_manualTriggerRendersDifferently() async throws {
+        let bot = try await loadCanonicalBot()
+        let assembler = ContextAssembler(bot: bot, store: BotStore())
+        let context = try await assembler.assemble(
+            mode: .heartbeat(trigger: .manual, missedGap: nil)
+        )
+
+        XCTAssertTrue(context.userPrompt.contains("manual"))
+    }
+
     private func loadCanonicalBot() async throws -> Bot {
         let fixturesURL = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

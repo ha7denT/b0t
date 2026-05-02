@@ -42,9 +42,8 @@ public struct ContextAssembler: Sendable {
         switch mode {
         case .conversation(let userPrompt):
             return try await assembleConversation(userPrompt: userPrompt)
-        case .heartbeat:
-            // Slice 5 implements this branch.
-            fatalError("heartbeat mode not implemented until Slice 5")
+        case .heartbeat(let trigger, let missedGap):
+            return try await assembleHeartbeat(trigger: trigger, missedGap: missedGap)
         }
     }
 
@@ -119,5 +118,86 @@ public struct ContextAssembler: Sendable {
                 "memory/recent.md",
             ]
         )
+    }
+
+    private func assembleHeartbeat(
+        trigger: TickTrigger,
+        missedGap: Duration?
+    ) async throws -> AssembledContext {
+        let identityCore = try await bot.identity.core
+        let identityPrinciples = try await bot.identity.principles
+        let memoryCore = try await bot.memory.core
+
+        let botName = identityCore.botName ?? bot.rootURL.lastPathComponent
+        let identityText = [identityCore.prose, identityPrinciples.prose].joined(separator: "\n\n")
+        let memoryText = memoryCore.prose
+
+        let systemInstructions = """
+            you are the b0t named '\(botName)'.
+
+            identity:
+            \(identityText)
+
+            what you remember about the user:
+            \(memoryText)
+            """
+
+        let triggerLine = "you woke from a \(trigger.rawValue) beat."
+        let userPrompt: String
+        if let missedGap {
+            userPrompt = """
+                \(triggerLine)
+                gap since last beat: ~\(Int(missedGap.timeInterval / 60)) minutes.
+
+                decide what to do at this beat. produce a TickDecision following the OpenClaw fields.
+                """
+        } else {
+            userPrompt = """
+                \(triggerLine)
+
+                decide what to do at this beat. produce a TickDecision following the OpenClaw fields.
+                """
+        }
+
+        let identityTokens = TokenEstimator.estimate(identityText)
+        let memoryTokens = TokenEstimator.estimate(memoryText)
+        let promptTokens = TokenEstimator.estimate(userPrompt)
+        let total = identityTokens + memoryTokens + promptTokens
+
+        let breakdown = [
+            "identity": identityTokens,
+            "memory": memoryTokens,
+            "userPrompt": promptTokens,
+        ]
+        let budget = TokenBudget(
+            estimated: total,
+            limit: Self.limit,
+            breakdown: breakdown,
+            didFallBackToDigest: false
+        )
+
+        Self.logger.debug(
+            "assembled heartbeat prompt — total: \(total), trigger: \(trigger.rawValue)"
+        )
+
+        return AssembledContext(
+            systemInstructions: systemInstructions,
+            userPrompt: userPrompt,
+            tools: [],
+            budget: budget,
+            loadedFiles: [
+                "identity/core.md",
+                "identity/principles.md",
+                "memory/core.md",
+            ]
+        )
+    }
+}
+
+private extension Duration {
+    /// Converts this Duration into seconds as a TimeInterval.
+    var timeInterval: TimeInterval {
+        let (seconds, attoseconds) = components
+        return Double(seconds) + Double(attoseconds) / 1e18
     }
 }
