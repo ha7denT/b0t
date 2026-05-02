@@ -127,10 +127,12 @@ public struct ContextAssembler: Sendable {
         let identityCore = try await bot.identity.core
         let identityPrinciples = try await bot.identity.principles
         let memoryCore = try await bot.memory.core
+        let actions = try await bot.heartbeat.actions
 
         let botName = identityCore.botName ?? bot.rootURL.lastPathComponent
         let identityText = [identityCore.prose, identityPrinciples.prose].joined(separator: "\n\n")
         let memoryText = memoryCore.prose
+        let actionsText = actions.prose
 
         let systemInstructions = """
             you are the b0t named '\(botName)'.
@@ -140,6 +142,9 @@ public struct ContextAssembler: Sendable {
 
             what you remember about the user:
             \(memoryText)
+
+            what to do at each beat (your action playbook):
+            \(actionsText)
             """
 
         let triggerLine = "you woke from a \(trigger.rawValue) beat."
@@ -161,12 +166,14 @@ public struct ContextAssembler: Sendable {
 
         let identityTokens = TokenEstimator.estimate(identityText)
         let memoryTokens = TokenEstimator.estimate(memoryText)
+        let actionsTokens = TokenEstimator.estimate(actionsText)
         let promptTokens = TokenEstimator.estimate(userPrompt)
-        let total = identityTokens + memoryTokens + promptTokens
+        let total = identityTokens + memoryTokens + actionsTokens + promptTokens
 
         let breakdown = [
             "identity": identityTokens,
             "memory": memoryTokens,
+            "actions": actionsTokens,
             "userPrompt": promptTokens,
         ]
         let budget = TokenBudget(
@@ -176,9 +183,7 @@ public struct ContextAssembler: Sendable {
             didFallBackToDigest: false
         )
 
-        Self.logger.debug(
-            "assembled heartbeat prompt — total: \(total), trigger: \(trigger.rawValue)"
-        )
+        Self.logger.debug("assembled heartbeat prompt — total: \(total), trigger: \(trigger.rawValue)")
 
         return AssembledContext(
             systemInstructions: systemInstructions,
@@ -189,6 +194,7 @@ public struct ContextAssembler: Sendable {
                 "identity/core.md",
                 "identity/principles.md",
                 "memory/core.md",
+                "heartbeat/actions.md",
             ]
         )
     }

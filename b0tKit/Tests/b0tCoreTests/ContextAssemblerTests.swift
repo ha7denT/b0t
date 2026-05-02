@@ -72,6 +72,20 @@ final class ContextAssemblerTests: XCTestCase {
         XCTAssertTrue(context.userPrompt.contains("manual"))
     }
 
+    func test_heartbeat_includesActionsMdProse() async throws {
+        let bot = try await loadCanonicalBot()
+        let assembler = ContextAssembler(bot: bot, store: BotStore())
+        let context = try await assembler.assemble(
+            mode: .heartbeat(trigger: .scheduled, missedGap: nil)
+        )
+
+        XCTAssertTrue(
+            context.systemInstructions.contains("note the time and update mood"),
+            "actions.md prose should be in the heartbeat prompt"
+        )
+        XCTAssertTrue(context.loadedFiles.contains("heartbeat/actions.md"))
+    }
+
     private func loadCanonicalBot() async throws -> Bot {
         let fixturesURL = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")
