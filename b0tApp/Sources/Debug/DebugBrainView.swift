@@ -12,6 +12,7 @@
         @State private var isThinking: Bool = false
         @State private var manager: ConversationManager?
         @State private var modelStatus: ModelStatus = .uninitialized
+        @State private var journalTail: String = ""
 
         private struct LogEntry: Identifiable {
             let id = UUID()
@@ -29,16 +30,12 @@
         var body: some View {
             VStack(spacing: 0) {
                 modelStatusBanner
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(log) { entry in
-                            Text(entry.text)
-                                .font(.system(.body, design: .monospaced))
-                                .foregroundStyle(colour(for: entry.role))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
-                    .padding()
+                HStack(alignment: .top, spacing: 0) {
+                    chatPane
+                        .frame(maxWidth: .infinity)
+                    Divider()
+                    journalPane
+                        .frame(maxWidth: .infinity)
                 }
                 Divider()
                 HStack {
@@ -53,6 +50,7 @@
             }
             .navigationTitle("debug brain")
             .task { await initializeManager() }
+            .task { await pollJournalTail() }
         }
 
         @ViewBuilder
@@ -70,6 +68,30 @@
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .padding(.top, 8)
+            }
+        }
+
+        private var chatPane: some View {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(log) { entry in
+                        Text(entry.text)
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundStyle(colour(for: entry.role))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .padding()
+            }
+        }
+
+        private var journalPane: some View {
+            ScrollView {
+                Text(journalTail.isEmpty ? "(journal empty)" : journalTail)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
             }
         }
 
@@ -110,6 +132,32 @@
             }
         }
 
+        private func pollJournalTail() async {
+            while !Task.isCancelled {
+                await refreshJournalTail()
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
+
+        private func refreshJournalTail() async {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.timeZone = TimeZone(identifier: "UTC")
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.calendar = Calendar(identifier: .iso8601)
+            let day = formatter.string(from: Date())
+            let url = bot.journal.directoryURL.appendingPathComponent("\(day).md")
+            if let content = try? String(contentsOf: url, encoding: .utf8) {
+                // Keep the last ~3000 characters — enough to show several entries.
+                if content.count <= 3000 {
+                    journalTail = content
+                } else {
+                    let suffix = content.suffix(3000)
+                    journalTail = "...\n" + String(suffix)
+                }
+            }
+        }
+
         private func send() async {
             guard let manager else { return }
             let prompt = input.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -122,6 +170,7 @@
             do {
                 let reply = try await manager.respond(to: prompt)
                 log.append(LogEntry(role: .bot, text: reply.text))
+                await refreshJournalTail()
             } catch {
                 log.append(LogEntry(role: .status, text: "error: \(error)"))
             }

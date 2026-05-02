@@ -65,6 +65,43 @@ final class ConversationManagerTests: XCTestCase {
         XCTAssertEqual(second.text, "remembered")
     }
 
+    func test_respond_appendsJournalEntryPerTurn() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+
+        let stub = StubLanguageModelClient { _, _ in
+            ConversationResponse(text: "hello back")
+        }
+        let manager = ConversationManager(bot: bot, store: store, client: stub)
+
+        _ = try await manager.respond(to: "hi")
+        _ = try await manager.respond(to: "anything new?")
+
+        // Find today's journal file. The fixture may contain older .md files;
+        // filter to only the file JournalWriter would create for today (UTC).
+        let journalDir = bot.journal.directoryURL
+        let entries = try FileManager.default.contentsOfDirectory(
+            at: journalDir,
+            includingPropertiesForKeys: nil
+        )
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .iso8601)
+        let todayString = formatter.string(from: Date())
+        let mdFiles = entries.filter {
+            $0.pathExtension == "md" && $0.deletingPathExtension().lastPathComponent == todayString
+        }
+        XCTAssertEqual(mdFiles.count, 1, "exactly one journal file should exist for today")
+
+        let content = try String(contentsOf: mdFiles[0], encoding: .utf8)
+        XCTAssertTrue(content.contains("turn 1"), "first turn should be numbered 1")
+        XCTAssertTrue(content.contains("turn 2"), "second turn should be numbered 2")
+        XCTAssertTrue(content.contains("user said: hi"))
+        XCTAssertTrue(content.contains("user said: anything new?"))
+    }
+
     // MARK: – Helpers
 
     /// Copies the read-only bundle fixture to a temp directory so tests that
