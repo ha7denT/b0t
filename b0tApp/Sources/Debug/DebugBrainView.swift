@@ -13,6 +13,8 @@
         @State private var manager: ConversationManager?
         @State private var modelStatus: ModelStatus = .uninitialized
         @State private var journalTail: String = ""
+        @State private var heartbeat: HeartbeatManager?
+        @State private var isHeartbeating: Bool = false
 
         private struct LogEntry: Identifiable {
             let id = UUID()
@@ -45,6 +47,9 @@
                         .onSubmit { Task { await send() } }
                     Button("send") { Task { await send() } }
                         .disabled(input.isEmpty || isThinking || manager == nil)
+                    Button("\u{2665}") { Task { await fireHeartbeat() } }
+                        .disabled(isHeartbeating || heartbeat == nil)
+                        .help("fire heartbeat now")
                 }
                 .padding()
             }
@@ -124,11 +129,24 @@
             }
 
             manager = ConversationManager(bot: bot, store: store, client: client)
+            heartbeat = HeartbeatManager(bot: bot, store: store, client: client)
         }
 
         private func makeStub() -> StubLanguageModelClient {
-            StubLanguageModelClient { context, _ in
-                ConversationResponse(text: "echo: \(context.userPrompt)")
+            StubLanguageModelClient { context, outputType in
+                if outputType == ConversationResponse.self {
+                    return ConversationResponse(text: "echo: \(context.userPrompt)")
+                } else if outputType == TickDecision.self {
+                    return TickDecision(
+                        observed: "manual tick",
+                        considered: ["pass"],
+                        decided: "pass",
+                        why: "stub mode",
+                        acted: "noted silently"
+                    )
+                } else {
+                    preconditionFailure("stub does not handle \(outputType)")
+                }
             }
         }
 
@@ -173,6 +191,27 @@
                 await refreshJournalTail()
             } catch {
                 log.append(LogEntry(role: .status, text: "error: \(error)"))
+            }
+        }
+
+        private func fireHeartbeat() async {
+            guard let heartbeat else { return }
+            isHeartbeating = true
+            defer { isHeartbeating = false }
+            log.append(LogEntry(role: .status, text: "\u{2665} firing heartbeat..."))
+            do {
+                let result = try await heartbeat.tick(trigger: .manual)
+                switch result {
+                case .decided(let d):
+                    log.append(LogEntry(role: .status, text: "\u{2665} \(d.decided): \(d.acted)"))
+                case .suppressed(let reason):
+                    log.append(LogEntry(role: .status, text: "\u{2665} suppressed (\(reason.rawValue))"))
+                case .errored(let msg):
+                    log.append(LogEntry(role: .status, text: "\u{2665} errored: \(msg)"))
+                }
+                await refreshJournalTail()
+            } catch {
+                log.append(LogEntry(role: .status, text: "\u{2665} tick threw: \(error)"))
             }
         }
     }
