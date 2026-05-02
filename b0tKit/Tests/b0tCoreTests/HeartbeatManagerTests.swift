@@ -43,6 +43,39 @@ final class HeartbeatManagerTests: XCTestCase {
         }
     }
 
+    func test_tick_writesJournalEntryAndAppliesObservations() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let stub = StubLanguageModelClient { _, _ in
+            TickDecision(
+                observed: "afternoon",
+                considered: ["pass", "store_for_later"],
+                decided: "store_for_later",
+                why: "user mentioned a deadline",
+                acted: "noted silently",
+                memoryObservations: [
+                    MemoryObservation(about: "deadlines", what: "vendor by friday", importance: .medium)
+                ]
+            )
+        }
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T15:00:00Z")!
+        let manager = HeartbeatManager(
+            bot: bot, store: store, client: stub, clock: FixedClock(date)
+        )
+
+        _ = try await manager.tick(trigger: .manual)
+
+        // Journal entry written.
+        let journalURL = bot.journal.directoryURL.appendingPathComponent("2026-05-01.md")
+        let journalContent = try String(contentsOf: journalURL, encoding: .utf8)
+        XCTAssertTrue(journalContent.contains("## 15:00 \u{2014} heartbeat 1"))
+        XCTAssertTrue(journalContent.contains("decided:** store_for_later"))
+
+        // Memory observation persisted.
+        let recent = try await bot.memory.recent
+        XCTAssertTrue(recent.prose.contains("vendor by friday"))
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

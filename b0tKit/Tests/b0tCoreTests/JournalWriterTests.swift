@@ -139,6 +139,51 @@ final class JournalWriterTests: XCTestCase {
         XCTAssertEqual(content, expected)
     }
 
+    func test_appendTick_writesByteExactOpenClawEntry() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T14:32:00Z")!
+        let writer = JournalWriter(bot: bot, store: store, clock: FixedClock(date))
+
+        let decision = TickDecision(
+            observed: "schedule wake; been 2h since last beat",
+            considered: ["quiet_check", "glance_calendar", "pass"],
+            decided: "glance_calendar",
+            why: "afternoon, calendar skill enabled, deadline today",
+            acted: "noted upcoming meeting silently",
+            mood: .attentive,
+            organUsed: "calendar"
+        )
+        let stateDelta = StateDelta(writtenFiles: [bot.memory.recentURL])
+
+        try await writer.appendTick(
+            decision: decision,
+            stateDelta: stateDelta,
+            beatNumber: 247
+        )
+
+        let content = try String(contentsOf: writer.journalURL(for: date), encoding: .utf8)
+        let expected = """
+            ---
+            date: 2026-05-01
+            ---
+
+            ## 14:32 \u{2014} heartbeat 247
+
+            **observed:** schedule wake; been 2h since last beat
+            **considered:** quiet_check, glance_calendar, pass
+            **decided:** glance_calendar
+            **why:** afternoon, calendar skill enabled, deadline today
+            **acted:** noted upcoming meeting silently
+            **mood:** attentive
+            **organ_used:** calendar
+            **state_delta:** memory/recent.md
+
+            """
+        XCTAssertEqual(content, expected)
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

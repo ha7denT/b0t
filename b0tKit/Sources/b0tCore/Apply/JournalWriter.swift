@@ -129,15 +129,36 @@ public struct JournalWriter: Sendable {
         stateDelta: StateDelta,
         beatNumber: Int
     ) async throws {
-        // Real impl in Task 20.
-        _ = decision
-        _ = stateDelta
-        _ = beatNumber
-        throw NSError(
-            domain: "JournalWriter",
-            code: -1,
-            userInfo: [NSLocalizedDescriptionKey: "appendTick not yet implemented"]
-        )
+        let date = clock.now()
+        let timeString = Self.timeString(for: date)
+        let stateDeltaText = Self.formatStateDelta(stateDelta, bot: bot)
+
+        var lines: [String] = [
+            "## \(timeString) \u{2014} heartbeat \(beatNumber)",
+            "",
+            "**observed:** \(decision.observed)",
+            "**considered:** \(decision.considered.joined(separator: ", "))",
+            "**decided:** \(decision.decided)",
+            "**why:** \(decision.why)",
+            "**acted:** \(decision.acted)",
+        ]
+
+        if let mood = decision.mood {
+            lines.append("**mood:** \(mood.rawValue)")
+        }
+        if let organ = decision.organUsed {
+            lines.append("**organ_used:** \(organ)")
+        }
+        if !decision.memoryObservations.isEmpty {
+            lines.append("**memory_observations:**")
+            for obs in decision.memoryObservations {
+                lines.append("- (\(obs.importance.rawValue)) \(obs.about): \(obs.what)")
+            }
+        }
+        lines.append("**state_delta:** \(stateDeltaText)")
+
+        let entry = lines.joined(separator: "\n")
+        try await appendRaw(entry, for: date)
     }
 
     public func appendSuppressed(
