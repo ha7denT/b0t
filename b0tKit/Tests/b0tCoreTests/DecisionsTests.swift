@@ -35,4 +35,31 @@ final class DecisionsTests: XCTestCase {
     func test_moodTag_hasEightCases() {
         XCTAssertEqual(MoodTag.allCases.count, 8)
     }
+
+    func test_tickDecision_defaultArguments() {
+        let d = TickDecision(
+            observed: "afternoon",
+            considered: ["pass", "glance_calendar"],
+            decided: "pass",
+            why: "nothing urgent",
+            acted: "noted silently"
+        )
+        XCTAssertNil(d.mood)
+        XCTAssertNil(d.organUsed)
+        XCTAssertTrue(d.memoryObservations.isEmpty)
+    }
+
+    func test_tickDecision_equality() {
+        let a = TickDecision(
+            observed: "x", considered: ["y"], decided: "y", why: "z", acted: "w",
+            mood: .attentive, organUsed: "calendar",
+            memoryObservations: [MemoryObservation(about: "a", what: "b", importance: .low)]
+        )
+        let b = TickDecision(
+            observed: "x", considered: ["y"], decided: "y", why: "z", acted: "w",
+            mood: .attentive, organUsed: "calendar",
+            memoryObservations: [MemoryObservation(about: "a", what: "b", importance: .low)]
+        )
+        XCTAssertEqual(a, b)
+    }
 }
