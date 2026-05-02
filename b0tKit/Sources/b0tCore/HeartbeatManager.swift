@@ -50,6 +50,16 @@ public actor HeartbeatManager {
         let beatNumber = nextBeatNumber
         nextBeatNumber += 1
 
+        // Quiet-hours check.
+        if let schedule = await loadSchedule(),
+            schedule.isQuietHours(at: clock.now())
+        {
+            try? await journalWriter.appendSuppressed(
+                reason: .quietHours, beatNumber: beatNumber
+            )
+            return .suppressed(reason: .quietHours)
+        }
+
         do {
             let context = try await assembler.assemble(
                 mode: .heartbeat(trigger: trigger, missedGap: nil)
@@ -74,6 +84,17 @@ public actor HeartbeatManager {
         } catch {
             Self.logger.error("heartbeat tick failed: \(String(describing: error))")
             return .errored(message: String(describing: error))
+        }
+    }
+
+    private func loadSchedule() async -> HeartbeatSchedule? {
+        do {
+            let scheduleFile = try await bot.heartbeat.schedule
+            return try HeartbeatSchedule.parse(scheduleFile)
+        } catch {
+            Self.logger.warning(
+                "failed to parse schedule.md, falling back to defaults: \(String(describing: error))")
+            return nil
         }
     }
 

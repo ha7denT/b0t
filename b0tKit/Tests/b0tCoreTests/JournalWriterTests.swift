@@ -184,6 +184,29 @@ final class JournalWriterTests: XCTestCase {
         XCTAssertEqual(content, expected)
     }
 
+    func test_appendSuppressed_writesByteExactEntry() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T23:14:00Z")!
+        let writer = JournalWriter(bot: bot, store: store, clock: FixedClock(date))
+
+        try await writer.appendSuppressed(reason: .quietHours, beatNumber: 248)
+
+        let content = try String(contentsOf: writer.journalURL(for: date), encoding: .utf8)
+        let expected = """
+            ---
+            date: 2026-05-01
+            ---
+
+            ## 23:14 \u{2014} heartbeat 248 \u{2014} suppressed
+
+            **reason:** quiet hours
+            **state_delta:** none
+
+            """
+        XCTAssertEqual(content, expected)
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

@@ -76,9 +76,50 @@ final class HeartbeatManagerTests: XCTestCase {
         XCTAssertTrue(recent.prose.contains("vendor by friday"))
     }
 
+    func test_tick_duringQuietHours_suppressesAndJournals() async throws {
+        let bot = try await loadFixtureBotInTempCopy(named: "quiet-hours-bot")
+        let store = BotStore()
+
+        // Stub raises if called — quiet-hours should suppress before the model is invoked.
+        let stub = StubLanguageModelClient { _, _ in
+            XCTFail("client must not be called during quiet hours")
+            return TickDecision(observed: "", considered: [], decided: "", why: "", acted: "")
+        }
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T12:00:00Z")!
+        let manager = HeartbeatManager(
+            bot: bot, store: store, client: stub, clock: FixedClock(date)
+        )
+
+        let result = try await manager.tick(trigger: .scheduled)
+
+        switch result {
+        case .suppressed(let reason):
+            XCTAssertEqual(reason, .quietHours)
+        default:
+            XCTFail("expected .suppressed(.quietHours), got \(result)")
+        }
+
+        // Journal should contain a suppression entry.
+        let journalURL = bot.journal.directoryURL.appendingPathComponent("2026-05-01.md")
+        let content = try String(contentsOf: journalURL, encoding: .utf8)
+        XCTAssertTrue(content.contains("## 12:00 \u{2014} heartbeat 1 \u{2014} suppressed"))
+        XCTAssertTrue(content.contains("**reason:** quiet hours"))
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")
+        let temp = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.copyItem(at: fixture, to: temp)
+        addTeardownBlock { try? FileManager.default.removeItem(at: temp) }
+        let store = BotStore()
+        return try await store.load(at: temp)
+    }
+
+    private func loadFixtureBotInTempCopy(named name: String) async throws -> Bot {
+        let fixture = Bundle.module.resourceURL!
+            .appendingPathComponent("Fixtures/\(name)")
         let temp = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
         try FileManager.default.copyItem(at: fixture, to: temp)

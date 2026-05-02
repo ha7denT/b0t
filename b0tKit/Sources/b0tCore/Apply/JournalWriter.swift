@@ -165,14 +165,22 @@ public struct JournalWriter: Sendable {
         reason: SuppressionReason,
         beatNumber: Int
     ) async throws {
-        // Real impl in Slice 6 Task 24.
-        _ = reason
-        _ = beatNumber
-        throw NSError(
-            domain: "JournalWriter",
-            code: -1,
-            userInfo: [NSLocalizedDescriptionKey: "appendSuppressed not yet implemented"]
-        )
+        let date = clock.now()
+        let timeString = Self.timeString(for: date)
+
+        let reasonText: String
+        switch reason {
+        case .quietHours: reasonText = "quiet hours"
+        case .modelUnavailable: reasonText = "model unavailable"
+        }
+
+        let entry = """
+            ## \(timeString) \u{2014} heartbeat \(beatNumber) \u{2014} suppressed
+
+            **reason:** \(reasonText)
+            **state_delta:** none
+            """
+        try await appendRaw(entry, for: date)
     }
 
     static func formatStateDelta(_ delta: StateDelta, bot: Bot) -> String {
