@@ -62,4 +62,16 @@ final class DecisionsTests: XCTestCase {
         )
         XCTAssertEqual(a, b)
     }
+
+    func test_relationshipNote_equality() {
+        let a = RelationshipNote(name: "Sam", relation: "spouse", notes: "likes coffee")
+        let b = RelationshipNote(name: "Sam", relation: "spouse", notes: "likes coffee")
+        XCTAssertEqual(a, b)
+    }
+
+    func test_moodTransition_equality() {
+        let a = MoodTransition(from: .idle, to: .delighted, why: "user said hello warmly")
+        let b = MoodTransition(from: .idle, to: .delighted, why: "user said hello warmly")
+        XCTAssertEqual(a, b)
+    }
 }
