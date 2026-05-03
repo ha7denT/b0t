@@ -86,6 +86,26 @@ final class ContextAssemblerTests: XCTestCase {
         XCTAssertTrue(context.loadedFiles.contains("heartbeat/actions.md"))
     }
 
+    func test_conversation_includesTimeAwarenessTool() async throws {
+        let bot = try await loadCanonicalBot()
+        let assembler = ContextAssembler(bot: bot, store: BotStore())
+        let context = try await assembler.assemble(mode: .conversation(userPrompt: "hi"))
+
+        XCTAssertEqual(context.tools.count, 1)
+        XCTAssertTrue(context.tools.first is TimeAwarenessTool)
+    }
+
+    func test_heartbeat_includesTimeAwarenessTool() async throws {
+        let bot = try await loadCanonicalBot()
+        let assembler = ContextAssembler(bot: bot, store: BotStore())
+        let context = try await assembler.assemble(
+            mode: .heartbeat(trigger: .scheduled, missedGap: nil)
+        )
+
+        XCTAssertEqual(context.tools.count, 1)
+        XCTAssertTrue(context.tools.first is TimeAwarenessTool)
+    }
+
     private func loadCanonicalBot() async throws -> Bot {
         let fixturesURL = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

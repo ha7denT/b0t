@@ -109,7 +109,7 @@ public struct ContextAssembler: Sendable {
         return AssembledContext(
             systemInstructions: systemInstructions,
             userPrompt: userPrompt,
-            tools: [],
+            tools: [TimeAwarenessTool()],
             budget: budget,
             loadedFiles: [
                 "identity/core.md",
@@ -189,7 +189,7 @@ public struct ContextAssembler: Sendable {
         return AssembledContext(
             systemInstructions: systemInstructions,
             userPrompt: userPrompt,
-            tools: [],
+            tools: [TimeAwarenessTool()],
             budget: budget,
             loadedFiles: [
                 "identity/core.md",
