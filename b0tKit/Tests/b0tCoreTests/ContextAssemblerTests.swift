@@ -106,9 +106,41 @@ final class ContextAssemblerTests: XCTestCase {
         XCTAssertTrue(context.tools.first is TimeAwarenessTool)
     }
 
+    func test_fallback_level1_trimsContent() async throws {
+        let bot = try await loadFixtureBot(named: "full-budget-bot")
+        let assembler = ContextAssembler(bot: bot, store: BotStore())
+        let context = try await assembler.assemble(
+            mode: .conversation(userPrompt: "hello"),
+            fallbackLevel: 1
+        )
+        XCTAssertTrue(
+            context.budget.didFallBackToDigest,
+            "level-1 fallback should mark didFallBackToDigest"
+        )
+    }
+
+    func test_fallback_level3_surfacesOverflow() async throws {
+        let bot = try await loadFixtureBot(named: "full-budget-bot")
+        let assembler = ContextAssembler(bot: bot, store: BotStore())
+        let context = try await assembler.assemble(
+            mode: .conversation(userPrompt: "hello"),
+            fallbackLevel: 3
+        )
+        XCTAssertTrue(context.budget.didFallBackToDigest)
+        // Level 3 should produce a self-aware "context overflowed" prompt rather than the user's prompt.
+        XCTAssertFalse(context.userPrompt.contains("hello"))
+    }
+
     private func loadCanonicalBot() async throws -> Bot {
         let fixturesURL = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")
+        let store = BotStore()
+        return try await store.load(at: fixturesURL)
+    }
+
+    private func loadFixtureBot(named name: String) async throws -> Bot {
+        let fixturesURL = Bundle.module.resourceURL!
+            .appendingPathComponent("Fixtures/\(name)")
         let store = BotStore()
         return try await store.load(at: fixturesURL)
     }

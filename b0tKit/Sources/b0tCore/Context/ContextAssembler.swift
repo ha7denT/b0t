@@ -47,6 +47,151 @@ public struct ContextAssembler: Sendable {
         }
     }
 
+    /// Internal: assembles with a graduated fallback level (per spec §7.4).
+    /// Public callers use `assemble(mode:)` which is `assemble(mode:fallbackLevel: 0)`.
+    /// `ConversationManager.respondWithFallback` calls this directly with incrementing
+    /// levels on `.exceededContextWindowSize`.
+    ///
+    /// - level 0: full context (delegates to `assembleConversation`/`assembleHeartbeat`).
+    /// - level 1: drops journal entries from conversation; drops actions.md from heartbeat.
+    /// - level 2: drops `memory/recent.md`; trims `memory/core` to a digest.
+    /// - level 3: surfaces overflow — minimal context, model is asked to acknowledge
+    ///   in the b0t voice.
+    func assemble(mode: AssemblyMode, fallbackLevel: Int) async throws -> AssembledContext {
+        if fallbackLevel == 0 {
+            return try await assemble(mode: mode)
+        }
+        switch mode {
+        case .conversation(let userPrompt):
+            return try await assembleConversationFallback(level: fallbackLevel, userPrompt: userPrompt)
+        case .heartbeat(let trigger, let missedGap):
+            return try await assembleHeartbeatFallback(
+                level: fallbackLevel, trigger: trigger, missedGap: missedGap)
+        }
+    }
+
+    private func assembleConversationFallback(level: Int, userPrompt: String) async throws -> AssembledContext
+    {
+        let identityCore = try await bot.identity.core
+        let identityPrinciples = try await bot.identity.principles
+
+        let botName = identityCore.botName ?? bot.rootURL.lastPathComponent
+        let identityText: String
+        let memoryText: String
+        let loadedFiles: [String]
+
+        switch level {
+        case 1:
+            // Drop journal/recent entries; keep identity + memory/core.
+            let memoryCore = try await bot.memory.core
+            identityText = [identityCore.prose, identityPrinciples.prose].joined(separator: "\n\n")
+            memoryText = memoryCore.prose
+            loadedFiles = ["identity/core.md", "identity/principles.md", "memory/core.md"]
+        case 2:
+            // Drop memory/recent and memory/core; keep only identity/core summary.
+            identityText = identityCore.prose
+            memoryText = "(memory trimmed)"
+            loadedFiles = ["identity/core.md"]
+        default:
+            // Level 3+: surface the overflow.
+            identityText = "(identity trimmed)"
+            memoryText = "(memory trimmed)"
+            loadedFiles = ["identity/core.md"]
+        }
+
+        let systemInstructions = """
+            you are the b0t named '\(botName)'.
+
+            identity:
+            \(identityText)
+
+            what you remember about the user:
+            \(memoryText)
+            """
+
+        let prompt: String
+        if level >= 3 {
+            prompt =
+                "you have lost most of your context. acknowledge this briefly to the user in your voice and ask them to repeat the essential."
+        } else {
+            prompt = userPrompt
+        }
+
+        let identityTokens = TokenEstimator.estimate(identityText)
+        let memoryTokens = TokenEstimator.estimate(memoryText)
+        let promptTokens = TokenEstimator.estimate(prompt)
+        let total = identityTokens + memoryTokens + promptTokens
+
+        let budget = TokenBudget(
+            estimated: total,
+            limit: Self.limit,
+            breakdown: [
+                "identity": identityTokens,
+                "memory": memoryTokens,
+                "userPrompt": promptTokens,
+            ],
+            didFallBackToDigest: true
+        )
+
+        Self.logger.debug("assembled fallback (level \(level)) — total: \(total)")
+
+        return AssembledContext(
+            systemInstructions: systemInstructions,
+            userPrompt: prompt,
+            tools: [TimeAwarenessTool()],
+            budget: budget,
+            loadedFiles: loadedFiles
+        )
+    }
+
+    private func assembleHeartbeatFallback(
+        level: Int,
+        trigger: TickTrigger,
+        missedGap: Duration?
+    ) async throws -> AssembledContext {
+        let identityCore = try await bot.identity.core
+        let botName = identityCore.botName ?? bot.rootURL.lastPathComponent
+        let identityText = identityCore.prose
+
+        let systemInstructions = """
+            you are the b0t named '\(botName)'.
+
+            identity:
+            \(identityText)
+
+            (memory and actions trimmed for budget)
+            """
+
+        let prompt: String
+        if level >= 3 {
+            prompt =
+                "your context overflowed. produce a minimal TickDecision with decided: 'pass' and acted: 'noted silently'."
+        } else {
+            prompt = "you woke from a \(trigger.rawValue) beat. produce a TickDecision."
+        }
+
+        let identityTokens = TokenEstimator.estimate(identityText)
+        let promptTokens = TokenEstimator.estimate(prompt)
+        let total = identityTokens + promptTokens
+
+        let budget = TokenBudget(
+            estimated: total,
+            limit: Self.limit,
+            breakdown: ["identity": identityTokens, "userPrompt": promptTokens],
+            didFallBackToDigest: true
+        )
+
+        Self.logger.debug("assembled heartbeat fallback (level \(level)) — total: \(total)")
+
+        return AssembledContext(
+            systemInstructions: systemInstructions,
+            userPrompt: prompt,
+            tools: [TimeAwarenessTool()],
+            budget: budget,
+            loadedFiles: ["identity/core.md"]
+        )
+    }
+
     private func assembleConversation(userPrompt: String) async throws -> AssembledContext {
         let identityCore = try await bot.identity.core
         let identityPrinciples = try await bot.identity.principles

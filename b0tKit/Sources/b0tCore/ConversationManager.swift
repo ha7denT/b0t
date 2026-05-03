@@ -47,13 +47,7 @@ public actor ConversationManager {
         let turnNumber = nextTurnNumber
         nextTurnNumber += 1
 
-        let context = try await assembler.assemble(
-            mode: .conversation(userPrompt: userPrompt)
-        )
-        let response = try await client.generate(
-            context: context,
-            generating: ConversationResponse.self
-        )
+        let response = try await respondWithFallback(userPrompt: userPrompt, level: 0)
         let delta = try await executor.apply(response)
         try await journalWriter.appendConversationTurn(
             prompt: userPrompt,
@@ -62,6 +56,25 @@ public actor ConversationManager {
             turnNumber: turnNumber
         )
         return response
+    }
+
+    private func respondWithFallback(userPrompt: String, level: Int) async throws -> ConversationResponse {
+        let context = try await assembler.assemble(
+            mode: .conversation(userPrompt: userPrompt),
+            fallbackLevel: level
+        )
+        do {
+            return try await client.generate(context: context, generating: ConversationResponse.self)
+        } catch LanguageModelClientError.exceededContextWindowSize {
+            if level >= 3 {
+                return ConversationResponse(
+                    text: "oh — let me start fresh, I was getting muddled.",
+                    mood: .thinking,
+                    memoryObservations: []
+                )
+            }
+            return try await respondWithFallback(userPrompt: userPrompt, level: level + 1)
+        }
     }
 
     /// Reads today's journal file and returns the next turn number.
