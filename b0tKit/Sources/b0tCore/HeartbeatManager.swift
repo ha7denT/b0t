@@ -150,4 +150,46 @@ public actor HeartbeatManager {
         }
         return maxN + 1
     }
+
+    #if DEBUG
+        private var debugTimerTask: Task<Void, Never>? = nil
+
+        /// Starts a DEBUG-only timer that fires `tick(.scheduled)` every `bpm/4` minutes.
+        ///
+        /// Activated via the `--debug-heartbeat-timer` launch arg. Only used in
+        /// simulator development where BGAppRefreshTask is unreliable. The faster
+        /// cadence (1/4 of the configured BPM) lets developers see the heartbeat
+        /// path exercise in seconds rather than waiting full BPM intervals.
+        public func startDebugTimer() {
+            guard debugTimerTask == nil else { return }
+            debugTimerTask = Task { [weak self] in
+                while !Task.isCancelled {
+                    guard let self else { return }
+                    let interval = await self.debugTimerInterval()
+                    do {
+                        try await Task.sleep(for: interval)
+                    } catch {
+                        return
+                    }
+                    _ = try? await self.tick(trigger: .scheduled)
+                }
+            }
+        }
+
+        public func stopDebugTimer() {
+            debugTimerTask?.cancel()
+            debugTimerTask = nil
+        }
+
+        private func debugTimerInterval() async -> Duration {
+            if let schedule = await loadSchedule(),
+                let interval = schedule.bpmInterval
+            {
+                let quartered = interval / 4
+                let floor = Duration.seconds(15)
+                return max(quartered, floor)
+            }
+            return .seconds(30)
+        }
+    #endif
 }
