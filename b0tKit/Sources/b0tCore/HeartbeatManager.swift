@@ -20,6 +20,7 @@ public actor HeartbeatManager {
     private let assembler: ContextAssembler
     private let executor: Executor
     private let journalWriter: JournalWriter
+    private let missedBeatDetector: MissedBeatDetector
 
     private var nextBeatNumber: Int = 1
     private var didLoadBeatNumber: Bool = false
@@ -40,6 +41,7 @@ public actor HeartbeatManager {
         self.assembler = ContextAssembler(bot: bot, store: store)
         self.executor = Executor(bot: bot, store: store)
         self.journalWriter = JournalWriter(bot: bot, store: store, clock: clock)
+        self.missedBeatDetector = MissedBeatDetector(bot: bot, store: store)
     }
 
     public func tick(trigger: TickTrigger) async throws -> TickResult {
@@ -50,19 +52,31 @@ public actor HeartbeatManager {
         let beatNumber = nextBeatNumber
         nextBeatNumber += 1
 
+        let schedule = await loadSchedule()
+
         // Quiet-hours check.
-        if let schedule = await loadSchedule(),
-            schedule.isQuietHours(at: clock.now())
-        {
+        if let schedule, schedule.isQuietHours(at: clock.now()) {
             try? await journalWriter.appendSuppressed(
                 reason: .quietHours, beatNumber: beatNumber
             )
             return .suppressed(reason: .quietHours)
         }
 
+        // Compute missed-beat gap, if relevant.
+        var missedGap: Duration? = nil
+        if let schedule, let bpmInterval = schedule.bpmInterval,
+            let actualGap = try? await missedBeatDetector.gap(now: clock.now())
+        {
+            // Threshold: 1.5x the expected interval.
+            let threshold = bpmInterval * 3 / 2
+            if actualGap > threshold {
+                missedGap = actualGap
+            }
+        }
+
         do {
             let context = try await assembler.assemble(
-                mode: .heartbeat(trigger: trigger, missedGap: nil)
+                mode: .heartbeat(trigger: trigger, missedGap: missedGap)
             )
             let decision = try await client.generate(
                 context: context,

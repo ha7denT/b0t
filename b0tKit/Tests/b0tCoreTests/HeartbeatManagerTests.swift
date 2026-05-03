@@ -106,6 +106,63 @@ final class HeartbeatManagerTests: XCTestCase {
         XCTAssertTrue(content.contains("**reason:** quiet hours"))
     }
 
+    func test_tick_afterLargeGap_prependsMissedBeatNoteToPrompt() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+
+        // Pre-populate today's journal with one entry from 2 hours ago — way
+        // longer than the canonical 30-minute BPM × 1.5 threshold.
+        let journalDir = bot.journal.directoryURL
+        try FileManager.default.createDirectory(at: journalDir, withIntermediateDirectories: true)
+        let twoHoursAgo = "12:30"
+        let journalContent = """
+            ---
+            date: 2026-05-01
+            ---
+
+            ## \(twoHoursAgo) \u{2014} heartbeat 1
+
+            **observed:** stale
+            **considered:** pass
+            **decided:** pass
+            **why:** stale
+            **acted:** noted silently
+            **state_delta:** none
+
+            """
+        try Data(journalContent.utf8).write(
+            to: journalDir.appendingPathComponent("2026-05-01.md"),
+            options: [.atomic]
+        )
+
+        final class CapturedPrompt: @unchecked Sendable {
+            var value: String?
+        }
+        let captured = CapturedPrompt()
+
+        let stub = StubLanguageModelClient { context, _ in
+            captured.value = context.userPrompt
+            return TickDecision(
+                observed: "after a gap",
+                considered: ["pass"],
+                decided: "pass",
+                why: "caught up",
+                acted: "noted silently"
+            )
+        }
+        let now = ISO8601DateFormatter().date(from: "2026-05-01T14:30:00Z")!
+        let manager = HeartbeatManager(
+            bot: bot, store: store, client: stub, clock: FixedClock(now)
+        )
+
+        _ = try await manager.tick(trigger: .scheduled)
+
+        XCTAssertNotNil(captured.value)
+        XCTAssertTrue(
+            captured.value!.contains("longer gap than usual"),
+            "prompt should include missed-beat note; got: \(captured.value ?? "")")
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

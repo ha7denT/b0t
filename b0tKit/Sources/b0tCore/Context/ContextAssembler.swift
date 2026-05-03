@@ -150,9 +150,10 @@ public struct ContextAssembler: Sendable {
         let triggerLine = "you woke from a \(trigger.rawValue) beat."
         let userPrompt: String
         if let missedGap {
+            let minutes = Int(missedGap.timeInterval / 60)
             userPrompt = """
                 \(triggerLine)
-                gap since last beat: ~\(Int(missedGap.timeInterval / 60)) minutes.
+                you have not woken in about \(minutes) minutes — that's a longer gap than usual. iOS may have skipped beats. you can mention this if it feels natural.
 
                 decide what to do at this beat. produce a TickDecision following the OpenClaw fields.
                 """
