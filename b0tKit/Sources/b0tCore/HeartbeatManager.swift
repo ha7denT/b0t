@@ -101,6 +101,7 @@ public actor HeartbeatManager {
             return .suppressed(reason: .modelUnavailable)
         } catch {
             Self.logger.error("heartbeat tick failed: \(String(describing: error))")
+            try? await journalWriter.appendError(error: error, kind: .heartbeat(number: beatNumber))
             return .errored(message: String(describing: error))
         }
     }

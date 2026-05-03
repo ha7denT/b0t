@@ -207,6 +207,61 @@ final class JournalWriterTests: XCTestCase {
         XCTAssertEqual(content, expected)
     }
 
+    func test_appendError_turn_writesByteExactEntry() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T14:33:00Z")!
+        let writer = JournalWriter(bot: bot, store: store, clock: FixedClock(date))
+
+        try await writer.appendError(
+            error: LanguageModelClientError.modelUnavailable,
+            kind: .turn(number: 8)
+        )
+
+        let content = try String(contentsOf: writer.journalURL(for: date), encoding: .utf8)
+        let expected = """
+            ---
+            date: 2026-05-01
+            ---
+
+            ## 14:33 \u{2014} turn 8 \u{2014} error
+
+            **error:** modelUnavailable
+            **state_delta:** none
+
+            """
+        XCTAssertEqual(content, expected)
+    }
+
+    func test_appendError_heartbeat_writesByteExactEntry() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T15:00:00Z")!
+        let writer = JournalWriter(bot: bot, store: store, clock: FixedClock(date))
+
+        struct Boom: Error, CustomStringConvertible {
+            var description: String { "boom" }
+        }
+        try await writer.appendError(
+            error: Boom(),
+            kind: .heartbeat(number: 247)
+        )
+
+        let content = try String(contentsOf: writer.journalURL(for: date), encoding: .utf8)
+        let expected = """
+            ---
+            date: 2026-05-01
+            ---
+
+            ## 15:00 \u{2014} heartbeat 247 \u{2014} error
+
+            **error:** boom
+            **state_delta:** none
+
+            """
+        XCTAssertEqual(content, expected)
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

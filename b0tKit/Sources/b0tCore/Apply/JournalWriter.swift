@@ -183,6 +183,42 @@ public struct JournalWriter: Sendable {
         try await appendRaw(entry, for: date)
     }
 
+    public func appendError(
+        error: Error,
+        kind: EntryKind
+    ) async throws {
+        let date = clock.now()
+        let timeString = Self.timeString(for: date)
+        let header: String
+        switch kind {
+        case .turn(let n): header = "## \(timeString) \u{2014} turn \(n) \u{2014} error"
+        case .heartbeat(let n): header = "## \(timeString) \u{2014} heartbeat \(n) \u{2014} error"
+        }
+        let errorText = describeError(error)
+        let entry = """
+            \(header)
+
+            **error:** \(errorText)
+            **state_delta:** none
+            """
+        try await appendRaw(entry, for: date)
+    }
+
+    private func describeError(_ error: Error) -> String {
+        if let lme = error as? LanguageModelClientError {
+            switch lme {
+            case .modelUnavailable: return "modelUnavailable"
+            case .exceededContextWindowSize(let n): return "exceededContextWindowSize(\(n))"
+            case .sessionFailed(let d): return "sessionFailed: \(d)"
+            case .malformedGenerableOutput(let d): return "malformedGenerableOutput: \(d)"
+            }
+        }
+        if let described = (error as? CustomStringConvertible)?.description {
+            return described
+        }
+        return String(describing: error)
+    }
+
     static func formatStateDelta(_ delta: StateDelta, bot: Bot) -> String {
         if delta.writtenFiles.isEmpty && delta.wouldNotifyText == nil {
             return "none"

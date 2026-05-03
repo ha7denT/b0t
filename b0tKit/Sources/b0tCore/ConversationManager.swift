@@ -47,15 +47,20 @@ public actor ConversationManager {
         let turnNumber = nextTurnNumber
         nextTurnNumber += 1
 
-        let response = try await respondWithFallback(userPrompt: userPrompt, level: 0)
-        let delta = try await executor.apply(response)
-        try await journalWriter.appendConversationTurn(
-            prompt: userPrompt,
-            response: response,
-            stateDelta: delta,
-            turnNumber: turnNumber
-        )
-        return response
+        do {
+            let response = try await respondWithFallback(userPrompt: userPrompt, level: 0)
+            let delta = try await executor.apply(response)
+            try await journalWriter.appendConversationTurn(
+                prompt: userPrompt,
+                response: response,
+                stateDelta: delta,
+                turnNumber: turnNumber
+            )
+            return response
+        } catch {
+            try? await journalWriter.appendError(error: error, kind: .turn(number: turnNumber))
+            throw error
+        }
     }
 
     private func respondWithFallback(userPrompt: String, level: Int) async throws -> ConversationResponse {
