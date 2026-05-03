@@ -201,7 +201,7 @@ public struct ContextAssembler: Sendable {
     }
 }
 
-private extension Duration {
+extension Duration {
     /// Converts this Duration into seconds as a TimeInterval.
     var timeInterval: TimeInterval {
         let (seconds, attoseconds) = components

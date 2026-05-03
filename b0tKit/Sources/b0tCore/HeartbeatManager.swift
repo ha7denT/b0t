@@ -4,14 +4,15 @@ import OSLog
 import b0tBrain
 
 /// Orchestrates one heartbeat tick: assemble context → call client → apply
-/// executor → append journal entry.
+/// executor → append journal entry. Also schedules the next BG task wake.
 ///
 /// Slice 5 (this file): manual-trigger path only. No BGAppRefreshTask, no
 /// schedule.md interpretation, no missed-beat detection.
 ///
 /// Slice 6 (Task 24-25): adds quiet-hours suppression and actions.md prose
-/// injection. Slice 7 (Task 27): adds missed-beat detection. Slice 8 (Task 30-32):
-/// adds register/scheduleNext/BGAppRefreshTask wiring + DEBUG timer fallback.
+/// injection. Slice 7 (Task 27): adds missed-beat detection. Slice 8 (this commit
+/// Task 29; Task 30-32) adds scheduleNext + register/BGAppRefreshTask wiring +
+/// DEBUG timer fallback.
 public actor HeartbeatManager {
     private let bot: Bot
     private let store: BotStore
@@ -21,6 +22,7 @@ public actor HeartbeatManager {
     private let executor: Executor
     private let journalWriter: JournalWriter
     private let missedBeatDetector: MissedBeatDetector
+    private let scheduler: any HeartbeatScheduler
 
     private var nextBeatNumber: Int = 1
     private var didLoadBeatNumber: Bool = false
@@ -32,12 +34,14 @@ public actor HeartbeatManager {
         bot: Bot,
         store: BotStore,
         client: any LanguageModelClient,
-        clock: any Clock = SystemClock()
+        clock: any Clock = SystemClock(),
+        scheduler: any HeartbeatScheduler = LiveBGTaskScheduler()
     ) {
         self.bot = bot
         self.store = store
         self.client = client
         self.clock = clock
+        self.scheduler = scheduler
         self.assembler = ContextAssembler(bot: bot, store: store)
         self.executor = Executor(bot: bot, store: store)
         self.journalWriter = JournalWriter(bot: bot, store: store, clock: clock)
@@ -99,6 +103,19 @@ public actor HeartbeatManager {
             Self.logger.error("heartbeat tick failed: \(String(describing: error))")
             return .errored(message: String(describing: error))
         }
+    }
+
+    /// Submits the next BG task request based on the schedule's BPM.
+    /// No-op when bpm is 0 (scheduled beats off; event triggers still fire).
+    public func scheduleNext() async throws {
+        guard let schedule = await loadSchedule(),
+            let interval = schedule.bpmInterval
+        else {
+            Self.logger.debug("scheduleNext skipped: no schedule or bpm is 0")
+            return
+        }
+        let next = clock.now().addingTimeInterval(interval.timeInterval)
+        try await scheduler.submitNextRequest(earliestBeginDate: next)
     }
 
     private func loadSchedule() async -> HeartbeatSchedule? {

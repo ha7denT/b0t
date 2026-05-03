@@ -163,6 +163,69 @@ final class HeartbeatManagerTests: XCTestCase {
             "prompt should include missed-beat note; got: \(captured.value ?? "")")
     }
 
+    func test_scheduleNext_submitsRequestAtBPMInterval() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let stub = StubLanguageModelClient { _, _ in
+            TickDecision(
+                observed: "x", considered: ["pass"], decided: "pass", why: "x", acted: "noted silently")
+        }
+        let now = ISO8601DateFormatter().date(from: "2026-05-01T15:00:00Z")!
+        let fake = FakeHeartbeatScheduler()
+        let manager = HeartbeatManager(
+            bot: bot, store: store, client: stub,
+            clock: FixedClock(now), scheduler: fake
+        )
+
+        try await manager.scheduleNext()
+
+        XCTAssertEqual(fake.submittedDates.count, 1)
+        let expected = now.addingTimeInterval(30 * 60)
+        XCTAssertEqual(fake.submittedDates[0], expected)
+    }
+
+    func test_scheduleNext_doesNotSubmitWhenBPM0() async throws {
+        let temp = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        let fixture = Bundle.module.resourceURL!
+            .appendingPathComponent("Fixtures/canonical-bot")
+        try FileManager.default.copyItem(at: fixture, to: temp)
+        addTeardownBlock { try? FileManager.default.removeItem(at: temp) }
+
+        let scheduleURL = temp.appendingPathComponent("heartbeat/schedule.md")
+        let scheduleContent = """
+            ---
+            heartbeat_bpm: 0
+            quiet_hours: ["22:00", "06:30"]
+            event_triggers: []
+            mutable: true
+            ---
+            # schedule
+
+            off.
+            """
+        try Data(scheduleContent.utf8).write(to: scheduleURL, options: [.atomic])
+
+        let store = BotStore()
+        let bot = try await store.load(at: temp)
+        let stub = StubLanguageModelClient { _, _ in
+            TickDecision(
+                observed: "x", considered: ["pass"], decided: "pass", why: "x", acted: "noted silently")
+        }
+        let now = Date()
+        let fake = FakeHeartbeatScheduler()
+        let manager = HeartbeatManager(
+            bot: bot, store: store, client: stub,
+            clock: FixedClock(now), scheduler: fake
+        )
+
+        try await manager.scheduleNext()
+
+        XCTAssertTrue(
+            fake.submittedDates.isEmpty,
+            "bpm: 0 disables scheduled beats — no request should be submitted")
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")
