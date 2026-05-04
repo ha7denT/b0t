@@ -71,19 +71,3 @@ final class StubLanguageModelClientTests: XCTestCase {
         }
     }
 }
-
-// MARK: - Test helpers
-
-private extension AssembledContext {
-    /// Minimal fixture for tests that need an `AssembledContext` without going through
-    /// the full `ContextAssembler` pipeline. Keeps test bodies concise.
-    static func testFixture(userPrompt: String) -> AssembledContext {
-        AssembledContext(
-            systemInstructions: "",
-            userPrompt: userPrompt,
-            tools: [],
-            budget: TokenBudget(estimated: 0, limit: 3500, breakdown: [:], didFallBackToDigest: false),
-            loadedFiles: []
-        )
-    }
-}

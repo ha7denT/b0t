@@ -9,12 +9,12 @@ import b0tBrain
 /// Production code is identical against either; tests shape the stub's
 /// outputs per case. See `docs/specs/phase-2-foundation-models-loop.md` §5.3.
 ///
-/// T9 (Phase 3): `generate` now returns `(Output, [ToolCallRecord])`. The records
-/// array captures tool invocations that occurred during the generation. Production
-/// callers drop the records with `_` until T10/T12 wire them into `ConversationTurn`
-/// and `TickResult`. `LiveLanguageModelClient` returns `[]` until the
-/// `LanguageModelSession.Transcript` API exposes iterable tool-call entries
-/// (see `LiveLanguageModelClient.extractToolCallRecords` for fallback rationale).
+/// T9 (Phase 3): `generate` returns `(Output, [ToolCallRecord])`. The records
+/// array captures tool invocations that occurred during the generation,
+/// extracted from `LanguageModelSession.Transcript` via
+/// `LiveLanguageModelClient.extractToolCallRecords`. Production callers may
+/// drop the records with `_` until T10/T12 wire them into `ConversationTurn`
+/// and `TickResult` respectively.
 public protocol LanguageModelClient: Sendable {
     func generate<Output: Generable>(
         context: AssembledContext,
