@@ -20,7 +20,7 @@
             let id = UUID()
             let role: Role
             let text: String
-            enum Role { case user, bot, status }
+            enum Role { case user, bot, status, toolCall }
         }
 
         private enum ModelStatus {
@@ -81,7 +81,11 @@
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(log) { entry in
                         Text(entry.text)
-                            .font(.system(.body, design: .monospaced))
+                            .font(
+                                entry.role == .toolCall
+                                    ? .system(.caption, design: .monospaced)
+                                    : .system(.body, design: .monospaced)
+                            )
                             .foregroundStyle(colour(for: entry.role))
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -105,6 +109,7 @@
             case .user: return .primary
             case .bot: return .accentColor
             case .status: return .secondary
+            case .toolCall: return .secondary.opacity(0.7)
             }
         }
 
@@ -187,6 +192,14 @@
 
             do {
                 let turn = try await manager.respond(to: prompt)
+                for record in turn.toolCalls {
+                    log.append(
+                        LogEntry(
+                            role: .toolCall,
+                            text:
+                                "  \u{2192} \(record.toolName)(\(record.argumentsSummary))\n  \u{2190} \(record.outputSummary)"
+                        ))
+                }
                 log.append(LogEntry(role: .bot, text: turn.response.text))
                 await refreshJournalTail()
             } catch LanguageModelClientError.modelUnavailable {
@@ -204,7 +217,15 @@
             do {
                 let result = try await heartbeat.tick(trigger: .manual)
                 switch result {
-                case .decided(let d, _, _):
+                case .decided(let d, _, let toolCalls):
+                    for record in toolCalls {
+                        log.append(
+                            LogEntry(
+                                role: .toolCall,
+                                text:
+                                    "  \u{2192} \(record.toolName)(\(record.argumentsSummary))\n  \u{2190} \(record.outputSummary)"
+                            ))
+                    }
                     log.append(LogEntry(role: .status, text: "\u{2665} \(d.decided): \(d.acted)"))
                 case .suppressed(let reason):
                     log.append(LogEntry(role: .status, text: "\u{2665} suppressed (\(reason.rawValue))"))
