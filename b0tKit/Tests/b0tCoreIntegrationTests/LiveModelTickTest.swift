@@ -16,7 +16,7 @@ final class LiveModelTickTest: XCTestCase {
         let result = try await manager.tick(trigger: .manual)
 
         switch result {
-        case .decided(let d):
+        case .decided(let d, _, _):
             XCTAssertFalse(d.observed.isEmpty)
             XCTAssertFalse(d.decided.isEmpty)
         case .suppressed(let reason):

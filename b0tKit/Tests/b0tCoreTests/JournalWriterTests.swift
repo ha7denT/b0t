@@ -316,6 +316,42 @@ final class JournalWriterTests: XCTestCase {
         )
     }
 
+    func testAppendTickRendersToolsCalled() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T14:00:00Z")!
+        let clock = FixedClock(date)
+        let writer = JournalWriter(bot: bot, store: store, clock: clock)
+
+        let decision = TickDecision(
+            observed: "afternoon",
+            considered: ["pass"],
+            decided: "pass",
+            why: "nothing urgent",
+            acted: "noted silently"
+        )
+        let records = [
+            ToolCallRecord(
+                toolName: "time_awareness",
+                argumentsSummary: "(no args)",
+                outputSummary: "12:00",
+                timestamp: date
+            )
+        ]
+        try await writer.appendTick(
+            decision: decision,
+            stateDelta: StateDelta(writtenFiles: [], wouldNotifyText: nil),
+            beatNumber: 1,
+            toolCalls: records
+        )
+
+        let url = writer.journalURL(for: clock.now())
+        let content = try String(contentsOf: url, encoding: .utf8)
+        XCTAssertTrue(content.contains("tools_called"), "expected 'tools_called' in tick journal output")
+        XCTAssertTrue(content.contains("time_awareness"), "expected tool name in tick journal output")
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

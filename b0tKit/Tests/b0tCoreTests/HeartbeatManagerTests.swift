@@ -35,7 +35,7 @@ final class HeartbeatManagerTests: XCTestCase {
         let result = try await manager.tick(trigger: .manual)
 
         switch result {
-        case .decided(let d):
+        case .decided(let d, _, _):
             XCTAssertEqual(d.decided, "pass")
             XCTAssertEqual(d.mood, .attentive)
         case .suppressed, .errored:
@@ -224,6 +224,46 @@ final class HeartbeatManagerTests: XCTestCase {
         XCTAssertTrue(
             fake.submittedDates.isEmpty,
             "bpm: 0 disables scheduled beats — no request should be submitted")
+    }
+
+    func testTickResultCarriesToolCallRecords() async throws {
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T14:00:00Z")!
+        let stub = StubLanguageModelClient { _, _ in
+            return StubLanguageModelClient.HandlerResult(
+                value: TickDecision(
+                    observed: "afternoon",
+                    considered: ["pass"],
+                    decided: "pass",
+                    why: "nothing urgent",
+                    acted: "noted silently"
+                ),
+                toolCalls: [
+                    ToolCallRecord(
+                        toolName: "time_awareness",
+                        argumentsSummary: "(no args)",
+                        outputSummary: "12:00",
+                        timestamp: date
+                    )
+                ]
+            )
+        }
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let clock = FixedClock(date)
+        let fake = FakeHeartbeatScheduler()
+        let manager = HeartbeatManager(
+            bot: bot, store: store, client: stub,
+            clock: clock, scheduler: fake
+        )
+
+        let result = try await manager.tick(trigger: .manual)
+
+        if case .decided(_, _, let toolCalls) = result {
+            XCTAssertEqual(toolCalls.count, 1)
+            XCTAssertEqual(toolCalls[0].toolName, "time_awareness")
+        } else {
+            XCTFail("expected .decided result, got \(result)")
+        }
     }
 
     private func loadCanonicalBotInTempCopy() async throws -> Bot {

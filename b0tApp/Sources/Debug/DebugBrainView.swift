@@ -204,7 +204,7 @@
             do {
                 let result = try await heartbeat.tick(trigger: .manual)
                 switch result {
-                case .decided(let d):
+                case .decided(let d, _, _):
                     log.append(LogEntry(role: .status, text: "\u{2665} \(d.decided): \(d.acted)"))
                 case .suppressed(let reason):
                     log.append(LogEntry(role: .status, text: "\u{2665} suppressed (\(reason.rawValue))"))

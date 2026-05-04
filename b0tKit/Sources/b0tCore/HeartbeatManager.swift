@@ -82,7 +82,7 @@ public actor HeartbeatManager {
             let context = try await assembler.assemble(
                 mode: .heartbeat(trigger: trigger, missedGap: missedGap)
             )
-            let (decision, _) = try await client.generate(
+            let (decision, toolCalls) = try await client.generate(
                 context: context,
                 generating: TickDecision.self
             )
@@ -90,9 +90,10 @@ public actor HeartbeatManager {
             try await journalWriter.appendTick(
                 decision: decision,
                 stateDelta: delta,
-                beatNumber: beatNumber
+                beatNumber: beatNumber,
+                toolCalls: toolCalls
             )
-            return .decided(decision)
+            return .decided(decision: decision, delta: delta, toolCalls: toolCalls)
         } catch LanguageModelClientError.modelUnavailable {
             try? await journalWriter.appendSuppressed(
                 reason: .modelUnavailable,
