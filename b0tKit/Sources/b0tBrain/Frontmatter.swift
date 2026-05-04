@@ -44,7 +44,7 @@ public struct Frontmatter: Sendable, Equatable {
         self.storage = [:]
     }
 
-    internal init(orderedPairs: [(String, YAMLValue)]) {
+    package init(orderedPairs: [(String, YAMLValue)]) {
         self.keys = orderedPairs.map(\.0)
         self.storage = Dictionary(uniqueKeysWithValues: orderedPairs)
     }

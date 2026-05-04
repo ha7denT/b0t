@@ -26,7 +26,10 @@ public enum ModuleRegistry {
     /// (conditionally on iOS).
     private static var factories: [String: @Sendable (Frontmatter) throws -> any Module] {
         var table: [String: @Sendable (Frontmatter) throws -> any Module] = [:]
-        // Future slices will populate this table.
+        table[TimeAwarenessModule.id] = { try TimeAwarenessModule(parameters: $0) }
+        // Slice 4 adds CalendarModule
+        // Slice 5 adds RemindersModule
+        // Slice 6 adds HealthModule (#if canImport(HealthKit) && os(iOS))
         return table
     }
 
