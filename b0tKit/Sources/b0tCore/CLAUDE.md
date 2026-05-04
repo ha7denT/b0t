@@ -4,7 +4,7 @@ The Foundation Models loop. Owns the lifecycle of `LanguageModelSession` instanc
 
 ## Public API contracts (as-built, Phase 2)
 
-- `ConversationManager` — actor; `respond(to:) async throws -> ConversationResponse`. Orchestrates assemble → client → executor → journal. Retries on `.exceededContextWindowSize` via graduated fallback (private overload `respondWithFallback(userPrompt:level:)`).
+- `ConversationManager` — actor; `respond(to:) async throws -> ConversationTurn` (Phase 3 / T10 — see `ConversationTurn.swift`; carries the typed `ConversationResponse` plus `[ToolCallRecord]` observed during the turn). Orchestrates assemble → client → executor → journal. Retries on `.exceededContextWindowSize` via graduated fallback (private overload `respondWithFallback(userPrompt:level:)`).
 - `HeartbeatManager` — actor; `tick(trigger:) async throws -> TickResult`, `scheduleNext() async throws`. DEBUG-only `startDebugTimer()` / `stopDebugTimer()`. (BGTaskScheduler `register(...)` happens in `b0tApp.@main.init()` because it must be called synchronously at app launch per Apple docs.)
 - `LanguageModelClient` protocol; `LiveLanguageModelClient` (wraps `LanguageModelSession`) and `StubLanguageModelClient` (test seam).
 - `ContextAssembler` — assembles `.conversation` and `.heartbeat` modes (public), plus an internal `assemble(mode:fallbackLevel:)` overload for graduated overflow recovery (levels 1/2/3 progressively trim content per spec §7.4). Token-budget logged in DEBUG via OSLog.

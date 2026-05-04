@@ -95,7 +95,7 @@ public struct JournalWriter: Sendable {
         response: ConversationResponse,
         stateDelta: StateDelta,
         turnNumber: Int,
-        toolCalls: [ToolCallRecord] = []
+        toolCalls: [ToolCallRecord] = []  // T11: render under "tools_called:" sub-section
     ) async throws {
         let date = clock.now()
         let timeString = Self.timeString(for: date)
