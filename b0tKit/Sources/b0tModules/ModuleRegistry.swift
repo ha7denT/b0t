@@ -29,7 +29,9 @@ public enum ModuleRegistry {
         table[TimeAwarenessModule.id] = { try TimeAwarenessModule(parameters: $0) }
         table[CalendarModule.id] = { try CalendarModule(parameters: $0) }
         table[RemindersModule.id] = { try RemindersModule(parameters: $0) }
-        // Slice 6 adds HealthModule (#if canImport(HealthKit) && os(iOS))
+        #if canImport(HealthKit) && os(iOS)
+            table[HealthModule.id] = { try HealthModule(parameters: $0) }
+        #endif
         return table
     }
 
