@@ -28,7 +28,7 @@ public enum ModuleRegistry {
         var table: [String: @Sendable (Frontmatter) throws -> any Module] = [:]
         table[TimeAwarenessModule.id] = { try TimeAwarenessModule(parameters: $0) }
         table[CalendarModule.id] = { try CalendarModule(parameters: $0) }
-        // Slice 5 adds RemindersModule
+        table[RemindersModule.id] = { try RemindersModule(parameters: $0) }
         // Slice 6 adds HealthModule (#if canImport(HealthKit) && os(iOS))
         return table
     }

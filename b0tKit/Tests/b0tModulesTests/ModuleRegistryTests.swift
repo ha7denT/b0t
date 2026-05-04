@@ -18,9 +18,9 @@ final class ModuleRegistryTests: XCTestCase {
     func testCanonicalBotInstantiatesAllKnownAndSkipsUnknownAndDisabled() async throws {
         let bot = try await loadFixture(named: "canonical-modules-bot")
         let modules = try await ModuleRegistry.loadModules(for: bot)
-        XCTAssertEqual(modules.count, 2)
+        XCTAssertEqual(modules.count, 3)
         let ids = Set(modules.map { type(of: $0).id })
-        XCTAssertEqual(ids, ["calendar", "time-awareness"])
+        XCTAssertEqual(ids, ["calendar", "reminders", "time-awareness"])
     }
 
     func testMissingModuleIDThrowsWithFileURL() async throws {
