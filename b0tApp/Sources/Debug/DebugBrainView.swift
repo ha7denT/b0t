@@ -62,7 +62,7 @@
         private var modelStatusBanner: some View {
             switch modelStatus {
             case .uninitialized:
-                Text("initializing model...")
+                Text("initializing model.")
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .padding(.top, 8)
@@ -114,17 +114,17 @@
             let client: any LanguageModelClient
             if forceStub {
                 client = makeStub()
-                modelStatus = .stub(reason: "--use-stub-client launch arg")
+                modelStatus = .stub(reason: "--use-stub-client launch arg.")
             } else {
                 do {
                     client = try LiveLanguageModelClient()
                     modelStatus = .live
                 } catch LanguageModelClientError.modelUnavailable {
                     client = makeStub()
-                    modelStatus = .stub(reason: "model unavailable on this device")
+                    modelStatus = .stub(reason: "model unavailable on this device.")
                 } catch {
                     client = makeStub()
-                    modelStatus = .stub(reason: "init failed: \(error)")
+                    modelStatus = .stub(reason: "init failed: \(error).")
                 }
             }
 
@@ -189,6 +189,8 @@
                 let reply = try await manager.respond(to: prompt)
                 log.append(LogEntry(role: .bot, text: reply.text))
                 await refreshJournalTail()
+            } catch LanguageModelClientError.modelUnavailable {
+                log.append(LogEntry(role: .status, text: "model unavailable on this device."))
             } catch {
                 log.append(LogEntry(role: .status, text: "error: \(error)"))
             }
@@ -198,7 +200,7 @@
             guard let heartbeat else { return }
             isHeartbeating = true
             defer { isHeartbeating = false }
-            log.append(LogEntry(role: .status, text: "\u{2665} firing heartbeat..."))
+            log.append(LogEntry(role: .status, text: "\u{2665} firing heartbeat."))
             do {
                 let result = try await heartbeat.tick(trigger: .manual)
                 switch result {

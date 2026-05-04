@@ -34,6 +34,13 @@ final class DecisionsTests: XCTestCase {
 
     func test_moodTag_hasEightCases() {
         XCTAssertEqual(MoodTag.allCases.count, 8)
+        XCTAssertEqual(
+            MoodTag.allCases,
+            [
+                .idle, .speaking, .thinking, .surprised,
+                .sleepy, .attentive, .worried, .delighted,
+            ]
+        )
     }
 
     func test_tickDecision_defaultArguments() {

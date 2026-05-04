@@ -13,7 +13,8 @@ import OSLog
 /// Generation errors are mapped to `LanguageModelClientError`:
 /// - `.exceededContextWindowSize` → `.exceededContextWindowSize`
 /// - `.decodingFailure` → `.malformedGenerableOutput`
-/// - all others → `.sessionFailed`
+/// - `.assetsUnavailable` → `.modelUnavailable`
+/// - all others → `.sessionFailed` (case name logged at error level)
 ///
 /// See spec §5.3.
 public struct LiveLanguageModelClient: LanguageModelClient {
@@ -59,7 +60,10 @@ public struct LiveLanguageModelClient: LanguageModelClient {
                 throw LanguageModelClientError.malformedGenerableOutput(
                     underlyingDescription: String(describing: error)
                 )
+            case .assetsUnavailable:
+                throw LanguageModelClientError.modelUnavailable
             default:
+                Self.logger.error("unhandled GenerationError: \(String(describing: error))")
                 throw LanguageModelClientError.sessionFailed(
                     underlyingDescription: String(describing: error)
                 )

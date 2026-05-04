@@ -14,6 +14,11 @@ import b0tBrain
 /// Slice 6 (Task 25) adds notification budget enforcement.
 ///
 /// Per spec §5.6, the Executor never posts real notifications in Phase 2.
+///
+/// Note: distinct from Swift's standard library `Executor` protocol (the one
+/// used by `_Concurrency` / actor execution). This is a `b0tCore`-scoped struct.
+/// Consumers inside the module reference `b0tCore.Executor` by default;
+/// outside callers may need to qualify the name if they also import `_Concurrency`.
 public struct Executor: Sendable {
     private let bot: Bot
     private let store: BotStore
