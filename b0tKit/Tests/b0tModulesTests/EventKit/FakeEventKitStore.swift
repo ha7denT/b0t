@@ -16,7 +16,10 @@ final class FakeEventKitStore: EventKitStore, @unchecked Sendable {
     var scriptedGrant: [EKEntityType: Bool] = [:]
     var scriptedEvents: [EKEvent] = []
     var scriptedCalendars: [EKCalendar] = []
+    var scriptedReminders: [EKReminder] = []
+    var scriptedDefaultReminderCalendar: EKCalendar?
     private(set) var currentStatus: [EKEntityType: EKAuthorizationStatus] = [:]
+    private(set) var savedReminders: [EKReminder] = []
 
     func authorizationStatus(for entityType: EKEntityType) -> EKAuthorizationStatus {
         currentStatus[entityType] ?? .notDetermined
@@ -34,5 +37,21 @@ final class FakeEventKitStore: EventKitStore, @unchecked Sendable {
 
     func calendars(for entityType: EKEntityType) -> [EKCalendar] {
         scriptedCalendars
+    }
+
+    func save(_ reminder: EKReminder, commit: Bool) throws {
+        savedReminders.append(reminder)
+    }
+
+    func fetchReminders(matching predicate: NSPredicate) async -> [EKReminder] {
+        scriptedReminders
+    }
+
+    func predicateForReminders(in calendars: [EKCalendar]?) -> NSPredicate {
+        NSPredicate(value: true)
+    }
+
+    func defaultCalendarForNewReminders() -> EKCalendar? {
+        scriptedDefaultReminderCalendar
     }
 }

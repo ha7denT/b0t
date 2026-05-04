@@ -40,4 +40,32 @@ final class FakeEventKitStoreTests: XCTestCase {
         XCTAssertEqual(results.count, 1)
         XCTAssertEqual(results[0].title, "coffee with Lin")
     }
+
+    func testSaveReminderRetainsIt() throws {
+        let store = FakeEventKitStore()
+        let reminder = EKReminder(eventStore: EKEventStore())
+        reminder.title = "email Lin"
+        try store.save(reminder, commit: true)
+        XCTAssertEqual(store.savedReminders.count, 1)
+        XCTAssertEqual(store.savedReminders[0].title, "email Lin")
+    }
+
+    func testFetchRemindersReturnsScripted() async {
+        let store = FakeEventKitStore()
+        let r = EKReminder(eventStore: EKEventStore())
+        r.title = "buy milk"
+        store.scriptedReminders = [r]
+        let predicate = NSPredicate(value: true)
+        let results = await store.fetchReminders(matching: predicate)
+        XCTAssertEqual(results.count, 1)
+        XCTAssertEqual(results[0].title, "buy milk")
+    }
+
+    func testDefaultCalendarForNewRemindersReturnsScripted() {
+        let store = FakeEventKitStore()
+        let cal = EKCalendar(for: .reminder, eventStore: EKEventStore())
+        cal.title = "b0t"
+        store.scriptedDefaultReminderCalendar = cal
+        XCTAssertEqual(store.defaultCalendarForNewReminders()?.title, "b0t")
+    }
 }

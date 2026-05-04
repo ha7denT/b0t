@@ -1,6 +1,12 @@
 @preconcurrency import EventKit
 import Foundation
 
+/// Wrapper to suppress sendability warnings for EventKit arrays in async context.
+/// Safe because EKEventStore callbacks execute synchronously.
+struct SendableRemindersBox: @unchecked Sendable {
+    let reminders: [EKReminder]
+}
+
 /// The seam through which `b0tModules`'s calendar and reminder tools talk
 /// to EventKit. Two implementations exist: `LiveEventKitStore` (wraps
 /// Apple's `EKEventStore`) and `FakeEventKitStore` (test-target visible,
@@ -16,7 +22,11 @@ public protocol EventKitStore: Sendable {
     func events(matching predicate: NSPredicate) async -> [EKEvent]
     func calendars(for entityType: EKEntityType) -> [EKCalendar]
 
-    // Reminders methods are added in T18 (Slice 5).
+    // Reminders (T18)
+    func save(_ reminder: EKReminder, commit: Bool) throws
+    func fetchReminders(matching predicate: NSPredicate) async -> [EKReminder]
+    func predicateForReminders(in calendars: [EKCalendar]?) -> NSPredicate
+    func defaultCalendarForNewReminders() -> EKCalendar?
 }
 
 /// The production `EventKitStore`. Wraps a single `EKEventStore`.
@@ -53,5 +63,26 @@ public struct LiveEventKitStore: EventKitStore {
 
     public func calendars(for entityType: EKEntityType) -> [EKCalendar] {
         store.calendars(for: entityType)
+    }
+
+    public func save(_ reminder: EKReminder, commit: Bool) throws {
+        try store.save(reminder, commit: commit)
+    }
+
+    public func fetchReminders(matching predicate: NSPredicate) async -> [EKReminder] {
+        await withCheckedContinuation { cont in
+            self.store.fetchReminders(matching: predicate) { reminders in
+                let box = SendableRemindersBox(reminders: reminders ?? [])
+                cont.resume(returning: box.reminders)
+            }
+        }
+    }
+
+    public func predicateForReminders(in calendars: [EKCalendar]?) -> NSPredicate {
+        store.predicateForReminders(in: calendars)
+    }
+
+    public func defaultCalendarForNewReminders() -> EKCalendar? {
+        store.defaultCalendarForNewReminders()
     }
 }
