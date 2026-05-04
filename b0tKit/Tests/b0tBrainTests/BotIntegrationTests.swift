@@ -71,15 +71,15 @@ final class BotIntegrationTests: XCTestCase {
             )
         }
 
-        // Enumerate all skills.
-        let skills = try await bot.skills.all
-        XCTAssertGreaterThan(skills.count, 0, "default-bot/skills/ ships zero skills?")
-        for skill in skills {
+        // Enumerate all modules.
+        let modules = try await bot.modules.all
+        XCTAssertGreaterThan(modules.count, 0, "default-bot/modules/ ships zero modules?")
+        for module in modules {
             XCTAssertNil(
-                skill.parseError,
-                "\(skill.fileURL.lastPathComponent) failed: \(String(describing: skill.parseError))"
+                module.parseError,
+                "\(module.fileURL.lastPathComponent) failed: \(String(describing: module.parseError))"
             )
-            XCTAssertNotNil(skill.skillID, "\(skill.fileURL.lastPathComponent) missing skill_id")
+            XCTAssertNotNil(module.moduleID, "\(module.fileURL.lastPathComponent) missing module_id")
         }
     }
 }

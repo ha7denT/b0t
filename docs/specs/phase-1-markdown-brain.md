@@ -109,7 +109,7 @@ public struct Bot: Sendable {
 
     public var identity: IdentitySection { get }
     public var memory: MemorySection { get }
-    public var skills: SkillsSection { get }
+    public var modules: ModulesSection { get }
     public var heartbeat: HeartbeatSection { get }
     public var face: FaceSection { get }
     public var journal: JournalSection { get }
@@ -337,7 +337,7 @@ Manual invalidation (`BotStore.invalidate(_:)`, `.invalidateAll()`) exists for t
 Read-side errors are *information*, not failures. They surface as:
 
 - `BotFile.parseError != nil` — Phase 1 just stores it; Phase 2's `ContextAssembler` and Phase 4's organ rendering act on it.
-- The eventual GUI hook (Phase 4): a file with `parseError != nil` renders its organ with sparks/broken-pipe visual feedback. The b0t voice acknowledges it in plain language: *"your `skills/calendar.md` has a YAML problem — I'm reading the prose but not the settings."*
+- The eventual GUI hook (Phase 4): a file with `parseError != nil` renders its organ with sparks/broken-pipe visual feedback. The b0t voice acknowledges it in plain language: *"your `modules/calendar.md` has a YAML problem — I'm reading the prose but not the settings."*
 
 Write-side errors are *real failures* that should be surfaced to the user. Phase 1 throws them up the stack; Phase 2 / Phase 4 will route them through the b0t voice as system-message-style strings (per the voice-and-copy guide: lowercase, functional, no exclamation marks).
 
@@ -351,15 +351,15 @@ b0tKit/Tests/b0tBrainTests/Fixtures/
 │   ├── identity/{core,principles,about_b0t,appearance,audio}.md
 │   ├── memory/{core,about_me,recent,relationships}.md
 │   ├── memory/archive/2026-01-01.md    // archive-shape test
-│   ├── skills/{calendar,mail,journaling,onboarding}.md
+│   ├── modules/{calendar,mail,journaling,onboarding}.md
 │   ├── heartbeat/{schedule,actions}.md
 │   ├── journal/2026-04-30.md
 │   └── face/                           // empty
 ├── broken-frontmatter-bot/
 │   ├── identity/core.md                // valid baseline
-│   ├── skills/broken-yaml.md           // invalid YAML inside frontmatter
-│   ├── skills/unterminated.md          // opens with --- but no closing
-│   ├── skills/non-utf8.md              // arbitrary bytes
+│   ├── modules/broken-yaml.md          // invalid YAML inside frontmatter
+│   ├── modules/unterminated.md         // opens with --- but no closing
+│   ├── modules/non-utf8.md             // arbitrary bytes
 │   └── memory/missing.md               // file declared in tests but absent
 └── empty-bot/                          // for BotProvisioner idempotency
 ```
@@ -400,7 +400,7 @@ for file in [
     try await bot.memory.core, try await bot.memory.aboutMe,
     try await bot.memory.recent, try await bot.memory.relationships,
     try await bot.heartbeat.schedule, try await bot.heartbeat.actions,
-] + (try await bot.skills.all) {
+] + (try await bot.modules.all) {
     XCTAssertNil(file.parseError, "\(file.fileURL.path) failed: \(String(describing: file.parseError))")
 }
 ```

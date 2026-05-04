@@ -20,8 +20,8 @@ default-bot/
 │   ├── relationships.md   # loaded when names come up
 │   ├── recent.md          # rolling 7-day digest, loaded on demand
 │   └── archive/           # older digests
-├── skills/
-│   ├── calendar.md        # canonical skill template
+├── modules/
+│   ├── calendar.md        # canonical module template
 │   ├── mail.md
 │   ├── reminders.md
 │   ├── health.md          # disabled by default
@@ -46,17 +46,17 @@ All files use YAML frontmatter for parameters and prose for behaviour. Keys used
 - **`always_in_context: true|false`** — whether the ContextAssembler always loads this file into the model's prompt.
 - **`load_on_demand: true|false`** — whether the file is loaded only via tool call.
 - **`load_when: <description>`** — human-readable hint describing the trigger condition.
-- **`enabled: true|false`** — whether a skill is active.
+- **`enabled: true|false`** — whether a module is active.
 - **`permission: <kind>`** — system permission required (calendar, mail, health, etc.).
-- **`skill_id: <slug>`** — for skill files, the ID the skill registry matches against.
+- **`module_id: <slug>`** — for module files, the ID the module registry matches against.
 
 ## Editing the default
 
 Changes to files here ship in the next app build. Be aware:
 
 - Voice changes in `identity/core.md` affect *every* new b0t users create. Test that the voice feels right by reading several files in sequence.
-- Skill changes affect new b0ts. Existing user b0ts retain their version of the skill files until the user explicitly updates.
-- Adding a new skill requires adding both the `.md` file here and a corresponding Swift bridge in `b0tKit/b0tSkills/`. New skills require new permissions; permission flow needs to be added to onboarding.
+- Module changes affect new b0ts. Existing user b0ts retain their version of the module files until the user explicitly updates.
+- Adding a new module requires adding both the `.md` file here and a corresponding Swift bridge in `b0tKit/b0tModules/`. New modules require new permissions; permission flow needs to be added to onboarding.
 
 ## Migration
 

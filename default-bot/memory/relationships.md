@@ -1,7 +1,7 @@
 ---
 mutable: true
 always_in_context: false
-load_when: a name comes up in conversation or in skill output
+load_when: a name comes up in conversation or in module output
 ---
 
 # relationships

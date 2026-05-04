@@ -12,7 +12,7 @@ b0t's philosophy is that the user owns their b0t. Ownership without legibility i
 
 ## Decision
 
-All canonical b0t state — identity, memory, skills, heartbeat configuration, journal — is stored as plain markdown files in the user's Documents directory. No SwiftData, no Core Data, no proprietary serialisation. Files use YAML frontmatter for structured parameters and prose below for behavioural content.
+All canonical b0t state — identity, memory, modules, heartbeat configuration, journal — is stored as plain markdown files in the user's Documents directory. No SwiftData, no Core Data, no proprietary serialisation. Files use YAML frontmatter for structured parameters and prose below for behavioural content.
 
 Ephemeral caches (parsed-markdown ASTs, animation state, sprite atlas indices) may use SwiftData but are never the source of truth — they're rebuilt from the markdown at any time.
 
@@ -22,7 +22,7 @@ Ephemeral caches (parsed-markdown ASTs, animation state, sprite atlas indices) m
 - **Editability = agency.** Users can modify any aspect of their b0t through a familiar tool (a text editor) without learning a custom UI for every parameter.
 - **Portability = permanence.** A b0t can be airdropped, backed up, version-controlled, or migrated to a future b0t app without dependency on our binary format.
 - **Transparency = trust.** Combined with the journal, the user can always see what their b0t knows and what it has done. No hidden state.
-- **Skill marketplace becomes possible (v2).** Plaintext skills can be shared, forked, reviewed.
+- **Module marketplace becomes possible (v2).** Plaintext modules can be shared, forked, reviewed.
 
 ## Consequences
 

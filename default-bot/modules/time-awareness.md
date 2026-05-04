@@ -1,5 +1,5 @@
 ---
-skill_id: time_awareness
+module_id: time_awareness
 enabled: true
 permission: none
 ---
@@ -8,7 +8,7 @@ permission: none
 
 I know what time it is, what day of the week, what month, and what's special about today (holidays, observances, the user's birthday if known).
 
-this is a passive skill — it doesn't take actions, it informs the others.
+this is a passive module — it doesn't take actions, it informs the others.
 
 ## what I do with it
 
@@ -22,7 +22,7 @@ this is a passive skill — it doesn't take actions, it informs the others.
 
 ## what counts as urgent
 
-nothing. time awareness doesn't surface things on its own — it shapes how I surface things from other skills.
+nothing. time awareness doesn't surface things on its own — it shapes how I surface things from other modules.
 
 ## what I ignore
 

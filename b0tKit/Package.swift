@@ -10,7 +10,7 @@ let package = Package(
     products: [
         .library(name: "b0tCore", targets: ["b0tCore"]),
         .library(name: "b0tBrain", targets: ["b0tBrain"]),
-        .library(name: "b0tSkills", targets: ["b0tSkills"]),
+        .library(name: "b0tModules", targets: ["b0tModules"]),
         .library(name: "b0tFace", targets: ["b0tFace"]),
         .library(name: "b0tAudio", targets: ["b0tAudio"]),
         .library(name: "b0tDesign", targets: ["b0tDesign"]),
@@ -26,7 +26,7 @@ let package = Package(
                 .product(name: "Yams", package: "Yams")
             ]
         ),
-        .target(name: "b0tSkills", dependencies: ["b0tBrain"]),
+        .target(name: "b0tModules", dependencies: ["b0tBrain"]),
         .target(name: "b0tFace", dependencies: ["b0tDesign"]),
         .target(name: "b0tAudio"),
         .target(name: "b0tDesign"),
@@ -49,7 +49,7 @@ let package = Package(
                 .copy("Fixtures")
             ]
         ),
-        .testTarget(name: "b0tSkillsTests", dependencies: ["b0tSkills"]),
+        .testTarget(name: "b0tModulesTests", dependencies: ["b0tModules"]),
         .testTarget(name: "b0tFaceTests", dependencies: ["b0tFace"]),
         .testTarget(name: "b0tAudioTests", dependencies: ["b0tAudio"]),
         .testTarget(name: "b0tDesignTests", dependencies: ["b0tDesign"]),

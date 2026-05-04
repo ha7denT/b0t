@@ -23,7 +23,7 @@ b0t/
 ├── default-bot/                   # the b0t that ships with the app
 │   ├── identity/
 │   ├── memory/
-│   ├── skills/
+│   ├── modules/
 │   ├── heartbeat/
 │   └── face/
 ├── assets/                        # raw design assets (face parts, palettes, fonts, sounds, icons)

@@ -1,5 +1,5 @@
 ---
-skill_id: reminders
+module_id: reminders
 enabled: true
 ---
 

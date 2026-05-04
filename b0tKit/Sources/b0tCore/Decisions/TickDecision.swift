@@ -7,8 +7,8 @@ import FoundationModels
 /// plus mood and organUsed. `state_delta` is NOT a field here — it's computed
 /// by JournalWriter from Executor side effects (see spec §3 / §5.5).
 ///
-/// `organUsed` is a skill identifier (e.g., "calendar", "mail") indicating which
-/// b0t organ engaged this beat, or nil if no skill was involved. Phase 2 ships
+/// `organUsed` is a module identifier (e.g., "calendar", "mail") indicating which
+/// b0t organ engaged this beat, or nil if no module was involved. Phase 2 ships
 /// only the time-awareness tool (Slice 9), so most ticks will have nil here.
 @Generable
 public struct TickDecision: Sendable, Equatable {
@@ -30,7 +30,7 @@ public struct TickDecision: Sendable, Equatable {
     @Guide(description: "Your current mood, or nil if no meaningful change.")
     public let mood: MoodTag?
 
-    @Guide(description: "The skill organ used this beat (e.g., 'calendar'), or nil.")
+    @Guide(description: "The module organ used this beat (e.g., 'calendar'), or nil.")
     public let organUsed: String?
 
     @Guide(description: "Things to remember from this beat.")

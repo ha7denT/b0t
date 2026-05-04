@@ -1,5 +1,5 @@
 ---
-skill_id: location
+module_id: location
 enabled: true
 mode: "significant_changes"
 named_places: {}
@@ -55,5 +55,5 @@ requires "While Using" location access. iOS 26 may also require Significant Loca
 
 ## links
 
-- [skills/calendar](calendar.md) — when you arrive at an event location, this is calendar-relevant.
+- [modules/calendar](calendar.md) — when you arrive at an event location, this is calendar-relevant.
 - [heartbeat/schedule](../heartbeat/schedule.md) — `location_change_significant` is a wake trigger.

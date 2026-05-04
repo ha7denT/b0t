@@ -215,7 +215,7 @@ final class BotStoreTests: XCTestCase {
 
     private func makeCanonicalBotDir() throws -> URL {
         let root = tmp.appendingPathComponent("b0t-test", isDirectory: true)
-        for sub in ["identity", "memory", "skills", "heartbeat", "face", "journal"] {
+        for sub in ["identity", "memory", "modules", "heartbeat", "face", "journal"] {
             try FileManager.default.createDirectory(
                 at: root.appendingPathComponent(sub, isDirectory: true),
                 withIntermediateDirectories: true
@@ -229,12 +229,12 @@ final class BotStoreTests: XCTestCase {
             to: root.appendingPathComponent("identity/principles.md"),
             atomically: true, encoding: .utf8
         )
-        try "---\nskill_id: calendar\nenabled: true\n---\n# calendar\n".write(
-            to: root.appendingPathComponent("skills/calendar.md"),
+        try "---\nmodule_id: calendar\nenabled: true\n---\n# calendar\n".write(
+            to: root.appendingPathComponent("modules/calendar.md"),
             atomically: true, encoding: .utf8
         )
-        try "---\nskill_id: mail\nenabled: false\n---\n# mail\n".write(
-            to: root.appendingPathComponent("skills/mail.md"),
+        try "---\nmodule_id: mail\nenabled: false\n---\n# mail\n".write(
+            to: root.appendingPathComponent("modules/mail.md"),
             atomically: true, encoding: .utf8
         )
         return root
@@ -249,15 +249,15 @@ final class BotStoreTests: XCTestCase {
         XCTAssertEqual(core.frontmatter["name"], .string("b0t-01"))
     }
 
-    func test_load_skillsAll_enumeratesDirectory() async throws {
+    func test_load_modulesAll_enumeratesDirectory() async throws {
         let root = try makeCanonicalBotDir()
         let store = BotStore()
         let bot = try await store.load(at: root)
-        let skills = try await bot.skills.all
-        XCTAssertEqual(skills.count, 2)
+        let modules = try await bot.modules.all
+        XCTAssertEqual(modules.count, 2)
         let ids: Set<String> = Set(
-            skills.compactMap { file -> String? in
-                if case .string(let s) = file.frontmatter["skill_id"] { return s }
+            modules.compactMap { file -> String? in
+                if case .string(let s) = file.frontmatter["module_id"] { return s }
                 return nil
             }
         )

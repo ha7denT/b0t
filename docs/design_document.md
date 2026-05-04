@@ -19,7 +19,7 @@ b0t is a personal AI companion you grow yourself, on your phone, in plain text.
 
 Every AI companion app on the market is a service. You rent a personality. You rent a memory. You rent a relationship with software you don't own and can't see inside. When the company changes the model, your companion changes. When the company shuts down, your companion dies.
 
-b0t inverts this. Your b0t lives entirely on your device. Its personality is a markdown file. Its memories are markdown files. Its skills are markdown files. You can open them, read them, edit them, share them, version them, back them up. The app is a body for files you own.
+b0t inverts this. Your b0t lives entirely on your device. Its personality is a markdown file. Its memories are markdown files. Its modules are markdown files. You can open them, read them, edit them, share them, version them, back them up. The app is a body for files you own.
 
 The on-device LLM (Apple's Foundation Models framework) is the engine that animates these files. It's small, free, private, and offline. It is not a vast intelligence. b0t doesn't pretend otherwise.
 
@@ -27,8 +27,8 @@ The on-device LLM (Apple's Foundation Models framework) is the engine that anima
 
 1. **Your b0t is yours.** No subscription, no cloud, no account. Files live in the user's Documents directory or iCloud Drive, in plain markdown. The app can be deleted; the b0t survives. The b0t can be airdropped to a friend.
 2. **Honesty about fidelity.** The visual and interaction design tells the truth about what the system is — a small local model executing a heartbeat loop animating a markdown character. No photorealism, no claims of sentience, no smoke and mirrors. Cassette-futurism aesthetic because cassette futurism is honest about technology being a manufactured object with constraints.
-3. **The system is legible.** The user can always see what their b0t is doing. Every capability is visible as an organ on the body. Every active operation lights up wiring. Every memory and skill is a file the user can open. Black-box AI is the opposite of what b0t is.
-4. **The user assembles their b0t.** b0t ships with a default personality and a curated skill library. The user composes from these and edits to make it theirs. b0t is a substrate, not a product. The user is the product.
+3. **The system is legible.** The user can always see what their b0t is doing. Every capability is visible as an organ on the body. Every active operation lights up wiring. Every memory and module is a file the user can open. Black-box AI is the opposite of what b0t is.
+4. **The user assembles their b0t.** b0t ships with a default personality and a curated module library. The user composes from these and edits to make it theirs. b0t is a substrate, not a product. The user is the product.
 5. **Restraint.** Most of the time, b0t is quiet. The face breathes, the heart beats. Notifications are rare and meaningful. Conversation is calm. Animation is sparse. Sound is sparing. Activity has weight because it isn't constant.
 
 ### 1.3 What b0t is not
@@ -65,7 +65,7 @@ Every b0t is a directory of markdown files on disk. The structure:
 │   │   ├── relationships.md         # people in the user's life
 │   │   ├── recent.md                # last N days, auto-summarised
 │   │   └── archive/                 # older summarised digests
-│   ├── skills/
+│   ├── modules/
 │   │   ├── calendar.md
 │   │   ├── mail.md
 │   │   ├── reminders.md
@@ -79,12 +79,12 @@ Every b0t is a directory of markdown files on disk. The structure:
 ├── b0t-02/
 │   └── ...
 └── _shared/
-    └── skills/                       # skills shared across all b0ts
+    └── modules/                      # modules shared across all b0ts
 ```
 
 **File ownership:** every file is either user-editable, b0t-editable, or both. b0t writes to `memory/recent.md`, `memory/relationships.md` (with permission), `journal/`, and the auto-summarisation passes. The user owns everything else, though the user can edit any file at any time.
 
-**Frontmatter for parameters.** Files with structured controls (heartbeat schedule, skill verbosity, voice settings) use YAML frontmatter for the parameters and prose below for the instructions:
+**Frontmatter for parameters.** Files with structured controls (heartbeat schedule, module verbosity, voice settings) use YAML frontmatter for the parameters and prose below for the instructions:
 
 ```markdown
 ---
@@ -100,7 +100,7 @@ At 30 BPM I tick roughly every two minutes when active...
 
 Sliders and toggles in the GUI read from and write to frontmatter. Prose stays the user's space.
 
-**Inter-file linking.** Files reference each other with markdown links: `[onboarding](skills/onboarding.md)`. The in-app viewer intercepts these and routes to the relevant organ. Backlinks are computed and shown — b0t's mind is a small personal wiki.
+**Inter-file linking.** Files reference each other with markdown links: `[onboarding](modules/onboarding.md)`. The in-app viewer intercepts these and routes to the relevant organ. Backlinks are computed and shown — b0t's mind is a small personal wiki.
 
 ### 2.2 Configurable heartbeat
 
@@ -109,7 +109,7 @@ The heartbeat is the central metaphor. It is also the actual scheduling mechanis
 **Each beat:**
 1. b0t wakes (background task, event trigger, or app-foreground tick).
 2. Loads the active b0t's identity core, memory core, and the current beat's instructions from `heartbeat/actions.md`.
-3. Loads any skill files relevant to the current context.
+3. Loads any module files relevant to the current context.
 4. Runs a fresh `LanguageModelSession` with this assembled context.
 5. Returns a typed `@Generable` decision: observe, act, notify, sleep.
 6. If acting, executes via tool calls (read calendar, write reminder, post notification).
@@ -135,7 +135,7 @@ The home screen of b0t is the b0t themselves — a face surrounded by a body of 
 - **Top half:** the b0t's face, breathing, blinking, occasionally glancing.
 - **Around the face:** organ icons arranged anatomically.
   - Above the eye-line: things that come in — perception (calendar awareness, mail awareness, location, hardware sensors), core memory, identity files.
-  - Below the ear-line: things that go out — actions, tools, skills (reminders, notifications, mail compose, calendar writes).
+  - Below the ear-line: things that go out — actions, tools, modules (reminders, notifications, mail compose, calendar writes).
   - Left and right balance for visual symmetry; assignment is by category, not arbitrary.
 - **Centre, directly below face:** the heart. Beats at the configured BPM. Tappable to access heartbeat config.
 - **Bottom half:** the chat surface. Conversation appears here.
@@ -163,7 +163,7 @@ The home screen of b0t is the b0t themselves — a face surrounded by a body of 
 
 **Conversation with dormant b0ts is allowed.** The active b0t is the only one with proactive behaviour and background work. Any b0t can be opened and chatted with directly. This means dormant b0ts are not dead; they're just off duty.
 
-**Soft cap of 5 b0ts in v1.** Justified as "your inner circle." Lift later if there's demand.
+**Soft cap of 6 b0ts in v1.** Justified as "your inner circle." Lift later if there's demand.
 
 ### 2.5 Face Creator
 
@@ -242,15 +242,15 @@ These layers share palette, grid, and underlying logic. Transitions between them
 
 ---
 
-## 4. Skills
+## 4. Modules
 
-### 4.1 What a skill is
+### 4.1 What a module is
 
-A skill is a `.md` file describing how b0t should think about and use a particular capability. The actual system access (EventKit for calendar, Mail framework, HealthKit, Core Location) is hardcoded Swift. The `.md` file is the prompt-and-behaviour spec.
+A module is a `.md` file describing how b0t should think about and use a particular capability. The actual system access (EventKit for calendar, Mail framework, HealthKit, Core Location) is hardcoded Swift. The `.md` file is the prompt-and-behaviour spec.
 
 This separation matters: users can compose new behaviours from existing primitives, but they can't add raw new system permissions through a markdown file. New capabilities (and their permissions) ship in app updates.
 
-### 4.2 v1 skill library
+### 4.2 v1 module library
 
 Curated set, all hand-written by the team, all expressing the cassette-futurism voice:
 
@@ -265,13 +265,13 @@ Curated set, all hand-written by the team, all expressing the cassette-futurism 
 9. **Journaling** — b0t maintains its own journal of observations about the user.
 10. **Onboarding** — the 24-heartbeat tutorial sequence.
 
-### 4.3 Skill file format
+### 4.3 Module file format
 
-Each skill is a markdown file with frontmatter for parameters and prose for behaviour:
+Each module is a markdown file with frontmatter for parameters and prose for behaviour:
 
 ```markdown
 ---
-skill_id: mail
+module_id: mail
 enabled: true
 verbosity: medium
 ignored_senders: ["linkedin.com", "noreply"]
@@ -292,15 +292,15 @@ If something seems urgent (deadline language, time-sensitive requests),
 I notify directly. Otherwise I wait for the user to ask.
 ```
 
-### 4.4 Skill portability
+### 4.4 Module portability
 
-Skills are plain `.md` files. Users can:
+Modules are plain `.md` files. Users can:
 - Edit them directly.
 - Disable them via frontmatter.
 - Share them by airdropping the file to another user.
-- Move skills between b0ts by copying files.
+- Move modules between b0ts by copying files.
 
-v2 ships an online repo / skill library where users can publish and discover skills.
+v2 ships an online repo / module library where users can publish and discover modules.
 
 ---
 
@@ -330,7 +330,7 @@ The 4096-token context window of Foundation Models is the central constraint. b0
 - `memory/core.md` — handful of always-true user facts (~100, capped at ~20 entries)
 
 **Loaded conditionally:**
-- 1–3 relevant skill files — selected by context (~600)
+- 1–3 relevant module files — selected by context (~600)
 - Recent journal — last 3–5 entries (~400)
 - `memory/relationships.md` — when names come up (~variable)
 
@@ -426,10 +426,10 @@ medium — about once every half hour.
 
 next time I beat, I'll show you my brain.
 
-→ [identity/onboarding](skills/onboarding.md)
+→ [identity/onboarding](modules/onboarding.md)
 ```
 
-The user can ignore this and the b0t functions normally. Or follow the link, see the onboarding skill file, learn what's coming. Tutorial as opt-in heartbeats.
+The user can ignore this and the b0t functions normally. Or follow the link, see the onboarding module file, learn what's coming. Tutorial as opt-in heartbeats.
 
 ---
 
@@ -471,7 +471,7 @@ Files stay on disk, fully readable and editable. The user can keep talking to th
 - **The "wow" depends on a single scripted sequence.** First-60-seconds quality determines retention. Disproportionate care on this moment.
 - **Pixel art with painterly lighting requires a specialist.** Hire someone who knows the craft (Replaced / Kingdom Two Crowns level), not a generalist illustrator.
 - **The cassette-futurism aesthetic must be applied with discipline, including in copy.** Microcopy, error messages, settings labels — all need to sound like a 1986 product manual, not 2026 SaaS. This is dialogue work.
-- **Marketplace skills (v2) are a content-moderation problem.** Community `.md` files loaded as system instructions = prompt injection paradise. v2 needs vetting/sandboxing.
+- **Marketplace modules (v2) are a content-moderation problem.** Community `.md` files loaded as system instructions = prompt injection paradise. v2 needs vetting/sandboxing.
 
 ---
 
@@ -479,12 +479,12 @@ Files stay on disk, fully readable and editable. The user can keep talking to th
 
 ### v1 (this design lock)
 
-- Multi-b0t roster (cap 5)
+- Multi-b0t roster (cap 6)
 - Face Creator (parts + overlays + accoutrements + palettes)
 - Markdown brain (full architecture)
 - Configurable heartbeat with onboarding sequence
 - Anatomical GUI (face, body, organs, wiring, heart)
-- v1 skill library (10 skills, all hand-curated)
+- v1 module library (10 modules, all hand-curated)
 - TTS with audio filter system (8 filters)
 - Notifications with mood-variant face icons
 - Local files in Documents directory; optional iCloud Drive sync
@@ -493,13 +493,13 @@ Files stay on disk, fully readable and editable. The user can keep talking to th
 
 ### v2
 
-- Online skill repo / marketplace (with vetting)
+- Online module repo / marketplace (with vetting)
 - macOS companion app (the same b0t accessible from Mac)
 - Apple Watch glance (b0t face + heart on wrist)
 - Live Activities and Dynamic Island integration
 - Personal Voice integration for the b0t having the user's voice
 - More sophisticated Face Creator (procedural overlays, animation customisation)
-- Skill creation tools (visual editors for custom skills without writing markdown)
+- Module creation tools (visual editors for custom modules without writing markdown)
 
 ### Beyond v2
 

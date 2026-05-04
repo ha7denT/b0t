@@ -16,25 +16,25 @@ final class BotLinkTests: XCTestCase {
 
     func test_parseLinks_findsAllInlineLinks() {
         let prose =
-            "see [calendar](skills/calendar.md) and [reminders](skills/reminders.md)"
+            "see [calendar](modules/calendar.md) and [reminders](modules/reminders.md)"
             + " and [docs](https://example.com)"
         let links = BotLink.parse(prose: prose, sourceFileURL: URL(fileURLWithPath: "/tmp/a.md"))
         XCTAssertEqual(links.count, 3)
         XCTAssertEqual(links[0].label, "calendar")
-        XCTAssertEqual(links[0].rawTarget, "skills/calendar.md")
+        XCTAssertEqual(links[0].rawTarget, "modules/calendar.md")
     }
 
     func test_resolve_relativePathToExistingFile() throws {
         let source = tmp.appendingPathComponent("identity/core.md")
-        let target = tmp.appendingPathComponent("skills/calendar.md")
+        let target = tmp.appendingPathComponent("modules/calendar.md")
         try FileManager.default.createDirectory(
             at: tmp.appendingPathComponent("identity"), withIntermediateDirectories: true)
         try FileManager.default.createDirectory(
-            at: tmp.appendingPathComponent("skills"), withIntermediateDirectories: true)
+            at: tmp.appendingPathComponent("modules"), withIntermediateDirectories: true)
         try "".write(to: source, atomically: true, encoding: .utf8)
         try "".write(to: target, atomically: true, encoding: .utf8)
 
-        let link = BotLink(label: "calendar", rawTarget: "../skills/calendar.md", sourceFileURL: source)
+        let link = BotLink(label: "calendar", rawTarget: "../modules/calendar.md", sourceFileURL: source)
         switch link.resolution {
         case .botFile(let url):
             XCTAssertEqual(url.standardizedFileURL, target.standardizedFileURL)
@@ -45,7 +45,7 @@ final class BotLinkTests: XCTestCase {
 
     func test_resolve_relativePathToMissingFile() {
         let source = tmp.appendingPathComponent("identity/core.md")
-        let link = BotLink(label: "x", rawTarget: "../skills/missing.md", sourceFileURL: source)
+        let link = BotLink(label: "x", rawTarget: "../modules/missing.md", sourceFileURL: source)
         if case .botFileMissing = link.resolution {
             // ok
         } else {

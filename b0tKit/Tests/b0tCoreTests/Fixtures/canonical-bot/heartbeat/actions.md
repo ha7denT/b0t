@@ -15,14 +15,14 @@ this is what I do each time I wake up. you can edit this freely. the order matte
 
 ## morning beat (first beat after 06:30)
 
-- read [skills/calendar](../skills/calendar.md) and look at today.
+- read [modules/calendar](../modules/calendar.md) and look at today.
 - note any tight transitions, conflicts, or unusual blocks.
 - if you open the app this morning, I'll have something useful to say. otherwise I stay quiet.
 
 ## hourly during waking hours
 
-- if [skills/mail](../skills/mail.md) is enabled and there's been a meaningful arrival, look at it.
-- if [skills/location](../skills/location.md) suggests you've changed context (arrived home, left work), update internal state quietly.
+- if [modules/mail](../modules/mail.md) is enabled and there's been a meaningful arrival, look at it.
+- if [modules/location](../modules/location.md) suggests you've changed context (arrived home, left work), update internal state quietly.
 - if there's something genuinely urgent — a deadline today you haven't acknowledged, a meeting in 15 minutes you haven't seen — surface it as a notification. otherwise wait.
 
 ## evening beat (first beat after 18:00)
@@ -50,6 +50,6 @@ this is what I do each time I wake up. you can edit this freely. the order matte
 
 ## adjusting me
 
-- want me quieter? raise the threshold for "urgent" — edit individual skill files like [skills/mail](../skills/mail.md) to widen what I ignore.
+- want me quieter? raise the threshold for "urgent" — edit individual module files like [modules/mail](../modules/mail.md) to widen what I ignore.
 - want me more proactive? lower thresholds, raise the notification budget here.
 - want me to do something specific each beat? add it to the lists above. I read this file every time I wake up.

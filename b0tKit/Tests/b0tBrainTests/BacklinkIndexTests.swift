@@ -17,12 +17,12 @@ final class BacklinkIndexTests: XCTestCase {
 
     func test_backlinks_findsFilesLinkingToTarget() async throws {
         let identityDir = tmp.appendingPathComponent("identity")
-        let skillsDir = tmp.appendingPathComponent("skills")
+        let modulesDir = tmp.appendingPathComponent("modules")
         try FileManager.default.createDirectory(at: identityDir, withIntermediateDirectories: true)
-        try FileManager.default.createDirectory(at: skillsDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: modulesDir, withIntermediateDirectories: true)
 
-        let target = skillsDir.appendingPathComponent("calendar.md")
-        try "---\nskill_id: calendar\n---\n# calendar\n".write(
+        let target = modulesDir.appendingPathComponent("calendar.md")
+        try "---\nmodule_id: calendar\n---\n# calendar\n".write(
             to: target, atomically: true, encoding: .utf8
         )
 
@@ -31,7 +31,7 @@ final class BacklinkIndexTests: XCTestCase {
         ---
         name: b0t-01
         ---
-        I use [calendar](../skills/calendar.md) for events.
+        I use [calendar](../modules/calendar.md) for events.
         """.write(to: coreURL, atomically: true, encoding: .utf8)
 
         let store = BotStore()

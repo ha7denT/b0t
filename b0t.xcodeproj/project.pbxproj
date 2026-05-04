@@ -11,7 +11,7 @@
 		1C47AFBE1FC5D310794439C9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E91319360B3AF9F60F37C9 /* ContentView.swift */; };
 		35017C62846B82978924F904 /* b0tFace in Frameworks */ = {isa = PBXBuildFile; productRef = 196A7880D576DA8B5936303B /* b0tFace */; };
 		3992D737C0B07C64F546F96F /* DebugBrainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A06500FFF84C51E4C2E4EB /* DebugBrainView.swift */; };
-		83579266A13A3AABBE751315 /* b0tSkills in Frameworks */ = {isa = PBXBuildFile; productRef = 0943B725594C26ACEE1FCD33 /* b0tSkills */; };
+		83579266A13A3AABBE751315 /* b0tModules in Frameworks */ = {isa = PBXBuildFile; productRef = 9191437918C3CD1EA6952709 /* b0tModules */; };
 		9E7FE541C355795463F2E047 /* default-bot in Resources */ = {isa = PBXBuildFile; fileRef = 933F2AE957C01B79FA72B32D /* default-bot */; };
 		A315E155CFA78CFB01DE92DF /* b0tAudio in Frameworks */ = {isa = PBXBuildFile; productRef = B94783E8348975DD05ED09EE /* b0tAudio */; };
 		A78B13C574B7EA676D887AB1 /* b0tApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419303501712CAB6314A7455 /* b0tApp.swift */; };
@@ -37,7 +37,7 @@
 			files = (
 				1657F0033948CC6E58164B2F /* b0tCore in Frameworks */,
 				B89D3BA46042B0830DC9742E /* b0tBrain in Frameworks */,
-				83579266A13A3AABBE751315 /* b0tSkills in Frameworks */,
+				83579266A13A3AABBE751315 /* b0tModules in Frameworks */,
 				35017C62846B82978924F904 /* b0tFace in Frameworks */,
 				A315E155CFA78CFB01DE92DF /* b0tAudio in Frameworks */,
 				F5A7F332C369477D81669E3A /* b0tDesign in Frameworks */,
@@ -129,7 +129,7 @@
 			packageProductDependencies = (
 				DCAB6B34E6DCAB50BB736458 /* b0tCore */,
 				B6FE8E3C008A965D697C367F /* b0tBrain */,
-				0943B725594C26ACEE1FCD33 /* b0tSkills */,
+				9191437918C3CD1EA6952709 /* b0tModules */,
 				196A7880D576DA8B5936303B /* b0tFace */,
 				B94783E8348975DD05ED09EE /* b0tAudio */,
 				EAC9282E0B9790D0812E07EB /* b0tDesign */,
@@ -403,13 +403,13 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0943B725594C26ACEE1FCD33 /* b0tSkills */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = b0tSkills;
-		};
 		196A7880D576DA8B5936303B /* b0tFace */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = b0tFace;
+		};
+		9191437918C3CD1EA6952709 /* b0tModules */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = b0tModules;
 		};
 		B6FE8E3C008A965D697C367F /* b0tBrain */ = {
 			isa = XCSwiftPackageProductDependency;

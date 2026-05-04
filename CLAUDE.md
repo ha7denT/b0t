@@ -6,7 +6,7 @@ The user's b0t lives as a directory of plain markdown files in their Documents f
 
 ## Philosophy in one paragraph
 
-Most AI companions are services — you rent a personality, you rent a memory. b0t inverts that. Your b0t is yours. Its identity, memory, and skills are markdown files you can open, edit, share, and version. The model is small, local, and free. The aesthetic is cassette-futurism — a personal device issued by a fictional small electronics firm circa 1986. The experience is honest about what the system is: a 3B-parameter local model running a heartbeat loop over markdown files. No claims of sentience, no smoke and mirrors.
+Most AI companions are services — you rent a personality, you rent a memory. b0t inverts that. Your b0t is yours. Its identity, memory, and modules are markdown files you can open, edit, share, and version. The model is small, local, and free. The aesthetic is cassette-futurism — a personal device issued by a fictional small electronics firm circa 1986. The experience is honest about what the system is: a 3B-parameter local model running a heartbeat loop over markdown files. No claims of sentience, no smoke and mirrors.
 
 ## Read first
 
@@ -39,7 +39,7 @@ b0t/
 ├── default-bot/               # the b0t that ships with the app (markdown only)
 │   ├── identity/
 │   ├── memory/
-│   ├── skills/
+│   ├── modules/
 │   ├── heartbeat/
 │   └── face/
 ├── assets/                    # raw design assets (pre-build)

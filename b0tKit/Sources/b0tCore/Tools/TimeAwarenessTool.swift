@@ -5,7 +5,7 @@ import FoundationModels
 ///
 /// Returns an ISO-8601 timestamp (UTC) and a coarse morning/afternoon/evening/
 /// night bucket. Trivially deterministic given a fixed clock, exercising the
-/// @Generable + Tool wiring before Phase 3 lands real skill bridges.
+/// @Generable + Tool wiring before Phase 3 lands real module bridges.
 ///
 /// Note: `Tool` in the iOS 26 SDK declares `name` and `description` as instance
 /// properties (`var name: String { get }`), not static. The spec's `static let`

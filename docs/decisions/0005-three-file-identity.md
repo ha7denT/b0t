@@ -11,7 +11,7 @@ A b0t's identity originally lived in a single `identity/core.md` containing voic
 Two pressures pulled in opposite directions:
 
 - **Voice consistency** is best preserved by rich prose modelled in the system prompt — the model pattern-matches the *style* of its instructions, not just the *content*. Compressing the prose flattens the b0t's voice.
-- **Token economics** demand minimal always-loaded context to leave room for skills, recent journal, and conversation.
+- **Token economics** demand minimal always-loaded context to leave room for modules, recent journal, and conversation.
 
 ## Decision
 
@@ -30,7 +30,7 @@ Identity is split across three files with distinct loading behaviour:
 
 ## Consequences
 
-- Always-loaded identity drops from ~800 tokens to ~450, freeing ~350 tokens per heartbeat for skills and recent context.
+- Always-loaded identity drops from ~800 tokens to ~450, freeing ~350 tokens per heartbeat for modules and recent context.
 - The `ContextAssembler` must distinguish always-loaded from on-demand files and only fetch on-demand content when the relevant trigger fires (meta question, recall-by-topic, etc.).
 - A new tool handle, `recall_about_b0t`, is exposed to the model so it can pull `about_b0t.md` into context when needed.
 - Frontmatter on each file declares its loading behaviour explicitly (`always_in_context: true|false`).

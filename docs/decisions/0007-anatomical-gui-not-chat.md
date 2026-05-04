@@ -15,7 +15,7 @@ b0t inverts this. The home screen is the b0t themselves — face, body, organs, 
 The home screen is the anatomical GUI, not a chat interface:
 
 - **Top half:** the b0t's face, breathing, blinking. Always alive.
-- **Around the face:** organs representing skills, memory, hardware access. Above the eye-line: perception (memory, sensors, identity). Below the ear-line: action (skills, tools, output).
+- **Around the face:** organs representing modules, memory, hardware access. Above the eye-line: perception (memory, sensors, identity). Below the ear-line: action (modules, tools, output).
 - **Centre below face:** the heart, beating at the configured BPM.
 - **Bottom half:** the chat surface — the b0t's chat replies and the user's input.
 
@@ -24,10 +24,10 @@ Chat is *part of* the home screen, not the whole screen. It coexists with the fa
 ## Rationale
 
 - **The character is the product.** A chat interface promises a service relationship — message in, response out. The anatomical GUI promises a *being* the user is with.
-- **Capability legibility.** Every organ is visible. Wiring lights up when skills are used. The user always knows what their b0t can do and what it's currently doing. Black-box AI is the opposite of what b0t is.
+- **Capability legibility.** Every organ is visible. Wiring lights up when modules are used. The user always knows what their b0t can do and what it's currently doing. Black-box AI is the opposite of what b0t is.
 - **Editability is one tap away.** Tapping an organ opens its file. Tapping again opens the editor. The user-owns-their-b0t thesis is made concrete by the screen layout.
 - **Idle state is interesting.** Most of the time, b0t isn't doing anything urgent. A chat-first app is empty when there's no message. The anatomical GUI is alive at rest — breathing, beating, glancing.
-- **The metaphor unifies mechanism and design.** The heartbeat is *literally* the central UI element. Switching b0ts is *literally* a gallery of faces. Skills are *literally* organs. Each design choice reinforces the next.
+- **The metaphor unifies mechanism and design.** The heartbeat is *literally* the central UI element. Switching b0ts is *literally* a gallery of faces. Modules are *literally* organs. Each design choice reinforces the next.
 
 ## Consequences
 

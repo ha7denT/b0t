@@ -1,5 +1,5 @@
 ---
-skill_id: notes
+module_id: notes
 enabled: false
 implementation: "shortcuts_fallback"
 permission: shortcuts
@@ -9,7 +9,7 @@ permission: shortcuts
 
 I can read your Apple Notes — kind of. iOS doesn't expose direct Notes access to apps in iOS 26, so I work through a Shortcuts integration: you set up a Shortcut that hands selected notes to me, and I can use them as context.
 
-if you don't set up the Shortcut, this skill is dormant.
+if you don't set up the Shortcut, this module is dormant.
 
 ## what I do with it
 
@@ -19,7 +19,7 @@ if you don't set up the Shortcut, this skill is dormant.
 
 ## what counts as urgent
 
-nothing. this skill is reactive only.
+nothing. this module is reactive only.
 
 ## what I ignore
 
@@ -37,7 +37,7 @@ iOS doesn't grant apps direct Notes access. I could ask you for screenshots and 
 
 ## v2
 
-if iOS adds first-party Notes access in a future version, this skill will be revisited. for now, Shortcuts is the way.
+if iOS adds first-party Notes access in a future version, this module will be revisited. for now, Shortcuts is the way.
 
 ## permission
 

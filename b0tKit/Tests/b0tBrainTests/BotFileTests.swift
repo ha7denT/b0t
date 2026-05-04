@@ -284,7 +284,7 @@ final class BotFileTests: XCTestCase {
     // MARK: - Fixture-driven soft-fail tests
 
     func test_fixture_brokenYAML_softFails() async throws {
-        let url = try fixtureURL("broken-frontmatter-bot/skills/broken-yaml.md")
+        let url = try fixtureURL("broken-frontmatter-bot/modules/broken-yaml.md")
         let text = try String(contentsOf: url, encoding: .utf8)
         let file = try BotFile(fileURL: url, text: text)
         guard case .frontmatterInvalidYAML = file.parseError else {
@@ -297,7 +297,7 @@ final class BotFileTests: XCTestCase {
     }
 
     func test_fixture_unterminatedFrontmatter_softFails() async throws {
-        let url = try fixtureURL("broken-frontmatter-bot/skills/unterminated.md")
+        let url = try fixtureURL("broken-frontmatter-bot/modules/unterminated.md")
         let text = try String(contentsOf: url, encoding: .utf8)
         let file = try BotFile(fileURL: url, text: text)
         XCTAssertEqual(file.parseError, .frontmatterUnterminated(url))
@@ -305,7 +305,7 @@ final class BotFileTests: XCTestCase {
     }
 
     func test_fixture_canonicalBotCalendarLink_resolves() async throws {
-        let calendarURL = try fixtureURL("canonical-bot/skills/calendar.md")
+        let calendarURL = try fixtureURL("canonical-bot/modules/calendar.md")
         let text = try String(contentsOf: calendarURL, encoding: .utf8)
         let file = try BotFile(fileURL: calendarURL, text: text)
         let links = BotLink.parse(prose: file.prose, sourceFileURL: calendarURL)

@@ -150,7 +150,7 @@ final class JournalWriterTests: XCTestCase {
             observed: "schedule wake; been 2h since last beat",
             considered: ["quiet_check", "glance_calendar", "pass"],
             decided: "glance_calendar",
-            why: "afternoon, calendar skill enabled, deadline today",
+            why: "afternoon, calendar module enabled, deadline today",
             acted: "noted upcoming meeting silently",
             mood: .attentive,
             organUsed: "calendar"
@@ -174,7 +174,7 @@ final class JournalWriterTests: XCTestCase {
             **observed:** schedule wake; been 2h since last beat
             **considered:** quiet_check, glance_calendar, pass
             **decided:** glance_calendar
-            **why:** afternoon, calendar skill enabled, deadline today
+            **why:** afternoon, calendar module enabled, deadline today
             **acted:** noted upcoming meeting silently
             **mood:** attentive
             **organ_used:** calendar

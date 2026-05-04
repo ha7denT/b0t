@@ -47,7 +47,7 @@ These decisions are locked. Do not re-open without explicit developer approval.
 | 5 | **Heartbeat uses BGAppRefreshTask + event triggers.** | iOS background reality. No silent fallback to fake heartbeats. |
 | 6 | **One-time purchase via non-consumable IAP, with 7-day trial tracked locally.** | No subscription. |
 | 7 | **All UI copy follows the cassette-futurism voice guide** (see design document §11). | Aesthetic discipline. |
-| 8 | **Multi-b0t enforces single-active-heartbeat.** | iOS background budget reality + user attention model. |
+| 8 | **Multi-b0t enforces single-active-heartbeat. Soft-cap at 6 b0ts.** | iOS background budget reality + user attention model. |
 | 9 | **No raw-RGB colour pickers.** All b0t colour customisation goes through curated palettes. | Aesthetic discipline. |
 | 10 | **No emoji or whimsy accoutrements in Face Creator.** Issued-equipment aesthetic only. | Aesthetic discipline. |
 
@@ -67,7 +67,7 @@ b0t/
 │   └── Sources/
 │       ├── b0tCore/                     # Foundation Models loop, heartbeat, agent state
 │       ├── b0tBrain/                    # Markdown file system, parsing, frontmatter, linking
-│       ├── b0tSkills/                   # Skill registry, EventKit/Mail/HealthKit/Location bridges
+│       ├── b0tModules/                  # Module registry, EventKit/Mail/HealthKit/Location bridges
 │       ├── b0tFace/                     # Face rig, animation, rendering
 │       ├── b0tAudio/                    # AVAudioEngine pipeline, TTS effects
 │       └── b0tDesign/                   # Tokens, palettes, fonts, shared views
@@ -84,7 +84,7 @@ b0t/
 ├── default-bot/                          # source-of-truth for the shipped b0t (markdown)
 │   ├── identity/
 │   ├── memory/
-│   ├── skills/
+│   ├── modules/
 │   ├── heartbeat/
 │   └── face/
 ├── assets/                               # face parts, palettes, fonts, icons, sounds
@@ -96,11 +96,11 @@ b0t/
 └── Tests/
     ├── b0tCoreTests/
     ├── b0tBrainTests/
-    ├── b0tSkillsTests/
+    ├── b0tModulesTests/
     └── b0tAudioTests/
 ```
 
-**Resource bundling.** `default-bot/` and `assets/` live at the repo root, not under a `Resources/` group. The iOS app target adds them as **folder references** in the Xcode project (`b0tApp` → "Add Files to b0tApp" → check "Create folder references"). Folder references mirror the on-disk structure in the bundle, so files added to `default-bot/skills/` on disk are automatically included in the next build. No symlinks, no copy-build-phase scripts.
+**Resource bundling.** `default-bot/` and `assets/` live at the repo root, not under a `Resources/` group. The iOS app target adds them as **folder references** in the Xcode project (`b0tApp` → "Add Files to b0tApp" → check "Create folder references"). Folder references mirror the on-disk structure in the bundle, so files added to `default-bot/modules/` on disk are automatically included in the next build. No symlinks, no copy-build-phase scripts.
 
 **Why:** the shared kit makes a future macOS/watchOS port low-cost. The brain layer is independent of the GUI — the markdown system can be unit-tested without launching SwiftUI.
 
@@ -113,7 +113,7 @@ User ←→ Home View ←→ ConversationManager ←→ b0tCore.LanguageModelSes
                     b0tBrain (reads/writes .md files)
                           │
                           ↓
-                    b0tSkills (calls EventKit, Mail, HealthKit, etc.)
+                    b0tModules (calls EventKit, Mail, HealthKit, etc.)
                           │
                           ↓
               Foundation Models @Generable typed responses
@@ -135,14 +135,14 @@ func runTick(forBot bot: Bot) async throws -> TickResult {
         bot: bot,
         identityFiles: [.core, .voice],
         memoryFiles: [.core, .recent],
-        skillFiles: bot.skills.relevantToCurrentContext(),
+        moduleFiles: bot.modules.relevantToCurrentContext(),
         recentJournal: bot.journal.lastN(5),
         tokenBudget: 3500  // leave room for response
     )
     
     let session = LanguageModelSession(
         instructions: context.systemPrompt,
-        tools: bot.skills.toolHandles
+        tools: bot.modules.toolHandles
     )
     
     let decision: TickDecision = try await session.respond(
@@ -164,7 +164,7 @@ The 4096-token Foundation Models context window is the hardest constraint. Stric
 
 - `identity/core.md` + `identity/principles.md`: ~450 tokens, always loaded
 - `memory/core.md`: ~150 tokens, always loaded
-- 1–3 relevant skill files: ~600 tokens
+- 1–3 relevant module files: ~600 tokens
 - Recent journal (last 3–5 entries): ~400 tokens
 - Working transcript: ~1500 tokens, auto-truncated
 - Response budget: ~500 tokens
@@ -206,7 +206,7 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 ### Phase 1 — markdown brain (no LLM yet)
 - Implement `b0tBrain`: file system access, markdown parsing, frontmatter parsing, inter-file linking, backlink computation.
 - Define the canonical b0t directory structure (see design doc §2.1).
-- Ship the default b0t resources (identity files, default skills, empty memory files, empty journal).
+- Ship the default b0t resources (identity files, default modules, empty memory files, empty journal).
 - Implement `BotLoader` that reads a b0t directory into memory and `BotWriter` that persists changes.
 - **Acceptance:** unit tests load the default b0t, parse all files, navigate links, write modifications. No UI needed.
 
@@ -218,10 +218,10 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - Implement journal writing in adapted-OpenClaw format.
 - **Acceptance:** a CLI test harness or minimal SwiftUI view can hold a conversation with the default b0t. Heartbeats fire and write journal entries.
 
-### Phase 3 — Skill bridges
-- Implement `b0tSkills`: typed bridges to EventKit, Mail (read-only via MailKit if available, else `MFMailComposeViewController` for compose), HealthKit, Core Location, Notes (via NotesKit if available, else surface limitation), Reminders (EventKit).
+### Phase 3 — Module bridges + Tools
+- Implement `b0tModules`: typed bridges to EventKit, Mail (read-only via MailKit if available, else `MFMailComposeViewController` for compose), HealthKit, Core Location, Notes (via NotesKit if available, else surface limitation), Reminders (EventKit).
 - Each bridge is a Swift type that exposes tool handles to the model and is permission-gated.
-- Implement skill registration: each shipped skill `.md` declares its `skill_id` in frontmatter, which maps to a registered bridge.
+- Implement module registration: each shipped module `.md` declares its `module_id` in frontmatter, which maps to a registered bridge.
 - **Acceptance:** the b0t can read calendar, surface upcoming events, create reminders, comment on step count. Permissions are requested correctly.
 
 ### Phase 4 — Anatomical GUI (default face)
@@ -231,11 +231,11 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - Implement chat composer.
 - Implement organ tap → inspection mode (lower half shows .md content).
 - Implement edit mode (full-screen markdown editor with frontmatter controls).
-- **Acceptance:** the default b0t is alive on screen, breathing, with a beating heart. The user can chat, tap organs to inspect them, edit files. Wiring lights up when skills are used.
+- **Acceptance:** the default b0t is alive on screen, breathing, with a beating heart. The user can chat, tap organs to inspect them, edit files. Wiring lights up when modules are used.
 
 ### Phase 5 — Onboarding sequence (first 60 seconds + 24-beat tutorial)
 - Implement the first-60-seconds scripted sequence (see design doc §6).
-- Implement the 24-beat onboarding sequence as a special skill.
+- Implement the 24-beat onboarding sequence as a special module.
 - Implement Face Creator entry point at the third wow moment.
 - **Acceptance:** fresh install plays through the first-60-seconds sequence smoothly. The 24-beat tutorial fires across subsequent heartbeats.
 
@@ -253,8 +253,8 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - Implement Gallery view (wallet-style selector).
 - Implement b0t switching (deliberate gesture, friction).
 - Implement dormant-b0t conversation (any b0t can be opened and chatted with; only active has heartbeat).
-- Soft-cap at 5 b0ts.
-- **Acceptance:** user can create up to 5 b0ts, switch between them, converse with dormant ones, only the active one has a heartbeat firing in the background.
+- Soft-cap at 6 b0ts.
+- **Acceptance:** user can create up to 6 b0ts, switch between them, converse with dormant ones, only the active one has a heartbeat firing in the background.
 
 ### Phase 8 — Audio (TTS + effects)
 - Implement `b0tAudio`: `AVSpeechSynthesizer` piped through `AVAudioEngine` effect chain.
@@ -307,18 +307,18 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - `RelationshipNote` — when b0t learns about a person (name, relation, notes)
 - `MoodTransition` — face mood changes (from, to, why)
 
-**REQUIRED:** `ContextAssembler` produces a typed `AssembledContext` with fields for each component (identity, memory, skills, recent journal). The system prompt is built from this struct, never concatenated ad-hoc.
+**REQUIRED:** `ContextAssembler` produces a typed `AssembledContext` with fields for each component (identity, memory, modules, recent journal). The system prompt is built from this struct, never concatenated ad-hoc.
 
 **REQUIRED:** if `Foundation Models` returns `.exceededContextWindowSize`, gracefully start a new session with the current state digest and surface the event to the user via the b0t ("oh — let me start fresh, I was getting muddled").
 
 **SHOULD:** instrument every model call with a debug-build-only metric: tokens-in, tokens-out, latency, decision type. Used for development tuning.
 
-### 5.3 b0tSkills (capability bridges)
+### 5.3 b0tModules (capability bridges)
 
-Each skill bridge is a Swift type conforming to `Skill`:
+Each module bridge is a Swift type conforming to `Module`:
 
 ```swift
-protocol Skill {
+protocol Module {
     static var id: String { get }
     var requiredPermissions: [PermissionKind] { get }
     var toolHandles: [ToolHandle] { get }
@@ -326,11 +326,11 @@ protocol Skill {
 }
 ```
 
-**REQUIRED:** skill `.md` files declare `skill_id` in frontmatter; loader matches to registered Swift type.
+**REQUIRED:** module `.md` files declare `module_id` in frontmatter; loader matches to registered Swift type.
 
-**REQUIRED:** every skill that requires a system permission (calendar, mail, health, location) requests permission through standard iOS APIs at first use. Skill is disabled in UI until permission granted. b0t can comment on missing permissions ("I don't have access to your calendar — can you let me look?").
+**REQUIRED:** every module that requires a system permission (calendar, mail, health, location) requests permission through standard iOS APIs at first use. Module is disabled in UI until permission granted. b0t can comment on missing permissions ("I don't have access to your calendar — can you let me look?").
 
-**REQUIRED:** v1 ships exactly the skills listed in design doc §4.2. No more, no fewer.
+**REQUIRED:** v1 ships exactly the modules listed in design doc §4.2. No more, no fewer.
 
 ### 5.4 b0tFace (rig + rendering)
 
@@ -380,7 +380,7 @@ protocol Skill {
 
 **REQUIRED:** the first-60-seconds sequence is hand-scripted, not generated. Implement as a deterministic state machine. The b0t's words at this stage are written by humans, not produced by the LLM. After onboarding, the LLM takes over.
 
-**REQUIRED:** the 24-beat tutorial sequence is a special skill (`skills/onboarding.md` in the default b0t). The skill emits the next tutorial heartbeat each beat until complete or dismissed.
+**REQUIRED:** the 24-beat tutorial sequence is a special module (`modules/onboarding.md` in the default b0t). The module emits the next tutorial heartbeat each beat until complete or dismissed.
 
 **REQUIRED:** onboarding can be skipped at any point. Users who skip are not nagged.
 
@@ -421,7 +421,7 @@ All app copy must follow these rules. **Run any user-facing string through this 
 
 - **App Store privacy manifest:** declares zero tracking, zero data collection, zero linked data.
 - **No analytics, no telemetry, no crash reporting that ships data off-device.** If crash logging is needed, use Apple's built-in MetricKit which keeps data on-device unless the user explicitly shares.
-- **All system permissions** (calendar, mail, health, location, notifications) are requested only when the user enables a skill that needs them, with explicit explanations.
+- **All system permissions** (calendar, mail, health, location, notifications) are requested only when the user enables a module that needs them, with explicit explanations.
 - **No ad SDK, no third-party SDKs that phone home.** Third-party Swift packages must be audited for network calls before inclusion.
 - **iCloud Drive sync is opt-in,** with the disclosure that files will sync to the user's iCloud (under their Apple ID, never to b0t servers).
 
@@ -445,7 +445,7 @@ All app copy must follow these rules. **Run any user-facing string through this 
 Do not implement these without explicit developer approval:
 
 - macOS, watchOS, visionOS apps
-- Online skill repository / marketplace
+- Online module repository / marketplace
 - Inter-b0t messaging
 - Cloud LLM fallback
 - Voice-first interaction (always-on listening)
@@ -502,9 +502,9 @@ The project ships with CLAUDE.md files at multiple levels:
 
 **Root `CLAUDE.md`:** project overview, build instructions, architecture summary, link to design doc and PRD, environment detection (Xcode-bundled Claude vs. standalone Claude Code).
 
-**Per-package CLAUDE.md** (in `b0tCore/`, `b0tBrain/`, `b0tSkills/`, etc.): describes that package's responsibilities, public API contracts, and patterns to follow.
+**Per-package CLAUDE.md** (in `b0tCore/`, `b0tBrain/`, `b0tModules/`, etc.): describes that package's responsibilities, public API contracts, and patterns to follow.
 
-**`Resources/CLAUDE.md`:** describes the structure of the default b0t resources, the skill format, and how to add new shipped skills.
+**`Resources/CLAUDE.md`:** describes the structure of the default b0t resources, the module format, and how to add new shipped modules.
 
 These CLAUDE.md files are loaded automatically by Claude Code in each working context.
 
@@ -554,7 +554,7 @@ These are explicitly open. Do not silently fill them in.
 | 6 | Type choices. | Phase 4 | **Resolved** — IoskeleyMono NL (brain, open-source), Söhne (chat). |
 | 7 | Sound design source. | Phase 8 | **Resolved** — internal |
 | 8 | Mail framework access vs `MFMailComposeViewController`. | Phase 3 | Open |
-| 9 | Notes integration approach. | Phase 3 | **Resolved** — fall back to Shortcuts integration or skip skill in v1 |
+| 9 | Notes integration approach. | Phase 3 | **Resolved** — fall back to Shortcuts integration or skip module in v1 |
 | 10 | App icon direction. | Phase 10 | **Resolved** — the heart organ from within the app |
 | 11 | Marketing video direction. | Phase 10 | Open |
 

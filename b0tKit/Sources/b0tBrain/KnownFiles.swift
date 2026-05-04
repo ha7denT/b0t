@@ -23,13 +23,13 @@ extension BotFile {
         return false
     }
 
-    /// `skill_id` (skill files). `nil` if absent.
-    public var skillID: String? {
-        if case .string(let s) = frontmatter["skill_id"] { return s }
+    /// `module_id` (module files). `nil` if absent.
+    public var moduleID: String? {
+        if case .string(let s) = frontmatter["module_id"] { return s }
         return nil
     }
 
-    /// `enabled` flag (skill files). Defaults to `true`.
+    /// `enabled` flag (module files). Defaults to `true`.
     public var enabled: Bool {
         if case .bool(let b) = frontmatter["enabled"] { return b }
         return true

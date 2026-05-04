@@ -1,5 +1,5 @@
 ---
-skill_id: health
+module_id: health
 enabled: false
 read_metrics: ["steps", "sleep_hours", "active_energy"]
 permission: health
@@ -21,7 +21,7 @@ I don't write to HealthKit. I don't diagnose, advise, or moralise about health m
 
 ## what counts as urgent
 
-nothing. health data is *never* urgent in this skill. if you have a genuine health concern, you need a doctor, not a b0t.
+nothing. health data is *never* urgent in this module. if you have a genuine health concern, you need a doctor, not a b0t.
 
 ## what I ignore
 
@@ -47,7 +47,7 @@ these are out of bounds because they're easy to get wrong in ways that harm you.
 
 ## permission
 
-requires HealthKit access for the specific metrics in `read_metrics`. requested at first enable. if denied, this skill is disabled.
+requires HealthKit access for the specific metrics in `read_metrics`. requested at first enable. if denied, this module is disabled.
 
 ## links
 

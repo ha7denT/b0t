@@ -1,5 +1,5 @@
 ---
-skill_id: mail
+module_id: mail
 enabled: true
 verbosity: medium
 ignored_senders: []
@@ -44,9 +44,9 @@ I don't send mail on your behalf. I don't archive, delete, or mark anything read
 
 ## permission
 
-requires mail access. iOS 26's mail framework permissions apply. if denied, this skill is disabled.
+requires mail access. iOS 26's mail framework permissions apply. if denied, this module is disabled.
 
 ## links
 
 - [memory/relationships](../memory/relationships.md) — I cross-reference senders against people you know.
-- [skills/calendar](calendar.md) — meeting invites land in mail too; I correlate them.
+- [modules/calendar](calendar.md) — meeting invites land in mail too; I correlate them.

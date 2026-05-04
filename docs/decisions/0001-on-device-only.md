@@ -6,7 +6,7 @@
 
 ## Context
 
-b0t needs an LLM to animate the markdown identity, memory, and skill files. The choice is between Apple's on-device Foundation Models framework (~3B params, local, free) and a cloud LLM (OpenAI, Anthropic, Google — far more capable but cloud-hosted, paid per call, network-dependent).
+b0t needs an LLM to animate the markdown identity, memory, and module files. The choice is between Apple's on-device Foundation Models framework (~3B params, local, free) and a cloud LLM (OpenAI, Anthropic, Google — far more capable but cloud-hosted, paid per call, network-dependent).
 
 A b0t that knows the user's calendar, mail, location, and conversations is most valuable precisely when those signals are also most sensitive. Trusting that data to a cloud service would undermine the core promise.
 

@@ -11,7 +11,7 @@ public struct Bot: Sendable {
 
     public var identity: IdentitySection { IdentitySection(rootURL: rootURL, store: store) }
     public var memory: MemorySection { MemorySection(rootURL: rootURL, store: store) }
-    public var skills: SkillsSection { SkillsSection(rootURL: rootURL, store: store) }
+    public var modules: ModulesSection { ModulesSection(rootURL: rootURL, store: store) }
     public var heartbeat: HeartbeatSection { HeartbeatSection(rootURL: rootURL, store: store) }
     public var face: FaceSection { FaceSection(rootURL: rootURL, store: store) }
     public var journal: JournalSection { JournalSection(rootURL: rootURL, store: store) }

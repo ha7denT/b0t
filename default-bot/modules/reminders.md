@@ -1,5 +1,5 @@
 ---
-skill_id: reminders
+module_id: reminders
 enabled: true
 default_list: "b0t"
 permission: reminders
@@ -43,4 +43,4 @@ requires Reminders access. requested at first use.
 
 ## links
 
-- [skills/calendar](calendar.md) — I'll suggest reminders for things that come up in calendar context ("want me to set a reminder to prep?").
+- [modules/calendar](calendar.md) — I'll suggest reminders for things that come up in calendar context ("want me to set a reminder to prep?").

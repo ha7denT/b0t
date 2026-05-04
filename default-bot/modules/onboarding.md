@@ -1,5 +1,5 @@
 ---
-skill_id: onboarding
+module_id: onboarding
 enabled: true
 total_beats: 24
 current_beat: 1
@@ -58,7 +58,7 @@ tap any of them. they open up.
 ```
 heartbeat 3/24
 
-when I use one of my skills, you'll see the line between 
+when I use one of my modules, you'll see the line between 
 me and that organ light up. data going in pulses toward 
 my face. data going out pulses away from it.
 
@@ -196,7 +196,7 @@ the data is yours.
 ```
 heartbeat 11/24
 
-[skills/calendar](../skills/calendar.md) is how I read 
+[modules/calendar](../modules/calendar.md) is how I read 
 your calendar. I don't write to it.
 
 if you grant me access (it'll ask), I'll start noticing 
@@ -204,7 +204,7 @@ the shape of your days. tight transitions, unusual
 blocks, things that need prep.
 ```
 
-→ [skills/calendar](../skills/calendar.md)
+→ [modules/calendar](../modules/calendar.md)
 
 ---
 
@@ -213,14 +213,14 @@ blocks, things that need prep.
 ```
 heartbeat 12/24
 
-[skills/mail](../skills/mail.md) — I scan unread mail, 
+[modules/mail](../modules/mail.md) — I scan unread mail, 
 ignore the noise, surface what matters.
 
 I don't send mail on your behalf. I don't archive or 
 delete. that's all yours.
 ```
 
-→ [skills/mail](../skills/mail.md)
+→ [modules/mail](../modules/mail.md)
 
 ---
 
@@ -229,14 +229,14 @@ delete. that's all yours.
 ```
 heartbeat 13/24
 
-[skills/reminders](../skills/reminders.md). when you 
+[modules/reminders](../modules/reminders.md). when you 
 say "remind me to X", I create a reminder. when 
 something's due, I mention it.
 
 I don't nag about overdue items more than once a day.
 ```
 
-→ [skills/reminders](../skills/reminders.md)
+→ [modules/reminders](../modules/reminders.md)
 
 ---
 
@@ -245,7 +245,7 @@ I don't nag about overdue items more than once a day.
 ```
 heartbeat 14/24
 
-[skills/health](../skills/health.md) is off by default. 
+[modules/health](../modules/health.md) is off by default. 
 health data is the most sensitive category — opt in 
 deliberately if you want it.
 
@@ -254,7 +254,7 @@ hours helps me understand a rough morning). I'll never
 diagnose, advise, or moralise.
 ```
 
-→ [skills/health](../skills/health.md)
+→ [modules/health](../modules/health.md)
 
 ---
 
@@ -263,7 +263,7 @@ diagnose, advise, or moralise.
 ```
 heartbeat 15/24
 
-[skills/location](../skills/location.md). I notice 
+[modules/location](../modules/location.md). I notice 
 arrivals and departures from named places — home, 
 work, wherever matters.
 
@@ -271,7 +271,7 @@ I never store a location history. I read the current
 state and react.
 ```
 
-→ [skills/location](../skills/location.md)
+→ [modules/location](../modules/location.md)
 
 ---
 
@@ -280,14 +280,14 @@ state and react.
 ```
 heartbeat 16/24
 
-[skills/notes](../skills/notes.md) — iOS doesn't let 
+[modules/notes](../modules/notes.md) — iOS doesn't let 
 me read Notes directly, so I work through a Shortcut. 
 you set it up, you push notes to me when relevant.
 
 opt-in, manual, nothing automatic.
 ```
 
-→ [skills/notes](../skills/notes.md)
+→ [modules/notes](../modules/notes.md)
 
 ---
 
@@ -296,17 +296,17 @@ opt-in, manual, nothing automatic.
 ```
 heartbeat 17/24
 
-three small skills:
+three small modules:
 
-- [weather](../skills/weather.md) — useful when 
+- [weather](../modules/weather.md) — useful when 
   calendar events meet the outdoors
-- [time-awareness](../skills/time-awareness.md) — 
+- [time-awareness](../modules/time-awareness.md) — 
   shapes my mood with the day
-- [journaling](../skills/journaling.md) — I keep a 
+- [journaling](../modules/journaling.md) — I keep a 
   log of every beat
 ```
 
-→ [skills/journaling](../skills/journaling.md)
+→ [modules/journaling](../modules/journaling.md)
 
 ---
 
@@ -406,7 +406,7 @@ a few small things you can do that'll make me more
 useful right away:
 
 - fill in your name in [memory/core](../memory/core.md)
-- enable [skills/calendar](../skills/calendar.md) — 
+- enable [modules/calendar](../modules/calendar.md) — 
   it's the highest-leverage one
 - skim [identity/core](../identity/core.md) and 
   decide if you want to adjust how I talk
@@ -422,7 +422,7 @@ heartbeat 24/24
 that's the tour. I'll stop firing tutorial beats now.
 
 if you want to revisit any of this, it's all in 
-`[skills/onboarding](../skills/onboarding.md)`. or 
+`[modules/onboarding](../modules/onboarding.md)`. or 
 just ask me.
 
 I'll be here.
@@ -438,4 +438,4 @@ I'll be here.
 
 ## after onboarding
 
-once `current_beat` exceeds `total_beats`, this skill goes quiet. the heartbeat continues normally with [actions](../heartbeat/actions.md).
+once `current_beat` exceeds `total_beats`, this module goes quiet. the heartbeat continues normally with [actions](../heartbeat/actions.md).

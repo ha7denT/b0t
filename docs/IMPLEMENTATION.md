@@ -4,7 +4,7 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 ## Current state
 
-- **Phase:** 3 — Skill bridges
+- **Phase:** 3 — Module bridges + Tools
 - **Status:** not started
 - **Plan:** (forthcoming — will live at `docs/plans/phase-3-*.md`)
 
@@ -15,7 +15,7 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 | 0 | Project setup | [phase-0](plans/phase-0-project-setup.md) | complete (2026-04-30) |
 | 1 | Markdown brain (no LLM) | [phase-1](plans/phase-1-markdown-brain.md) | complete (2026-05-01) |
 | 2 | Foundation Models loop | [phase-2](plans/phase-2-foundation-models-loop.md) | complete (2026-05-04) |
-| 3 | Skill bridges | — | not started |
+| 3 | Module bridges + Tools | — | not started |
 | 4 | Anatomical GUI (default face) | — | not started |
 | 5 | Onboarding sequence | — | not started |
 | 6 | Face Creator | — | not started |

@@ -1,10 +1,10 @@
 import Foundation
 
-public struct SkillsSection: Sendable {
+public struct ModulesSection: Sendable {
     public let rootURL: URL
     internal let store: BotStore
 
-    public var directoryURL: URL { rootURL.appendingPathComponent("skills", isDirectory: true) }
+    public var directoryURL: URL { rootURL.appendingPathComponent("modules", isDirectory: true) }
 
     public var all: [BotFile] {
         get async throws { try await listMarkdownFiles(at: directoryURL, store: store) }

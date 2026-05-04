@@ -1,5 +1,5 @@
 ---
-skill_id: calendar
+module_id: calendar
 enabled: true
 verbosity: medium
 lookahead_hours: 24
@@ -47,9 +47,9 @@ what doesn't count: the regular pattern of your week, recurring meetings, anythi
 
 ## permission
 
-requires calendar access. requested at first use. if denied, this skill is disabled and I'll mention I can't see your calendar when relevant ("I'd check your calendar but I don't have access — let me know in `[skills/calendar](skills/calendar.md)`").
+requires calendar access. requested at first use. if denied, this module is disabled and I'll mention I can't see your calendar when relevant ("I'd check your calendar but I don't have access — let me know in `[modules/calendar](calendar.md)`").
 
 ## links
 
 - [memory/relationships](../memory/relationships.md) — when calendar events involve people I know, I draw on this for context.
-- [skills/reminders](reminders.md) — for actions that come out of calendar context (e.g., "remind me to prep for the 2pm").
+- [modules/reminders](reminders.md) — for actions that come out of calendar context (e.g., "remind me to prep for the 2pm").

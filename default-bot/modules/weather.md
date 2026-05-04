@@ -1,5 +1,5 @@
 ---
-skill_id: weather
+module_id: weather
 enabled: true
 units: "metric"
 mention_unprompted: false
@@ -10,7 +10,7 @@ network: required
 
 I check today's weather. it's a small bit of context for the day's shape — useful when calendar events involve travel or being outside.
 
-this is one of the few skills that uses the network. WeatherKit is on-device for some queries and falls back to Apple's servers for forecasts. all weather queries are anonymised by Apple; no personal data is sent.
+this is one of the few modules that uses the network. WeatherKit is on-device for some queries and falls back to Apple's servers for forecasts. all weather queries are anonymised by Apple; no personal data is sent.
 
 ## what I do with it
 
@@ -39,9 +39,9 @@ this is one of the few skills that uses the network. WeatherKit is on-device for
 
 ## permission
 
-requires the location permission already granted to [skills/location](location.md). uses Apple's WeatherKit which is privacy-respecting.
+requires the location permission already granted to [modules/location](location.md). uses Apple's WeatherKit which is privacy-respecting.
 
 ## links
 
-- [skills/calendar](calendar.md) — outdoor events get weather-correlated.
-- [skills/location](location.md) — weather queries use your current location.
+- [modules/calendar](calendar.md) — outdoor events get weather-correlated.
+- [modules/location](location.md) — weather queries use your current location.

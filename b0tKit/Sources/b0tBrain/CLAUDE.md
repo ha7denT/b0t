@@ -26,7 +26,7 @@ The markdown layer. Reads, parses, and writes the user's b0t files.
 
 - `BotStore` (actor) — read/write/load/backlinks; owns `MtimeStampedCache`.
 - `Bot` (struct) — directory handle with sub-namespaces.
-- Sub-namespace structs: `IdentitySection`, `MemorySection`, `SkillsSection`, `HeartbeatSection`, `FaceSection`, `JournalSection`.
+- Sub-namespace structs: `IdentitySection`, `MemorySection`, `ModulesSection`, `HeartbeatSection`, `FaceSection`, `JournalSection`.
 - `BotFile` — Sendable round-trippable value with mutation primitives (`settingFrontmatter`, `removingFrontmatter`, `replacingProse`, `appendingProseSection`).
 - `Frontmatter`, `YAMLValue` — ordered projection of frontmatter contents.
 - `BotFileError` — six-case error taxonomy (read-thrown, read-annotated, write-thrown).

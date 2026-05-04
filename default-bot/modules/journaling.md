@@ -1,5 +1,5 @@
 ---
-skill_id: journaling
+module_id: journaling
 enabled: true
 end_of_day_reflection: true
 permission: none
@@ -58,4 +58,4 @@ none required. journals are local files.
 ## links
 
 - [memory/recent](../memory/recent.md) — daily summaries land here.
-- [identity/principles](../identity/principles.md) — "I keep no secrets" depends on this skill working honestly.
+- [identity/principles](../identity/principles.md) — "I keep no secrets" depends on this module working honestly.

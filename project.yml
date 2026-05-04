@@ -38,7 +38,7 @@ targets:
       - package: b0tKit
         product: b0tBrain
       - package: b0tKit
-        product: b0tSkills
+        product: b0tModules
       - package: b0tKit
         product: b0tFace
       - package: b0tKit
