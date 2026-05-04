@@ -52,5 +52,11 @@
 	<array>
 		<string>fetch</string>
 	</array>
+	<key>NSCalendarsUsageDescription</key>
+	<string>So I can read your calendar and let you know what's coming up.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>So I can create reminders when you ask, and list ones you already have.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>So I can mention your step count when it's relevant — quietly, never as advice.</string>
 </dict>
 </plist>
