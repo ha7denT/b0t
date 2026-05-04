@@ -94,7 +94,8 @@ public struct JournalWriter: Sendable {
         prompt: String,
         response: ConversationResponse,
         stateDelta: StateDelta,
-        turnNumber: Int
+        turnNumber: Int,
+        toolCalls: [ToolCallRecord] = []
     ) async throws {
         let date = clock.now()
         let timeString = Self.timeString(for: date)

@@ -19,9 +19,9 @@ final class ConversationManagerTests: XCTestCase {
         }
         let manager = ConversationManager(bot: bot, store: store, client: stub)
 
-        let response = try await manager.respond(to: "hello")
+        let turn = try await manager.respond(to: "hello")
 
-        XCTAssertEqual(response.text, "echo: hello")
+        XCTAssertEqual(turn.response.text, "echo: hello")
     }
 
     func test_respond_appliesMemoryObservations_persistsAcrossTurns() async throws {
@@ -61,8 +61,8 @@ final class ConversationManagerTests: XCTestCase {
         let manager = ConversationManager(bot: bot, store: store, client: stub)
 
         _ = try await manager.respond(to: "I have a vendor call at 4 today")
-        let second = try await manager.respond(to: "what's on my calendar?")
-        XCTAssertEqual(second.text, "remembered")
+        let secondTurn = try await manager.respond(to: "what's on my calendar?")
+        XCTAssertEqual(secondTurn.response.text, "remembered")
     }
 
     func test_respond_appendsJournalEntryPerTurn() async throws {
@@ -100,6 +100,31 @@ final class ConversationManagerTests: XCTestCase {
         XCTAssertTrue(content.contains("turn 2"), "second turn should be numbered 2")
         XCTAssertTrue(content.contains("user said: hi"))
         XCTAssertTrue(content.contains("user said: anything new?"))
+    }
+
+    func testRespondReturnsToolCallsFromStub() async throws {
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        let stub = StubLanguageModelClient { _, _ in
+            return StubLanguageModelClient.HandlerResult(
+                value: ConversationResponse(text: "ok", mood: .thinking, memoryObservations: []),
+                toolCalls: [
+                    ToolCallRecord(
+                        toolName: "time_awareness",
+                        argumentsSummary: "{}",
+                        outputSummary: "12:00 UTC, afternoon",
+                        timestamp: date
+                    )
+                ]
+            )
+        }
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+        let manager = ConversationManager(bot: bot, store: store, client: stub)
+
+        let turn: ConversationTurn = try await manager.respond(to: "what time")
+        XCTAssertEqual(turn.response.text, "ok")
+        XCTAssertEqual(turn.toolCalls.count, 1)
+        XCTAssertEqual(turn.toolCalls[0].toolName, "time_awareness")
     }
 
     // MARK: – Helpers

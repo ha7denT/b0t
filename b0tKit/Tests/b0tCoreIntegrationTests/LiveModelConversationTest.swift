@@ -13,9 +13,9 @@ final class LiveModelConversationTest: XCTestCase {
         let client = try LiveLanguageModelClient()
         let manager = ConversationManager(bot: bot, store: store, client: client)
 
-        let response = try await manager.respond(to: "say hi in one sentence")
+        let turn = try await manager.respond(to: "say hi in one sentence")
 
-        XCTAssertFalse(response.text.isEmpty, "expected a non-empty reply")
+        XCTAssertFalse(turn.response.text.isEmpty, "expected a non-empty reply")
 
         // Journal entry written.
         let formatter = DateFormatter()

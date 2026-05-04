@@ -186,8 +186,8 @@
             defer { isThinking = false }
 
             do {
-                let reply = try await manager.respond(to: prompt)
-                log.append(LogEntry(role: .bot, text: reply.text))
+                let turn = try await manager.respond(to: prompt)
+                log.append(LogEntry(role: .bot, text: turn.response.text))
                 await refreshJournalTail()
             } catch LanguageModelClientError.modelUnavailable {
                 log.append(LogEntry(role: .status, text: "model unavailable on this device."))

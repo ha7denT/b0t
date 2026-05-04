@@ -39,7 +39,7 @@ public actor ConversationManager {
         self.journalWriter = JournalWriter(bot: bot, store: store, clock: clock)
     }
 
-    public func respond(to userPrompt: String) async throws -> ConversationResponse {
+    public func respond(to userPrompt: String) async throws -> ConversationTurn {
         if !didLoadTurnNumber {
             nextTurnNumber = await loadNextTurnNumber()
             didLoadTurnNumber = true
@@ -48,36 +48,41 @@ public actor ConversationManager {
         nextTurnNumber += 1
 
         do {
-            let response = try await respondWithFallback(userPrompt: userPrompt, level: 0)
+            let (response, toolCalls) = try await respondWithFallback(userPrompt: userPrompt, level: 0)
             let delta = try await executor.apply(response)
             try await journalWriter.appendConversationTurn(
                 prompt: userPrompt,
                 response: response,
                 stateDelta: delta,
-                turnNumber: turnNumber
+                turnNumber: turnNumber,
+                toolCalls: toolCalls
             )
-            return response
+            return ConversationTurn(response: response, toolCalls: toolCalls)
         } catch {
             try? await journalWriter.appendError(error: error, kind: .turn(number: turnNumber))
             throw error
         }
     }
 
-    private func respondWithFallback(userPrompt: String, level: Int) async throws -> ConversationResponse {
+    private func respondWithFallback(
+        userPrompt: String, level: Int
+    ) async throws -> (ConversationResponse, [ToolCallRecord]) {
         let context = try await assembler.assemble(
             mode: .conversation(userPrompt: userPrompt),
             fallbackLevel: level
         )
         do {
-            let (response, _) = try await client.generate(
+            return try await client.generate(
                 context: context, generating: ConversationResponse.self)
-            return response
         } catch LanguageModelClientError.exceededContextWindowSize {
             if level >= 3 {
-                return ConversationResponse(
-                    text: "oh — let me start fresh, I was getting muddled.",
-                    mood: .thinking,
-                    memoryObservations: []
+                return (
+                    ConversationResponse(
+                        text: "oh — let me start fresh, I was getting muddled.",
+                        mood: .thinking,
+                        memoryObservations: []
+                    ),
+                    []
                 )
             }
             return try await respondWithFallback(userPrompt: userPrompt, level: level + 1)
