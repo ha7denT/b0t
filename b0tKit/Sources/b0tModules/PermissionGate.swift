@@ -1,6 +1,10 @@
 import EventKit
 import Foundation
 
+#if canImport(HealthKit) && os(iOS)
+    import HealthKit
+#endif
+
 /// Single chokepoint for system-permission requests across all Modules.
 ///
 /// Each `Module` instance constructs (or is injected) a `PermissionGate`
@@ -15,9 +19,23 @@ import Foundation
 package actor PermissionGate {
     private let eventKit: any EventKitStore
 
-    package init(eventKit: any EventKitStore = LiveEventKitStore()) {
-        self.eventKit = eventKit
-    }
+    #if canImport(HealthKit) && os(iOS)
+        private let health: any HealthStore
+    #endif
+
+    #if canImport(HealthKit) && os(iOS)
+        package init(
+            eventKit: any EventKitStore = LiveEventKitStore(),
+            health: any HealthStore = LiveHealthStore()
+        ) {
+            self.eventKit = eventKit
+            self.health = health
+        }
+    #else
+        package init(eventKit: any EventKitStore = LiveEventKitStore()) {
+            self.eventKit = eventKit
+        }
+    #endif
 
     package func ensure(_ kind: PermissionKind) async -> Bool {
         switch kind {
@@ -26,9 +44,12 @@ package actor PermissionGate {
         case .reminders:
             return await ensureEventKit(.reminder)
         #if canImport(HealthKit)
-            case .healthRead:
-                // T22 wires the health backend.
-                return false
+            case .healthRead(let identifiers):
+                #if os(iOS)
+                    return await ensureHealthRead(identifiers)
+                #else
+                    return false
+                #endif
         #endif
         }
     }
@@ -46,4 +67,22 @@ package actor PermissionGate {
             return false
         }
     }
+
+    #if canImport(HealthKit) && os(iOS)
+        private func ensureHealthRead(_ identifiers: [HKQuantityTypeIdentifier]) async -> Bool {
+            // HealthKit's read-permission state is not observable post-prompt.
+            // We cannot reliably distinguish "denied" from "never asked" via
+            // authorizationStatus(for:) for read intents — Apple deliberately
+            // hides this. So we just request, trusting the system to dedupe
+            // re-prompts. Returning true means "we tried"; the actual data
+            // query in HealthStepsTodayTool handles "no data" gracefully.
+            let types: Set<HKObjectType> = Set(identifiers.map { HKQuantityType($0) })
+            do {
+                try await health.requestAuthorization(toShare: nil, read: types)
+                return true
+            } catch {
+                return false
+            }
+        }
+    #endif
 }
