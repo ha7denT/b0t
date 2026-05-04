@@ -54,6 +54,7 @@ let package = Package(
             dependencies: ["b0tModules"],
             resources: [.copy("Fixtures")]
         ),
+        .testTarget(name: "b0tModulesLiveTests", dependencies: ["b0tModules"]),
         .testTarget(name: "b0tFaceTests", dependencies: ["b0tFace"]),
         .testTarget(name: "b0tAudioTests", dependencies: ["b0tAudio"]),
         .testTarget(name: "b0tDesignTests", dependencies: ["b0tDesign"]),
