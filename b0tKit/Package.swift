@@ -26,7 +26,7 @@ let package = Package(
                 .product(name: "Yams", package: "Yams")
             ]
         ),
-        .target(name: "b0tModules", dependencies: ["b0tBrain"]),
+        .target(name: "b0tModules", dependencies: ["b0tBrain", "b0tCore"]),
         .target(name: "b0tFace", dependencies: ["b0tDesign"]),
         .target(name: "b0tAudio"),
         .target(name: "b0tDesign"),

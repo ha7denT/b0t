@@ -1,5 +1,6 @@
 import Foundation
 import FoundationModels
+import b0tCore
 
 /// A tool the model can call to anchor its replies in current time.
 ///

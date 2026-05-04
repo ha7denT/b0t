@@ -1,6 +1,7 @@
 import FoundationModels
 import XCTest
-@testable import b0tCore
+import b0tCore
+@testable import b0tModules
 
 final class TimeAwarenessToolTests: XCTestCase {
     final class FixedClock: b0tCore.Clock, @unchecked Sendable {

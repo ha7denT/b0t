@@ -8,7 +8,7 @@ import b0tBrain
 /// `[start, 24:00) ∪ [00:00, end]` rather than a literal Swift range.
 ///
 /// Named `ClockTime` (not `TimeOfDay`) to avoid colliding with the
-/// `TimeOfDay` bucket enum in `Tools/TimeOfDay.swift`. Spec §5.7
+/// `TimeOfDay` bucket enum in `b0tModules/TimeAwareness/TimeOfDay.swift`. Spec §5.7
 /// matches this name.
 public struct ClockTime: Sendable, Equatable, Hashable, Comparable {
     public let hour: Int

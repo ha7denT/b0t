@@ -5,7 +5,7 @@ import Foundation
 /// `SystemClock` reads the wall clock. `TestClock` (test-target only) returns
 /// a fixed `Date` configured per test. Used by `ConversationManager`,
 /// `HeartbeatManager`, `JournalWriter`, `MissedBeatDetector`, and
-/// `TimeAwarenessTool` so deterministic timestamps are possible in tests.
+/// `TimeAwarenessTool` (now in `b0tModules`) so deterministic timestamps are possible in tests.
 ///
 /// Note: distinct from Swift's standard library `Clock` protocol (the one
 /// used with `ContinuousClock` / `SuspendingClock`). This is a small

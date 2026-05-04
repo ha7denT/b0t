@@ -138,7 +138,8 @@ public struct ContextAssembler: Sendable {
         return AssembledContext(
             systemInstructions: systemInstructions,
             userPrompt: prompt,
-            tools: [TimeAwarenessTool()],
+            // T26 will wire real tools via ModuleRegistry; TimeAwarenessTool migrated to b0tModules.
+            tools: [],
             budget: budget,
             loadedFiles: loadedFiles
         )
@@ -186,7 +187,8 @@ public struct ContextAssembler: Sendable {
         return AssembledContext(
             systemInstructions: systemInstructions,
             userPrompt: prompt,
-            tools: [TimeAwarenessTool()],
+            // T26 will wire real tools via ModuleRegistry; TimeAwarenessTool migrated to b0tModules.
+            tools: [],
             budget: budget,
             loadedFiles: ["identity/core.md"]
         )
@@ -254,7 +256,8 @@ public struct ContextAssembler: Sendable {
         return AssembledContext(
             systemInstructions: systemInstructions,
             userPrompt: userPrompt,
-            tools: [TimeAwarenessTool()],
+            // T26 will wire real tools via ModuleRegistry; TimeAwarenessTool migrated to b0tModules.
+            tools: [],
             budget: budget,
             loadedFiles: [
                 "identity/core.md",
@@ -334,7 +337,8 @@ public struct ContextAssembler: Sendable {
         return AssembledContext(
             systemInstructions: systemInstructions,
             userPrompt: userPrompt,
-            tools: [TimeAwarenessTool()],
+            // T26 will wire real tools via ModuleRegistry; TimeAwarenessTool migrated to b0tModules.
+            tools: [],
             budget: budget,
             loadedFiles: [
                 "identity/core.md",

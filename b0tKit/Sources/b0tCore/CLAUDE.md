@@ -13,7 +13,7 @@ The Foundation Models loop. Owns the lifecycle of `LanguageModelSession` instanc
 - `JournalWriter` — OpenClaw-format appends in four variants (turn, heartbeat, suppressed, error).
 - `HeartbeatSchedule` — frontmatter parser for `schedule.md` (BPM, quiet hours via `ClockRange`, event triggers via `EventTriggerKind`).
 - `MissedBeatDetector` — duration since last journal entry's timestamp.
-- `TimeAwarenessTool` — sole `Tool` shipped in Phase 2; Phase 3 wires real module bridges.
+- (no concrete `Tool`s ship from `b0tCore` as of Phase 3; the `TimeAwarenessTool` migrated to `b0tModules/TimeAwareness/` — see `b0tKit/Sources/b0tModules/CLAUDE.md`).
 - `HeartbeatScheduler` protocol; `LiveBGTaskScheduler` (wraps `BGTaskScheduler.shared` on iOS only) and `FakeHeartbeatScheduler` (DEBUG-only, for unit tests).
 
 ## Patterns

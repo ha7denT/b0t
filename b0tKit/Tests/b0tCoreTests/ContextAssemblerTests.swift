@@ -86,24 +86,26 @@ final class ContextAssemblerTests: XCTestCase {
         XCTAssertTrue(context.loadedFiles.contains("heartbeat/actions.md"))
     }
 
-    func test_conversation_includesTimeAwarenessTool() async throws {
+    func test_conversation_toolsEmptyUntilT26() async throws {
+        // TimeAwarenessTool migrated to b0tModules (T6). T26 wires real tools
+        // via ModuleRegistry; until then, ContextAssembler produces no tools.
         let bot = try await loadCanonicalBot()
         let assembler = ContextAssembler(bot: bot, store: BotStore())
         let context = try await assembler.assemble(mode: .conversation(userPrompt: "hi"))
 
-        XCTAssertEqual(context.tools.count, 1)
-        XCTAssertTrue(context.tools.first is TimeAwarenessTool)
+        XCTAssertTrue(context.tools.isEmpty)
     }
 
-    func test_heartbeat_includesTimeAwarenessTool() async throws {
+    func test_heartbeat_toolsEmptyUntilT26() async throws {
+        // TimeAwarenessTool migrated to b0tModules (T6). T26 wires real tools
+        // via ModuleRegistry; until then, ContextAssembler produces no tools.
         let bot = try await loadCanonicalBot()
         let assembler = ContextAssembler(bot: bot, store: BotStore())
         let context = try await assembler.assemble(
             mode: .heartbeat(trigger: .scheduled, missedGap: nil)
         )
 
-        XCTAssertEqual(context.tools.count, 1)
-        XCTAssertTrue(context.tools.first is TimeAwarenessTool)
+        XCTAssertTrue(context.tools.isEmpty)
     }
 
     func test_fallback_level1_trimsContent() async throws {
