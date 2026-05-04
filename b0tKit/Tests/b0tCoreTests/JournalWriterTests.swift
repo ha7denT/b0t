@@ -262,6 +262,60 @@ final class JournalWriterTests: XCTestCase {
         XCTAssertEqual(content, expected)
     }
 
+    func test_appendConversationTurn_rendersToolsCalledSubsection() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T12:00:00Z")!
+        let writer = JournalWriter(bot: bot, store: store, clock: FixedClock(date))
+
+        let response = ConversationResponse(text: "ok", mood: .thinking, memoryObservations: [])
+        let records = [
+            ToolCallRecord(
+                toolName: "time_awareness",
+                argumentsSummary: "(no args)",
+                outputSummary: "12:00 UTC, afternoon",
+                timestamp: date
+            )
+        ]
+        try await writer.appendConversationTurn(
+            prompt: "what time",
+            response: response,
+            stateDelta: .empty,
+            turnNumber: 1,
+            toolCalls: records
+        )
+
+        let content = try String(contentsOf: writer.journalURL(for: date), encoding: .utf8)
+        XCTAssertTrue(content.contains("tools_called"), "expected 'tools_called' in journal output")
+        XCTAssertTrue(content.contains("time_awareness"), "expected tool name in journal output")
+        XCTAssertTrue(content.contains("(no args)"), "expected args summary in journal output")
+        XCTAssertTrue(content.contains("12:00 UTC, afternoon"), "expected output summary in journal output")
+    }
+
+    func test_appendConversationTurn_omitsToolsCalledIfEmpty() async throws {
+        let bot = try await loadCanonicalBotInTempCopy()
+        let store = BotStore()
+
+        let date = ISO8601DateFormatter().date(from: "2026-05-01T09:15:00Z")!
+        let writer = JournalWriter(bot: bot, store: store, clock: FixedClock(date))
+
+        let response = ConversationResponse(text: "ok", mood: .thinking, memoryObservations: [])
+        try await writer.appendConversationTurn(
+            prompt: "hi",
+            response: response,
+            stateDelta: .empty,
+            turnNumber: 1,
+            toolCalls: []
+        )
+
+        let content = try String(contentsOf: writer.journalURL(for: date), encoding: .utf8)
+        XCTAssertFalse(
+            content.contains("tools_called"),
+            "expected 'tools_called' to be absent for empty toolCalls"
+        )
+    }
+
     private func loadCanonicalBotInTempCopy() async throws -> Bot {
         let fixture = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

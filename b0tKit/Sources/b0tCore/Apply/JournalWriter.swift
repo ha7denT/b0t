@@ -95,7 +95,7 @@ public struct JournalWriter: Sendable {
         response: ConversationResponse,
         stateDelta: StateDelta,
         turnNumber: Int,
-        toolCalls: [ToolCallRecord] = []  // T11: render under "tools_called:" sub-section
+        toolCalls: [ToolCallRecord] = []
     ) async throws {
         let date = clock.now()
         let timeString = Self.timeString(for: date)
@@ -120,6 +120,14 @@ public struct JournalWriter: Sendable {
         }
 
         lines.append("**state_delta:** \(stateDeltaText)")
+
+        if !toolCalls.isEmpty {
+            lines.append("**tools_called:**")
+            for record in toolCalls {
+                lines.append(
+                    "- \(record.toolName)(\(record.argumentsSummary)) \u{2192} \(record.outputSummary)")
+            }
+        }
 
         let entry = lines.joined(separator: "\n")
         try await appendRaw(entry, for: date)
