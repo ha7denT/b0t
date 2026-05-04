@@ -39,15 +39,13 @@ public enum ModuleRegistry {
         let files = try await bot.modules.all
         var modules: [any Module] = []
         for file in files {
-            let fm = file.frontmatter
-
             // enabled: false → silent skip
-            if case .bool(false) = fm["enabled"] {
+            if !file.enabled {
                 continue
             }
 
             // module_id missing → throw (user-fixable error)
-            guard case .string(let id) = fm["module_id"] else {
+            guard let id = file.moduleID else {
                 throw ModuleLoadError.missingModuleID(file: file.fileURL)
             }
 
@@ -62,7 +60,7 @@ public enum ModuleRegistry {
             // known id → instantiate; per-Module parameter-decode errors
             // get wrapped so the caller knows which Module rejected.
             do {
-                modules.append(try factory(fm))
+                modules.append(try factory(file.frontmatter))
             } catch {
                 throw ModuleLoadError.invalidParameters(moduleID: id, underlying: error)
             }
