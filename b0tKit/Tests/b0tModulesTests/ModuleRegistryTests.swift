@@ -15,11 +15,12 @@ final class ModuleRegistryTests: XCTestCase {
         XCTAssertEqual(modules.count, 0)
     }
 
-    func testCanonicalBotInstantiatesTimeAwarenessAndSkipsUnknownAndDisabled() async throws {
+    func testCanonicalBotInstantiatesAllKnownAndSkipsUnknownAndDisabled() async throws {
         let bot = try await loadFixture(named: "canonical-modules-bot")
         let modules = try await ModuleRegistry.loadModules(for: bot)
-        XCTAssertEqual(modules.count, 1)
-        XCTAssertEqual(type(of: modules[0]).id, "time-awareness")
+        XCTAssertEqual(modules.count, 2)
+        let ids = Set(modules.map { type(of: $0).id })
+        XCTAssertEqual(ids, ["calendar", "time-awareness"])
     }
 
     func testMissingModuleIDThrowsWithFileURL() async throws {
