@@ -2,6 +2,7 @@
     import SwiftUI
     import b0tCore
     import b0tBrain
+    import b0tModules
 
     struct DebugBrainView: View {
         let bot: Bot
@@ -133,8 +134,24 @@
                 }
             }
 
-            manager = ConversationManager(bot: bot, store: store, client: client)
-            heartbeat = HeartbeatManager(bot: bot, store: store, client: client)
+            let modules = (try? await ModuleRegistry.loadModules(for: bot)) ?? []
+            let tools = modules.flatMap(\.tools)
+            let toolsRequirePermission = modules.contains { !$0.requiredPermissions.isEmpty }
+
+            manager = ConversationManager(
+                bot: bot,
+                store: store,
+                client: client,
+                tools: tools,
+                toolsRequirePermission: toolsRequirePermission
+            )
+            heartbeat = HeartbeatManager(
+                bot: bot,
+                store: store,
+                client: client,
+                tools: tools,
+                toolsRequirePermission: toolsRequirePermission
+            )
         }
 
         private func makeStub() -> StubLanguageModelClient {

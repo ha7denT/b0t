@@ -28,13 +28,20 @@ public actor ConversationManager {
         bot: Bot,
         store: BotStore,
         client: any LanguageModelClient,
-        clock: any Clock = SystemClock()
+        clock: any Clock = SystemClock(),
+        tools: [any Tool] = [],
+        toolsRequirePermission: Bool = false
     ) {
         self.bot = bot
         self.store = store
         self.client = client
         self.clock = clock
-        self.assembler = ContextAssembler(bot: bot, store: store)
+        self.assembler = ContextAssembler(
+            bot: bot,
+            store: store,
+            tools: tools,
+            toolsRequirePermission: toolsRequirePermission
+        )
         self.executor = Executor(bot: bot, store: store)
         self.journalWriter = JournalWriter(bot: bot, store: store, clock: clock)
     }
