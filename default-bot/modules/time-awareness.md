@@ -1,5 +1,5 @@
 ---
-module_id: time_awareness
+module_id: time-awareness
 enabled: true
 permission: none
 ---
