@@ -133,6 +133,36 @@ final class ContextAssemblerTests: XCTestCase {
         XCTAssertFalse(context.userPrompt.contains("hello"))
     }
 
+    func testPermissionAddendumPresentWhenToolsRequirePermission() async throws {
+        let bot = try await loadCanonicalBot()
+        let assembler = ContextAssembler(
+            bot: bot,
+            store: BotStore(),
+            tools: [],
+            toolsRequirePermission: true
+        )
+        let context = try await assembler.assemble(mode: .conversation(userPrompt: "hi"))
+        XCTAssertTrue(
+            context.systemInstructions.contains("permissionDenied"),
+            "expected the permission addendum string mentioning permissionDenied"
+        )
+    }
+
+    func testPermissionAddendumAbsentWhenToolsDoNotRequirePermission() async throws {
+        let bot = try await loadCanonicalBot()
+        let assembler = ContextAssembler(
+            bot: bot,
+            store: BotStore(),
+            tools: [],
+            toolsRequirePermission: false
+        )
+        let context = try await assembler.assemble(mode: .conversation(userPrompt: "hi"))
+        XCTAssertFalse(
+            context.systemInstructions.contains("permissionDenied"),
+            "expected no permission addendum when no permissioned tools"
+        )
+    }
+
     private func loadCanonicalBot() async throws -> Bot {
         let fixturesURL = Bundle.module.resourceURL!
             .appendingPathComponent("Fixtures/canonical-bot")

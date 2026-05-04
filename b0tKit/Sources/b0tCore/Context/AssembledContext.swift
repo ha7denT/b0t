@@ -15,6 +15,7 @@ public struct AssembledContext: Sendable {
     public let systemInstructions: String
     public let userPrompt: String
     public let tools: [any Tool]
+    public let toolsRequirePermission: Bool
     public let budget: TokenBudget
     public let loadedFiles: [String]
 
@@ -22,12 +23,14 @@ public struct AssembledContext: Sendable {
         systemInstructions: String,
         userPrompt: String,
         tools: [any Tool],
+        toolsRequirePermission: Bool = false,
         budget: TokenBudget,
         loadedFiles: [String]
     ) {
         self.systemInstructions = systemInstructions
         self.userPrompt = userPrompt
         self.tools = tools
+        self.toolsRequirePermission = toolsRequirePermission
         self.budget = budget
         self.loadedFiles = loadedFiles
     }

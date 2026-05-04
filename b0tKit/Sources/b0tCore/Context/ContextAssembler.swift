@@ -27,15 +27,32 @@ import b0tBrain
 public struct ContextAssembler: Sendable {
     private let bot: Bot
     private let store: BotStore
+    private let tools: [any Tool]
+    private let toolsRequirePermission: Bool
 
     private static let logger = Logger(
         subsystem: "com.toppeross.b0t.b0tCore", category: "ContextAssembler"
     )
     private static let limit = 3500
+    private static let permissionHandlingInstruction = """
 
-    public init(bot: Bot, store: BotStore) {
+        Some of your tools may return a result with `permissionDenied: true`. \
+        That means you don't have system access yet. When this happens, mention \
+        it to the user in your own voice — keep it brief, suggest they can grant \
+        access in iOS Settings if they'd like, and don't pretend the tool worked. \
+        If you've been denied access, don't keep trying to call the same tool in a turn.
+        """
+
+    public init(
+        bot: Bot,
+        store: BotStore,
+        tools: [any Tool] = [],
+        toolsRequirePermission: Bool = false
+    ) {
         self.bot = bot
         self.store = store
+        self.tools = tools
+        self.toolsRequirePermission = toolsRequirePermission
     }
 
     public func assemble(mode: AssemblyMode) async throws -> AssembledContext {
@@ -135,11 +152,15 @@ public struct ContextAssembler: Sendable {
 
         Self.logger.debug("assembled fallback (level \(level)) — total: \(total)")
 
+        let finalInstructions =
+            toolsRequirePermission
+            ? systemInstructions + Self.permissionHandlingInstruction
+            : systemInstructions
         return AssembledContext(
-            systemInstructions: systemInstructions,
+            systemInstructions: finalInstructions,
             userPrompt: prompt,
-            // T26 will wire real tools via ModuleRegistry; TimeAwarenessTool migrated to b0tModules.
-            tools: [],
+            tools: self.tools,
+            toolsRequirePermission: self.toolsRequirePermission,
             budget: budget,
             loadedFiles: loadedFiles
         )
@@ -184,11 +205,15 @@ public struct ContextAssembler: Sendable {
 
         Self.logger.debug("assembled heartbeat fallback (level \(level)) — total: \(total)")
 
+        let finalInstructions =
+            toolsRequirePermission
+            ? systemInstructions + Self.permissionHandlingInstruction
+            : systemInstructions
         return AssembledContext(
-            systemInstructions: systemInstructions,
+            systemInstructions: finalInstructions,
             userPrompt: prompt,
-            // T26 will wire real tools via ModuleRegistry; TimeAwarenessTool migrated to b0tModules.
-            tools: [],
+            tools: self.tools,
+            toolsRequirePermission: self.toolsRequirePermission,
             budget: budget,
             loadedFiles: ["identity/core.md"]
         )
@@ -253,11 +278,15 @@ public struct ContextAssembler: Sendable {
             "assembled conversation prompt — total: \(total), breakdown: \(breakdown)"
         )
 
+        let finalInstructions =
+            toolsRequirePermission
+            ? systemInstructions + Self.permissionHandlingInstruction
+            : systemInstructions
         return AssembledContext(
-            systemInstructions: systemInstructions,
+            systemInstructions: finalInstructions,
             userPrompt: userPrompt,
-            // T26 will wire real tools via ModuleRegistry; TimeAwarenessTool migrated to b0tModules.
-            tools: [],
+            tools: self.tools,
+            toolsRequirePermission: self.toolsRequirePermission,
             budget: budget,
             loadedFiles: [
                 "identity/core.md",
@@ -334,11 +363,15 @@ public struct ContextAssembler: Sendable {
 
         Self.logger.debug("assembled heartbeat prompt — total: \(total), trigger: \(trigger.rawValue)")
 
+        let finalInstructions =
+            toolsRequirePermission
+            ? systemInstructions + Self.permissionHandlingInstruction
+            : systemInstructions
         return AssembledContext(
-            systemInstructions: systemInstructions,
+            systemInstructions: finalInstructions,
             userPrompt: userPrompt,
-            // T26 will wire real tools via ModuleRegistry; TimeAwarenessTool migrated to b0tModules.
-            tools: [],
+            tools: self.tools,
+            toolsRequirePermission: self.toolsRequirePermission,
             budget: budget,
             loadedFiles: [
                 "identity/core.md",
