@@ -1,77 +1,89 @@
 import FoundationModels
 import XCTest
+import b0tBrain
+
 @testable import b0tCore
 
 final class StubLanguageModelClientTests: XCTestCase {
-    func test_returnsCannedConversationResponse() async throws {
-        let stub = StubLanguageModelClient { context, outputType in
-            XCTAssertEqual(context.userPrompt, "hi")
-            XCTAssert(outputType == ConversationResponse.self)
-            return ConversationResponse(text: "echo: hi")
+    func testReturnsTypedOutputAndEmptyRecords() async throws {
+        let client = StubLanguageModelClient { context, type in
+            return ConversationResponse(
+                text: "echo: \(context.userPrompt)", mood: .thinking, memoryObservations: [])
         }
-        let context = AssembledContext(
+        let context = AssembledContext.testFixture(userPrompt: "hi")
+        let (response, records) = try await client.generate(
+            context: context, generating: ConversationResponse.self
+        )
+        XCTAssertEqual(response.text, "echo: hi")
+        XCTAssertEqual(records.count, 0)
+    }
+
+    func testHandlerCanReturnTupleWithRecords() async throws {
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        let client = StubLanguageModelClient { context, type in
+            return StubLanguageModelClient.HandlerResult(
+                value: ConversationResponse(text: "done", mood: .thinking, memoryObservations: []),
+                toolCalls: [
+                    ToolCallRecord(
+                        toolName: "time_awareness",
+                        argumentsSummary: "(no args)",
+                        outputSummary: "12:00 UTC, afternoon",
+                        timestamp: date
+                    )
+                ]
+            )
+        }
+        let context = AssembledContext.testFixture(userPrompt: "what time")
+        let (response, records) = try await client.generate(
+            context: context, generating: ConversationResponse.self
+        )
+        XCTAssertEqual(response.text, "done")
+        XCTAssertEqual(records.count, 1)
+        XCTAssertEqual(records[0].toolName, "time_awareness")
+    }
+
+    func testTypeMismatchStillReportsMalformed() async {
+        let client = StubLanguageModelClient { _, _ in
+            return "not a ConversationResponse"
+        }
+        let context = AssembledContext.testFixture(userPrompt: "x")
+        do {
+            _ = try await client.generate(context: context, generating: ConversationResponse.self)
+            XCTFail("expected throw")
+        } catch LanguageModelClientError.malformedGenerableOutput {
+            // expected
+        } catch {
+            XCTFail("got \(error)")
+        }
+    }
+
+    func testHandlerThrowingPropagates() async {
+        struct Boom: Error {}
+        let client = StubLanguageModelClient { _, _ in throw Boom() }
+        let context = AssembledContext.testFixture(userPrompt: "x")
+        do {
+            _ = try await client.generate(context: context, generating: ConversationResponse.self)
+            XCTFail("expected throw")
+        } catch is Boom {
+            // expected
+        } catch {
+            XCTFail("got unexpected error: \(error)")
+        }
+    }
+}
+
+// MARK: - Test helpers
+
+private extension AssembledContext {
+    /// Minimal fixture for tests that need an `AssembledContext` without going through
+    /// the full `ContextAssembler` pipeline. Keeps test bodies concise.
+    static func testFixture(userPrompt: String) -> AssembledContext {
+        AssembledContext(
             systemInstructions: "",
-            userPrompt: "hi",
+            userPrompt: userPrompt,
             tools: [],
             budget: TokenBudget(estimated: 0, limit: 3500, breakdown: [:], didFallBackToDigest: false),
             loadedFiles: []
         )
-        let response: ConversationResponse = try await stub.generate(
-            context: context,
-            generating: ConversationResponse.self
-        )
-        XCTAssertEqual(response.text, "echo: hi")
-    }
-
-    func test_throwsWhenHandlerReturnsWrongType() async {
-        // Stub's handler returns a String when the test asks for ConversationResponse.
-        // The stub must surface this as malformedGenerableOutput rather than crash.
-        let stub = StubLanguageModelClient { _, _ in
-            // Return a String — wrong type relative to the request below.
-            return "not a ConversationResponse" as Any
-        }
-        do {
-            let _: ConversationResponse = try await stub.generate(
-                context: AssembledContext(
-                    systemInstructions: "",
-                    userPrompt: "",
-                    tools: [],
-                    budget: TokenBudget(
-                        estimated: 0, limit: 3500, breakdown: [:], didFallBackToDigest: false
-                    ),
-                    loadedFiles: []
-                ),
-                generating: ConversationResponse.self
-            )
-            XCTFail("expected throw")
-        } catch LanguageModelClientError.malformedGenerableOutput {
-            // pass
-        } catch {
-            XCTFail("expected malformedGenerableOutput, got \(error)")
-        }
-    }
-
-    func test_throwsConfiguredError() async {
-        struct Boom: Error {}
-        let stub = StubLanguageModelClient { _, _ in throw Boom() }
-        do {
-            let _: ConversationResponse = try await stub.generate(
-                context: AssembledContext(
-                    systemInstructions: "",
-                    userPrompt: "",
-                    tools: [],
-                    budget: TokenBudget(
-                        estimated: 0, limit: 3500, breakdown: [:], didFallBackToDigest: false
-                    ),
-                    loadedFiles: []
-                ),
-                generating: ConversationResponse.self
-            )
-            XCTFail("expected throw")
-        } catch is Boom {
-            // pass — stub does not wrap; tests see the underlying error
-        } catch {
-            XCTFail("expected Boom, got \(error)")
-        }
     }
 }

@@ -82,7 +82,7 @@ public actor HeartbeatManager {
             let context = try await assembler.assemble(
                 mode: .heartbeat(trigger: trigger, missedGap: missedGap)
             )
-            let decision = try await client.generate(
+            let (decision, _) = try await client.generate(
                 context: context,
                 generating: TickDecision.self
             )

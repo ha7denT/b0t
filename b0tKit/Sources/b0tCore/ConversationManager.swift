@@ -69,7 +69,9 @@ public actor ConversationManager {
             fallbackLevel: level
         )
         do {
-            return try await client.generate(context: context, generating: ConversationResponse.self)
+            let (response, _) = try await client.generate(
+                context: context, generating: ConversationResponse.self)
+            return response
         } catch LanguageModelClientError.exceededContextWindowSize {
             if level >= 3 {
                 return ConversationResponse(

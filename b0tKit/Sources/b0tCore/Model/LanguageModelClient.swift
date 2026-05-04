@@ -1,5 +1,6 @@
 import Foundation
 import FoundationModels
+import b0tBrain
 
 /// The seam through which `b0tCore` talks to a language model.
 ///
@@ -7,11 +8,18 @@ import FoundationModels
 /// `LanguageModelSession`) and `StubLanguageModelClient` (test-target visible).
 /// Production code is identical against either; tests shape the stub's
 /// outputs per case. See `docs/specs/phase-2-foundation-models-loop.md` §5.3.
+///
+/// T9 (Phase 3): `generate` now returns `(Output, [ToolCallRecord])`. The records
+/// array captures tool invocations that occurred during the generation. Production
+/// callers drop the records with `_` until T10/T12 wire them into `ConversationTurn`
+/// and `TickResult`. `LiveLanguageModelClient` returns `[]` until the
+/// `LanguageModelSession.Transcript` API exposes iterable tool-call entries
+/// (see `LiveLanguageModelClient.extractToolCallRecords` for fallback rationale).
 public protocol LanguageModelClient: Sendable {
     func generate<Output: Generable>(
         context: AssembledContext,
         generating outputType: Output.Type
-    ) async throws -> Output
+    ) async throws -> (Output, [ToolCallRecord])
 }
 
 /// Errors surfaced by any `LanguageModelClient` implementation.
