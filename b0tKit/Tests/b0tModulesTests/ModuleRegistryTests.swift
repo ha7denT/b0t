@@ -15,14 +15,20 @@ final class ModuleRegistryTests: XCTestCase {
         XCTAssertEqual(modules.count, 0)
     }
 
-    func testMissingModuleIDThrows() async throws {
+    func testCanonicalBotInstantiatesTimeAwarenessAndSkipsUnknownAndDisabled() async throws {
         let bot = try await loadFixture(named: "canonical-modules-bot")
+        let modules = try await ModuleRegistry.loadModules(for: bot)
+        XCTAssertEqual(modules.count, 1)
+        XCTAssertEqual(type(of: modules[0]).id, "time-awareness")
+    }
+
+    func testMissingModuleIDThrowsWithFileURL() async throws {
+        let bot = try await loadFixture(named: "missing-id-bot")
         do {
             _ = try await ModuleRegistry.loadModules(for: bot)
             XCTFail("expected throw on missing module_id")
-        } catch ModuleLoadError.missingModuleID {
-            // expected — alphabetical iteration order means missing-id.md
-            // throws before unknown.md skips. We accept this coupling.
+        } catch ModuleLoadError.missingModuleID(let url) {
+            XCTAssertEqual(url.lastPathComponent, "missing-id.md")
         } catch {
             XCTFail("expected ModuleLoadError.missingModuleID, got \(error)")
         }
