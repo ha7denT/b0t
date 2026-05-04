@@ -49,7 +49,7 @@ These decisions are locked. Do not re-open without explicit developer approval.
 | 7 | **All UI copy follows the cassette-futurism voice guide** (see design document §11). | Aesthetic discipline. |
 | 8 | **Multi-b0t enforces single-active-heartbeat. Soft-cap at 6 b0ts.** | iOS background budget reality + user attention model. |
 | 9 | **No raw-RGB colour pickers.** All b0t colour customisation goes through curated palettes. | Aesthetic discipline. |
-| 10 | **No emoji or whimsy accoutrements in Face Creator.** Issued-equipment aesthetic only. | Aesthetic discipline. |
+| 10 | **No emoji or whimsy decals in Face Creator.** Issued-equipment aesthetic only. | Aesthetic discipline. |
 
 ---
 
@@ -240,7 +240,7 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - **Acceptance:** fresh install plays through the first-60-seconds sequence smoothly. The 24-beat tutorial fires across subsequent heartbeats.
 
 ### Phase 6 — Face Creator
-- Implement the parts + overlays + accoutrements composition system.
+- Implement the parts + decals composition system (three Part slots: Skull, Eyes, Jaw).
 - Implement palette system (curated, no RGB picker).
 - Implement face rig with animation states (idle, speaking, thinking, surprised, sleepy, attentive, worried, delighted).
 - Implement Randomise / shuffle.

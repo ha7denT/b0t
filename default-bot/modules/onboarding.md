@@ -353,11 +353,10 @@ changes.
 heartbeat 20/24
 
 want me to look different? open the face creator 
-(tap my face, then "edit"). parts, overlays, 
-accoutrements, palettes.
+(tap my face, then "edit"). parts, decals, palettes.
 
-restraint helps. an ID badge looks more at home than 
-sunglasses. but it's your call.
+restraint helps. the issued-equipment look ages well. 
+but it's your call.
 ```
 
 → no link — points at the in-app feature

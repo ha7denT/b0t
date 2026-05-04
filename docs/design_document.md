@@ -169,12 +169,11 @@ The home screen of b0t is the b0t themselves — a face surrounded by a body of 
 
 The Face Creator is a feature-grade sub-product. Designing the face is part of how the user bonds with their b0t.
 
-**Architecture: parts + overlays + accoutrements.**
-- **Parts** are the b0t's anatomy — face shape, eye shape, mouth shape, brow style. Each part is a rigged sprite that animates (blinks, speaks, expresses). Parts are designed as a system: every combination is coherent.
-- **Overlays** are patterns applied to parts — freckles, scanlines, pixel grain, dithering patterns. Overlays follow the part's rig.
-- **Accoutrements** are added items — antennae, scanner visors, indicator lights, ID badges, hazard stripes. **Issued-equipment aesthetic, not novelty cosplay.** No cat ears, no sunglasses, no whimsy props. Every accoutrement reinforces the "personal device issued by a small electronics firm in 1986" feel.
+**Architecture: parts + decals.**
+- **Parts** are the b0t's anatomy — Skull (face shape), Eyes, and Jaw (mouth). Each part is a rigged sprite that animates (blinks, speaks, expresses). Parts are designed as a system: every combination is coherent. Three Part slots only — Skull, Eyes, Jaw.
+- **Decals** are patterns applied to parts — freckles, scanlines, pixel grain, dithering patterns. Decals follow the part's rig.
 
-**Palette system.** The user picks a curated palette per b0t (3-5 colours). Parts and overlays use named slots — `primary`, `accent`, `shadow`, `highlight` — that map to the palette. Changing the palette recolours the entire b0t coherently. **No arbitrary RGB picker** — palettes are curated, all designed to look good in the cassette-futurism aesthetic.
+**Palette system.** The user picks a curated palette per b0t (3-5 colours). Parts and decals use named slots — `primary`, `accent`, `shadow`, `highlight` — that map to the palette. Changing the palette recolours the entire b0t coherently. **No arbitrary RGB picker** — palettes are curated, all designed to look good in the cassette-futurism aesthetic.
 
 **Animation states baked into parts.** Idle (breathing, blinking, glancing), speaking, thinking, surprised, sleepy, attentive, worried, delighted. ~8 emotional states. The Creator preview shows the face cycling through states, not a static portrait.
 
@@ -316,7 +315,7 @@ The b0t's identity is split across three files, each with a different role and l
 
 **`identity/about_b0t.md`** — the manual. *Loaded on demand only*, via tool call when the user asks meta questions about how b0t works. Written in b0t's voice as if explaining itself to the user. Contains exposition about the file structure, memory architecture, what can be edited. ~700 tokens. Heartbeats never load this file. This is the lever that keeps the always-on context budget tight while preserving rich documentation.
 
-**`identity/appearance.md`** is mostly frontmatter — face Creator parameters, palette, accoutrements — with a prose section the user can use to describe their b0t's vibe in their own words. Loaded only when the Face Creator is open.
+**`identity/appearance.md`** is mostly frontmatter — face Creator parameters, palette, decals — with a prose section the user can use to describe their b0t's vibe in their own words. Loaded only when the Face Creator is open.
 
 **`identity/audio.md`** is the TTS configuration — filter (Clean, Warm, Tape, FM, Radio, Distant, Vintage, Hi-Fi), pitch offset, rate. Frontmatter only. Loaded only when TTS is invoked.
 
@@ -352,7 +351,7 @@ This file is loaded into context only when relevant — when a name comes up, or
 
 ### 5.4 The journal
 
-`journal/YYYY-MM-DD.md` is b0t's own log. Each heartbeat appends an entry in adapted-OpenClaw format:
+`journal/YYYY-MM-DD.md` is b0t's own log. Each heartbeat **or conversation turn** appends an entry in adapted-OpenClaw format:
 
 ```markdown
 ## 14:32 — heartbeat 247
@@ -480,7 +479,7 @@ Files stay on disk, fully readable and editable. The user can keep talking to th
 ### v1 (this design lock)
 
 - Multi-b0t roster (cap 6)
-- Face Creator (parts + overlays + accoutrements + palettes)
+- Face Creator (parts + decals + palettes)
 - Markdown brain (full architecture)
 - Configurable heartbeat with onboarding sequence
 - Anatomical GUI (face, body, organs, wiring, heart)
@@ -498,7 +497,7 @@ Files stay on disk, fully readable and editable. The user can keep talking to th
 - Apple Watch glance (b0t face + heart on wrist)
 - Live Activities and Dynamic Island integration
 - Personal Voice integration for the b0t having the user's voice
-- More sophisticated Face Creator (procedural overlays, animation customisation)
+- More sophisticated Face Creator (procedural decals, animation customisation)
 - Module creation tools (visual editors for custom modules without writing markdown)
 
 ### Beyond v2

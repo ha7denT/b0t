@@ -56,7 +56,7 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 - Final shape: `b0tCore` module with ~25 public types, 145 SPM tests passing, 2 gated live-FM integration tests against the production `default-bot/`.
 - No new third-party SPM dependencies. `FoundationModels` and `BackgroundTasks` are system-provided (iOS 26 / macOS 26).
 - Privacy audit: confirmed zero new network calls. `LanguageModelSession` is on-device per Apple's design; `BGTaskScheduler` is a system service. No telemetry, no analytics. Privacy posture intact.
-- Decision (i) — conversation turns also produce OpenClaw journal entries — resolves a PRD §3.2 vs design doc §5.4 ambiguity in PRD's favour. **Follow-up doc PR pending:** update design doc §5.4 to read "Each heartbeat or conversation turn appends an entry…".
+- Decision (i) — conversation turns also produce OpenClaw journal entries — resolves a PRD §3.2 vs design doc §5.4 ambiguity in PRD's favour. Follow-up doc PR applied 2026-05-04: design doc §5.4 updated to read "Each heartbeat or conversation turn appends an entry…".
 - Phase 1 note about "first spec planned: `context-assembler.md` during Phase 2 prep" is closed — subsumed by the Phase 2 spec.
 - Mid-phase plan-vs-SDK adaptations made (and well-documented in commit bodies):
   - `@Generable(representNilExplicitlyInGeneratedContent: true)` doesn't exist in Xcode 26.2's SDK — used plain `@Generable` (handles `Optional` natively).
