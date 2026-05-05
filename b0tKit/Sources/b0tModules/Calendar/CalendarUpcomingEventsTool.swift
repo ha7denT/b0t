@@ -93,35 +93,11 @@ public struct CalendarUpcomingEventsTool: Tool, PermissionAware, Sendable {
 
     public func call(arguments: Arguments) async throws -> Output {
         guard await gate.ensure(.calendar) else {
-            print("[b0t] calendar.upcoming_events: permissionDenied=true (gate refused)")
             return Output(events: [], permissionDenied: true)
         }
         let window = max(1, arguments.windowHours ?? defaultLookaheadHours)
         let now = clock.now()
         let end = now.addingTimeInterval(TimeInterval(window) * 3600)
-        print(
-            "[b0t] calendar.upcoming_events: window=\(window)h, now=\(now), end=\(end)"
-        )
-        let calendars = store.calendars(for: .event)
-        print("[b0t] calendar.upcoming_events: \(calendars.count) calendars visible:")
-        for cal in calendars {
-            print("[b0t]   - '\(cal.title)' (type=\(cal.type.rawValue), source=\(cal.source.title))")
-        }
-        // Diagnostic: also probe a 7-day window to distinguish "no events
-        // anywhere" from "event outside our 24h window".
-        let weekEnd = now.addingTimeInterval(7 * 24 * 3600)
-        let weekPredicate = store.predicateForEvents(
-            withStart: now.addingTimeInterval(-7 * 24 * 3600),
-            end: weekEnd,
-            calendars: nil
-        )
-        let weekRaw = await store.events(matching: weekPredicate)
-        print("[b0t] calendar.upcoming_events: ±7-day probe found \(weekRaw.count) events")
-        for ek in weekRaw.prefix(10) {
-            print(
-                "[b0t]   probe: '\(ek.title ?? "(untitled)")' \(ek.startDate) → \(ek.endDate) calendar='\(ek.calendar?.title ?? "?")'"
-            )
-        }
 
         // EventKit refuses any predicate not built via its own factory:
         // `EKEventStore.eventsMatchingPredicate:` throws NSInvalidArgumentException
@@ -138,17 +114,10 @@ public struct CalendarUpcomingEventsTool: Tool, PermissionAware, Sendable {
         // filter remains because EventKit returns canceled events too.
         let predicate = store.predicateForEvents(withStart: now, end: end, calendars: nil)
         let raw = await store.events(matching: predicate)
-        print("[b0t] calendar.upcoming_events: raw count=\(raw.count)")
-        for ek in raw {
-            print(
-                "[b0t]   - \(ek.title ?? "(untitled)") start=\(ek.startDate) end=\(ek.endDate) status=\(ek.status.rawValue)"
-            )
-        }
         let filtered =
             raw
             .filter { $0.endDate >= now && $0.startDate <= end }
             .filter { $0.status != .canceled }
-        print("[b0t] calendar.upcoming_events: filtered count=\(filtered.count)")
 
         // Emit ISO-8601 in the user's local timezone with offset suffix
         // (e.g. "2026-05-05T17:00:00+10:00") rather than UTC ("...Z"). The
