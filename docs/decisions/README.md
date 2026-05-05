@@ -21,3 +21,5 @@ Standard sections: Context, Decision, Rationale, Consequences, When to revisit.
 | 0005 | [Three-file identity split](0005-three-file-identity.md) | Accepted |
 | 0006 | [Default b0t name "b0t-01"](0006-default-name-b0t-01.md) | Accepted |
 | 0007 | [Anatomical GUI as the primary interface](0007-anatomical-gui-not-chat.md) | Accepted |
+| 0008 | [Implementation amendment — 2026-05-04 vocabulary and architectural locks](0008-implementation-amendment-2026-05-04.md) | Accepted |
+| 0009 | [`Module` protocol uses `[any Tool]` directly (no `ToolHandle` wrapper)](0009-module-protocol-simplification.md) | Accepted |
