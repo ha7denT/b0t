@@ -134,8 +134,11 @@ The home screen of b0t is the b0t themselves — a face surrounded by a body of 
 **Layout (portrait):**
 - **Top half:** the b0t's face, breathing, blinking, occasionally glancing.
 - **Around the face:** organ icons arranged anatomically.
-  - Above the eye-line: things that come in — perception (calendar awareness, mail awareness, location, hardware sensors), core memory, identity files.
-  - Below the ear-line: things that go out — actions, tools, modules (reminders, notifications, mail compose, calendar writes).
+  - **Above the eye-line:** Reasoning (top crown), Memory, Identity, Modules — the b0t's perception, knowledge, and capability surfaces.
+  - **Below the eye-line:** Sensors, Tools, Network, Location — the b0t's input/output to the world.
+  - **Bottom-centre:** Heart — the b0t's heartbeat, distinguished as the most-touched control.
+
+The in/out distinction by eye-line is preserved. See [ADR-0010](decisions/0010-organs-are-anatomical-subsystems.md) for the full canonical organ list and rationale.
   - Left and right balance for visual symmetry; assignment is by category, not arbitrary.
 - **Centre, directly below face:** the heart. Beats at the configured BPM. Tappable to access heartbeat config.
 - **Bottom half:** the chat surface. Conversation appears here.
@@ -252,6 +255,8 @@ This separation matters: users can compose new behaviours from existing primitiv
 ### 4.2 v1 module library
 
 Curated set, all hand-written by the team, all expressing the cassette-futurism voice:
+
+Modules are surfaced through the **Modules organ** in the anatomical GUI (see [ADR-0010](decisions/0010-organs-are-anatomical-subsystems.md)). The Modules organ is the meta-organ that opens a directory of installed modules; tapping a module file drills into its inspection view. The 10 modules below are the v1 library — they live as `.md` files inside the Modules organ, not as their own organs.
 
 1. **Calendar** — read events, summarise the day, surface conflicts, comment on tight transitions.
 2. **Mail** — triage unread, surface what matters, ignore rules user can edit.
