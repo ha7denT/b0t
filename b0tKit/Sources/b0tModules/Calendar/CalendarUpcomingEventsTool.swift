@@ -93,12 +93,15 @@ public struct CalendarUpcomingEventsTool: Tool, PermissionAware, Sendable {
         let now = clock.now()
         let end = now.addingTimeInterval(TimeInterval(window) * 3600)
 
-        // T16's simple form: the FakeEventKitStore returns scriptedEvents
-        // wholesale; the production LiveEventKitStore would benefit from
-        // `predicateForEvents(withStart:end:calendars:)` but we don't extend
-        // the protocol in T16. Use NSPredicate(value: true) and filter
-        // in-memory by start-date range. Slice 4-or-later may revisit.
-        let predicate = NSPredicate(value: true)
+        // EventKit refuses any predicate not built via its own factory:
+        // `EKEventStore.eventsMatchingPredicate:` throws NSInvalidArgumentException
+        // on a generic NSPredicate. Use the store's typed builder. The fake
+        // returns its scriptedEvents wholesale; the live impl forwards to
+        // `EKEventStore.predicateForEvents(withStart:end:calendars:)`. The
+        // in-memory `.filter { startDate ... }` is still belt-and-braces:
+        // the predicate may include events that overlap the window from
+        // before `now`, and we want strictly upcoming.
+        let predicate = store.predicateForEvents(withStart: now, end: end, calendars: nil)
         let raw = await store.events(matching: predicate)
         let filtered =
             raw

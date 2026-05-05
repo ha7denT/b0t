@@ -21,6 +21,11 @@ public protocol EventKitStore: Sendable {
     // Calendar
     func events(matching predicate: NSPredicate) async -> [EKEvent]
     func calendars(for entityType: EKEntityType) -> [EKCalendar]
+    func predicateForEvents(
+        withStart startDate: Date,
+        end endDate: Date,
+        calendars: [EKCalendar]?
+    ) -> NSPredicate
 
     // Reminders (T18)
     func save(_ reminder: EKReminder, commit: Bool) throws
@@ -63,6 +68,14 @@ public struct LiveEventKitStore: EventKitStore {
 
     public func calendars(for entityType: EKEntityType) -> [EKCalendar] {
         store.calendars(for: entityType)
+    }
+
+    public func predicateForEvents(
+        withStart startDate: Date,
+        end endDate: Date,
+        calendars: [EKCalendar]?
+    ) -> NSPredicate {
+        store.predicateForEvents(withStart: startDate, end: endDate, calendars: calendars)
     }
 
     public func save(_ reminder: EKReminder, commit: Bool) throws {

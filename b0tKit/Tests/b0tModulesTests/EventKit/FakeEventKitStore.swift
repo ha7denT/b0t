@@ -39,6 +39,14 @@ final class FakeEventKitStore: EventKitStore, @unchecked Sendable {
         scriptedCalendars
     }
 
+    func predicateForEvents(
+        withStart startDate: Date,
+        end endDate: Date,
+        calendars: [EKCalendar]?
+    ) -> NSPredicate {
+        NSPredicate(value: true)
+    }
+
     func save(_ reminder: EKReminder, commit: Bool) throws {
         savedReminders.append(reminder)
     }
