@@ -4,9 +4,9 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 ## Current state
 
-- **Phase:** 3 — Module bridges + Tools
+- **Phase:** 4 — Anatomical GUI (default face)
 - **Status:** not started
-- **Plan:** (forthcoming — will live at `docs/plans/phase-3-*.md`)
+- **Plan:** (forthcoming — will live at `docs/plans/phase-4-*.md`)
 
 ## Phase ledger
 
@@ -15,7 +15,7 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 | 0 | Project setup | [phase-0](plans/phase-0-project-setup.md) | complete (2026-04-30) |
 | 1 | Markdown brain (no LLM) | [phase-1](plans/phase-1-markdown-brain.md) | complete (2026-05-01) |
 | 2 | Foundation Models loop | [phase-2](plans/phase-2-foundation-models-loop.md) | complete (2026-05-04) |
-| 3 | Module bridges + Tools | — | not started |
+| 3 | Module bridges + Tools | [phase-3](plans/phase-3-modules-and-tools.md) | complete (2026-05-05) |
 | 4 | Anatomical GUI (default face) | — | not started |
 | 5 | Onboarding sequence | — | not started |
 | 6 | Face Creator | — | not started |
@@ -32,7 +32,7 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 ## Specs in flight
 
-- (none currently — Phase 3 spec to be brainstormed when phase begins)
+- (none currently — Phase 4 spec to be brainstormed when phase begins)
 
 ## Notes from Phase 0
 
@@ -68,3 +68,26 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 - `Package.swift` adds `.macOS("26.0")` alongside `.iOS("26.0")` — required so SPM `swift build`/`swift test` on the macOS host can resolve `FoundationModels` (which is macOS 26+ only, not back-deployable). Phase 4 may revisit if a separate macOS target is wanted.
 - The canonical-bot test fixture grew during Phase 2 to mirror more of production `default-bot/`'s shape: `actions.md` body filled in (was stub), `schedule.md` gained `event_triggers` and `mutable` fields, `identity/core.md` `name:` key renamed to `b0t_name:` to match production.
 - Docs to refresh in a follow-up sweep (post-phase-close): doc-comment "Slice N (forthcoming)" references in several files now describe completed work in past tense; spec §5.7 still uses `TimeOfDay` for the HH:MM type which got renamed to `ClockTime`.
+
+## Notes from Phase 3
+
+- Spec at `docs/specs/phase-3-modules-and-tools.md` settled eight design questions during brainstorming on 2026-05-04 (scope shape, MCP-as-architecture-only, demo bar, Module-vs-ToolHandle, permission-denial flow, tool surface per module, lenient registry, registry seam location). Plan at `docs/plans/phase-3-modules-and-tools.md` decomposed the spec into 32 tasks across 7 walking-skeleton slices. Implemented 2026-05-04 to 2026-05-05.
+- Final shape: `b0tModules` package with 4 Modules (TimeAwareness, Calendar, Reminders, Health-iOS-only), 5 public Tools, ~196 SPM tests passing on macOS host, 4 gated live tests for iOS simulator (`LIVE_TESTS=1`). `b0tCore` ships zero concrete `Tool`s — all migrated to `b0tModules`.
+- No new third-party SPM dependencies. `EventKit`, `HealthKit`, `FoundationModels` all system-provided.
+- Privacy audit: confirmed zero new network calls in `b0tModules`. Both `EventKit` and `HealthKit` are local-only system APIs. No telemetry, no third-party SDKs that phone home. Privacy posture intact.
+- Decision: `Module` returns `[any Tool]` directly rather than the PRD §5.3 sketch's `[ToolHandle]` indirection. ADR-0009 records the rationale (FM `Tool` already encodes the MCP shape via `@Generable`; a wrapper would re-serialise without information). PRD §5.3 is now treated as historical sketch superseded by the as-built code + ADR-0009.
+- Mid-phase plan-vs-SDK adaptations made:
+  - `EKEventStore` is non-`Sendable` in Swift 6 strict concurrency — used `@preconcurrency import EventKit` and `nonisolated(unsafe)` on the stored property in `LiveEventKitStore` (Task 14). Same pattern for `HKHealthStore` in `LiveHealthStore` (Task 22).
+  - `EKEventStore.fetchReminders(matching:completion:)` is callback-based — bridged to async via `withCheckedContinuation` plus a `SendableRemindersBox: @unchecked Sendable` wrapper (Task 18) to satisfy the strict-concurrency boundary.
+  - `package init` (not `public`) on `Module`/`Tool` initialisers that accept a `PermissionGate` — Swift forbids exposing a package-scoped type in a public signature. The structs themselves remain public; outside callers get tools via the `ModuleRegistry` pipeline (Tasks 16, 17, 19, 20, 21, 23, 24).
+  - `extractToolCallRecords(from: Transcript)` initially keyed by `toolName` — caught in T9 quality review as a latent bug (same tool called twice would silently overwrite outputs). Fixed to id-based pairing using `Transcript.ToolCall.id` / `Transcript.ToolOutput.id` (commit `cae08d9`). Also switched `argumentsSummary` from `String(describing:)` to `GeneratedContent.jsonString` for compact human-readable output.
+  - `BotFile.enabled` and `BotFile.moduleID` accessors in `KnownFiles.swift` already encapsulated the frontmatter pattern-matching the registry needed — caught in T4 quality review and refactored to use them rather than duplicating logic (commit `b785e49`).
+  - `default-bot/modules/time-awareness.md` had `module_id: time_awareness` (underscore) but the registry factory key is `"time-awareness"` (hyphen) — caught by T28's production-default-bot integration test (commit `7b6bda5`). Markdown corrected to match.
+- T17 implementer chose to collapse the plan's `Health/` and `HealthKit/` subdirectories into a single `HealthKit/` directory — `HealthModule` and `HealthStepsTodayTool` live alongside `HealthStore`. Minor structural deviation, no functional impact.
+- T26 (app-layer wiring) updated `ConversationManager.init` and `HeartbeatManager.init` to accept `tools: [any Tool] = []` and `toolsRequirePermission: Bool = false` (defaulted, backward-compatible). `DebugBrainView.initializeManager` now calls `ModuleRegistry.loadModules(for: bot)` and threads the result into both managers. The `try? ... ?? []` pattern is intentional fault-tolerance — a registry-load failure shouldn't block app startup.
+- T27 added `NSCalendarsUsageDescription`, `NSRemindersFullAccessUsageDescription`, `NSHealthShareUsageDescription` to `b0tApp/Info.plist` directly (not via `project.yml` `INFOPLIST_KEY_*`). Phase 2 Task 30 had already documented xcodegen 2.44.1 dropping these keys — same pattern reused.
+- The `JournalWriter.swift:217` (now `:235`-ish) "Conditional cast from any Error to any CustomStringConvertible always succeeds" warning is pre-existing Phase 2 lint, surfaced by SourceKit when nearby files were edited. Out of Phase 3 scope; flagged for a future cleanup sweep.
+- Manual smoke checklist (real-device or simulator with Apple Intelligence enabled) deferred to Jamee — agent harness can't drive the simulator UI deterministically. Spec §10 acceptance criteria #1–#6 (in-conversation calendar/reminders/health flow) are the load-bearing live verification.
+- Docs to refresh in a follow-up sweep (post-phase-close):
+  - PRD §1.5 `b0tModules/` comment reads "EventKit/Mail/HealthKit/Location bridges" — Phase 3 ships EventKit (calendar+reminders) + HealthKit only; Mail/Location/Notes/Weather deferred to Phase 3.5 or later.
+  - PRD §5.3 sketches `Module` with `toolHandles` — superseded by ADR-0009; the PRD section can be marked historical or amended.
