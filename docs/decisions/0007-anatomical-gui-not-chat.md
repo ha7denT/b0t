@@ -3,6 +3,7 @@
 **Status:** Accepted
 **Date:** 2026-04-30
 **Deciders:** Jamee
+**Partly superseded by:** [ADR-0010](0010-organs-are-anatomical-subsystems.md) (organ semantics; the in/out ear-line distinction stands)
 
 ## Context
 
