@@ -1,6 +1,7 @@
 import SwiftUI
 import b0tBrain
 import b0tCore
+import b0tModules
 
 #if canImport(BackgroundTasks) && os(iOS)
     import BackgroundTasks
@@ -59,7 +60,26 @@ struct b0tApp: App {
             }
         }
 
-        let manager = HeartbeatManager(bot: bot, store: store, client: client)
+        let modules: [any Module]
+        do {
+            modules = try await ModuleRegistry.loadModules(for: bot)
+            print(
+                "[b0t] (heartbeat) loaded \(modules.count) modules: \(modules.map { type(of: $0).id })"
+            )
+        } catch {
+            print("[b0t] (heartbeat) ModuleRegistry.loadModules threw: \(error)")
+            modules = []
+        }
+        let tools = modules.flatMap(\.tools)
+        let toolsRequirePermission = modules.contains { !$0.requiredPermissions.isEmpty }
+
+        let manager = HeartbeatManager(
+            bot: bot,
+            store: store,
+            client: client,
+            tools: tools,
+            toolsRequirePermission: toolsRequirePermission
+        )
         heartbeat = manager
         b0tApp.shared.heartbeat = manager
 

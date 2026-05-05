@@ -134,7 +134,16 @@
                 }
             }
 
-            let modules = (try? await ModuleRegistry.loadModules(for: bot)) ?? []
+            let modules: [any Module]
+            do {
+                modules = try await ModuleRegistry.loadModules(for: bot)
+                print(
+                    "[b0t] loaded \(modules.count) modules: \(modules.map { type(of: $0).id })"
+                )
+            } catch {
+                print("[b0t] ModuleRegistry.loadModules threw: \(error)")
+                modules = []
+            }
             let tools = modules.flatMap(\.tools)
             let toolsRequirePermission = modules.contains { !$0.requiredPermissions.isEmpty }
 
