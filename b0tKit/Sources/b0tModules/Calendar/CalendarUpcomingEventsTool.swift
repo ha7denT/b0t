@@ -96,6 +96,26 @@ public struct CalendarUpcomingEventsTool: Tool, PermissionAware, Sendable {
         print(
             "[b0t] calendar.upcoming_events: window=\(window)h, now=\(now), end=\(end)"
         )
+        let calendars = store.calendars(for: .event)
+        print("[b0t] calendar.upcoming_events: \(calendars.count) calendars visible:")
+        for cal in calendars {
+            print("[b0t]   - '\(cal.title)' (type=\(cal.type.rawValue), source=\(cal.source.title))")
+        }
+        // Diagnostic: also probe a 7-day window to distinguish "no events
+        // anywhere" from "event outside our 24h window".
+        let weekEnd = now.addingTimeInterval(7 * 24 * 3600)
+        let weekPredicate = store.predicateForEvents(
+            withStart: now.addingTimeInterval(-7 * 24 * 3600),
+            end: weekEnd,
+            calendars: nil
+        )
+        let weekRaw = await store.events(matching: weekPredicate)
+        print("[b0t] calendar.upcoming_events: ±7-day probe found \(weekRaw.count) events")
+        for ek in weekRaw.prefix(10) {
+            print(
+                "[b0t]   probe: '\(ek.title ?? "(untitled)")' \(ek.startDate) → \(ek.endDate) calendar='\(ek.calendar?.title ?? "?")'"
+            )
+        }
 
         // EventKit refuses any predicate not built via its own factory:
         // `EKEventStore.eventsMatchingPredicate:` throws NSInvalidArgumentException
