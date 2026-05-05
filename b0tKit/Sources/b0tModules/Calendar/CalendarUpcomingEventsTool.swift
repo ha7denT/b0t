@@ -87,11 +87,15 @@ public struct CalendarUpcomingEventsTool: Tool, PermissionAware, Sendable {
 
     public func call(arguments: Arguments) async throws -> Output {
         guard await gate.ensure(.calendar) else {
+            print("[b0t] calendar.upcoming_events: permissionDenied=true (gate refused)")
             return Output(events: [], permissionDenied: true)
         }
         let window = max(1, arguments.windowHours ?? defaultLookaheadHours)
         let now = clock.now()
         let end = now.addingTimeInterval(TimeInterval(window) * 3600)
+        print(
+            "[b0t] calendar.upcoming_events: window=\(window)h, now=\(now), end=\(end)"
+        )
 
         // EventKit refuses any predicate not built via its own factory:
         // `EKEventStore.eventsMatchingPredicate:` throws NSInvalidArgumentException
@@ -108,10 +112,17 @@ public struct CalendarUpcomingEventsTool: Tool, PermissionAware, Sendable {
         // filter remains because EventKit returns canceled events too.
         let predicate = store.predicateForEvents(withStart: now, end: end, calendars: nil)
         let raw = await store.events(matching: predicate)
+        print("[b0t] calendar.upcoming_events: raw count=\(raw.count)")
+        for ek in raw {
+            print(
+                "[b0t]   - \(ek.title ?? "(untitled)") start=\(ek.startDate) end=\(ek.endDate) status=\(ek.status.rawValue)"
+            )
+        }
         let filtered =
             raw
             .filter { $0.endDate >= now && $0.startDate <= end }
             .filter { $0.status != .canceled }
+        print("[b0t] calendar.upcoming_events: filtered count=\(filtered.count)")
 
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
