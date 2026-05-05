@@ -2,15 +2,16 @@
 
 The Foundation Models loop. Owns the lifecycle of `LanguageModelSession` instances, the `ContextAssembler`, and the `@Generable` decision types that the model returns.
 
-## Public API contracts (as-built, Phase 2)
+## Public API contracts (as-built, Phase 3)
 
 - `ConversationManager` — actor; `respond(to:) async throws -> ConversationTurn` (Phase 3 / T10 — see `ConversationTurn.swift`; carries the typed `ConversationResponse` plus `[ToolCallRecord]` observed during the turn). Orchestrates assemble → client → executor → journal. Retries on `.exceededContextWindowSize` via graduated fallback (private overload `respondWithFallback(userPrompt:level:)`).
-- `HeartbeatManager` — actor; `tick(trigger:) async throws -> TickResult`, `scheduleNext() async throws`. DEBUG-only `startDebugTimer()` / `stopDebugTimer()`. (BGTaskScheduler `register(...)` happens in `b0tApp.@main.init()` because it must be called synchronously at app launch per Apple docs.)
-- `LanguageModelClient` protocol; `LiveLanguageModelClient` (wraps `LanguageModelSession`) and `StubLanguageModelClient` (test seam).
-- `ContextAssembler` — assembles `.conversation` and `.heartbeat` modes (public), plus an internal `assemble(mode:fallbackLevel:)` overload for graduated overflow recovery (levels 1/2/3 progressively trim content per spec §7.4). Token-budget logged in DEBUG via OSLog.
+- `HeartbeatManager` — actor; `tick(trigger:) async throws -> TickResult`, `scheduleNext() async throws`. DEBUG-only `startDebugTimer()` / `stopDebugTimer()`. (BGTaskScheduler `register(...)` happens in `b0tApp.@main.init()` because it must be called synchronously at app launch per Apple docs.) `TickResult.decided` carries `(decision: TickDecision, delta: StateDelta, toolCalls: [ToolCallRecord])` (Phase 3 / T12).
+- `LanguageModelClient` protocol; `generate(context:generating:)` returns `(Output, [ToolCallRecord])` (Phase 3 / T9). `LiveLanguageModelClient` (wraps `LanguageModelSession`) extracts records from the session's `Transcript` by pairing `.toolCalls` and `.toolOutput` entries by id. `StubLanguageModelClient` (test seam).
+- `ContextAssembler` — assembles `.conversation` and `.heartbeat` modes (public), plus an internal `assemble(mode:fallbackLevel:)` overload for graduated overflow recovery (levels 1/2/3 progressively trim content per spec §7.4). `init` accepts `tools: [any Tool]` and `toolsRequirePermission: Bool` (Phase 3 / T25); when the flag is true the system prompt gains a permission-handling addendum instructing the model how to address `permissionDenied: true` tool results. Token-budget logged in DEBUG via OSLog.
 - `@Generable` types: `ConversationResponse`, `TickDecision`, `MemoryObservation`, `RelationshipNote`, `MoodTransition` (last two ship as types but aren't exercised in Phase 2).
+- `ConversationTurn` (Phase 3 / T10) — public `Sendable` struct wrapping a `ConversationResponse` plus `[ToolCallRecord]` observed during the turn.
 - `Executor` — applies decisions to `BotStore` (memory observations to `memory/recent.md`, would-notify capture for Phase 4+ posting; respects `notification_budget_per_day` from `actions.md`).
-- `JournalWriter` — OpenClaw-format appends in four variants (turn, heartbeat, suppressed, error).
+- `JournalWriter` — OpenClaw-format appends in four variants (turn, heartbeat, suppressed, error). Both `appendConversationTurn` and `appendTick` render a `**tools_called:**` sub-section under the entry when `toolCalls` is non-empty (Phase 3 / T11–T12).
 - `HeartbeatSchedule` — frontmatter parser for `schedule.md` (BPM, quiet hours via `ClockRange`, event triggers via `EventTriggerKind`).
 - `MissedBeatDetector` — duration since last journal entry's timestamp.
 - (no concrete `Tool`s ship from `b0tCore` as of Phase 3; the `TimeAwarenessTool` migrated to `b0tModules/TimeAwareness/` — see `b0tKit/Sources/b0tModules/CLAUDE.md`).
