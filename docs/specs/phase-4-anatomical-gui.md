@@ -306,7 +306,7 @@ Land in this order, typically across two PRs (the housekeeping PR first, then th
 4. `docs/references/face-roster.md`.
 5. `b0tApp/Resources/manufacturers.json`.
 6. **PRD edits** (targeted): §3 Phase 4 acceptance updated; §3 Phase 6 absorbs rig + parts + Face Creator; §5.4 prefaced with "rig ships in Phase 6"; §12 Q4 closed (asset pipeline is Gamelabs).
-7. **Design doc edits** (targeted): §3.3 organ language updated (organs = anatomical subsystems); §4.2 reframed (modules live *inside* the Modules organ).
+7. **Design doc edits** (targeted): §2.3 organ language updated (organs = anatomical subsystems); §4.2 reframed (modules live *inside* the Modules organ).
 8. `docs/specs/phase-4-assets-checklist.md` deleted (superseded by §7 of this spec).
 9. `docs/IMPLEMENTATION.md` — Phase 4 status flips to "specced," ledger entry, Specs-in-flight updated.
 

@@ -5,7 +5,7 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 ## Current state
 
 - **Phase:** 4 — Anatomical GUI (static face)
-- **Status:** specced
+- **Status:** implementing — Slice 0 complete (`c07fbec`); Slice 1 ready (b0tDesign palettes & shaders)
 - **Spec:** [phase-4-anatomical-gui](specs/phase-4-anatomical-gui.md)
 - **Plan:** [phase-4-anatomical-gui](plans/phase-4-anatomical-gui.md)
 
