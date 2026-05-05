@@ -224,14 +224,14 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - Implement module registration: each shipped module `.md` declares its `module_id` in frontmatter, which maps to a registered bridge.
 - **Acceptance:** the b0t can read calendar, surface upcoming events, create reminders, comment on step count. Permissions are requested correctly.
 
-### Phase 4 — Anatomical GUI (default face)
-- Implement `Home/`: face area (top half), organ ring (around face), heart (centre below face), chat surface (bottom half).
-- Implement organ wiring with phosphor-glow lines, animated based on system activity.
-- Use a default rigged face (one shipped face) for now — Face Creator is later.
-- Implement chat composer.
-- Implement organ tap → inspection mode (lower half shows .md content).
+### Phase 4 — Anatomical GUI (static face)
+- Implement `Home/`: anatomy area (top half) with Hilfer composed of three baked Parts (Skull / Eye-screen / Jaw), 9-organ ring, beating heart, pulsing wiring; backlit-LCD inspection panel (bottom half) doubling as chat surface.
+- Implement chat composer (default LCD content).
+- Implement organ tap → inspection mode (LCD swaps to organ controls; frontmatter renders as native controls inline with markdown).
 - Implement edit mode (full-screen markdown editor with frontmatter controls).
-- **Acceptance:** the default b0t is alive on screen, breathing, with a beating heart. The user can chat, tap organs to inspect them, edit files. Wiring lights up when modules are used.
+- Decal layer architecturally present, no Hilfer decal assets.
+- Face rig (mood states, blink, breathing) deferred to Phase 6 per ADR-0011.
+- **Acceptance:** the default b0t is alive on screen with a static face, beating heart, pulsing wiring on tool calls. The user can chat, tap organs to inspect them, edit files. See `docs/specs/phase-4-anatomical-gui.md` §14 for the full smoke checklist.
 
 ### Phase 5 — Onboarding sequence (first 60 seconds + 24-beat tutorial)
 - Implement the first-60-seconds scripted sequence (see design doc §6).
@@ -239,14 +239,12 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - Implement Face Creator entry point at the third wow moment.
 - **Acceptance:** fresh install plays through the first-60-seconds sequence smoothly. The 24-beat tutorial fires across subsequent heartbeats.
 
-### Phase 6 — Face Creator
-- Implement the parts + decals composition system (three Part slots: Skull, Eyes, Jaw).
-- Implement palette system (curated, no RGB picker).
-- Implement face rig with animation states (idle, speaking, thinking, surprised, sleepy, attentive, worried, delighted).
-- Implement Randomise / shuffle.
-- Implement face export as the b0t's `face/` directory contents (parameter file + composed sprite cache).
-- Pre-render mood-variant icons for notifications.
-- **Acceptance:** user can compose, save, and revisit a custom face. The home screen shows the user's face. Notifications use the right mood variant.
+### Phase 6 — Face rig + Parts library + Face Creator
+- Implement face rig per `docs/specs/face-creator-procedural-animation.md` (forthcoming): mood-state machine over Part atlases, blink loop, breathing, mouth-open cycle. 8 mood states per Part: idle, speaking, thinking, surprised, sleepy, attentive, worried, delighted.
+- Implement Parts library (Skull / Eyes / Jaw variants from across the roster).
+- Implement Face Creator UX (composition, randomise, save).
+- Implement mood-variant notification icons (rendered to disk at face-creation time).
+- **Acceptance:** user can compose, save, and revisit a custom face composed of unlocked Parts. Home screen shows the user's face animating across mood states. Notifications use the right mood variant.
 
 ### Phase 7 — Multi-b0t and Gallery
 - Implement multi-b0t directory model with `_active` pointer.
@@ -333,6 +331,8 @@ protocol Module {
 **REQUIRED:** v1 ships exactly the modules listed in design doc §4.2. No more, no fewer.
 
 ### 5.4 b0tFace (rig + rendering)
+
+**Phase note:** Phase 4 ships a single static face composed of three baked Parts. The rig requirements below ship in Phase 6 per ADR-0011.
 
 **REQUIRED:** the face is rendered using **SpriteKit embedded in SwiftUI via `SpriteView`**. Each face part is an `SKSpriteNode`. Animation is driven by `SKAction` sequences (idle blink, breathing, glance, mood transitions). Sprite frames are bundled in `SKTextureAtlas` per part. Mood states are state-machine-driven on the scene level.
 
@@ -549,7 +549,7 @@ These are explicitly open. Do not silently fill them in.
 | 1 | Final pricing. Decided pre-launch. | Phase 9 | Open |
 | 2 | Default `identity/core.md` content. | Phase 1 | **Resolved** — drafted, in revision |
 | 3 | Face rigging tool. | Phase 4 | **Resolved** — SpriteKit + SwiftUI |
-| 4 | Pixel art assets. | Phase 4 | **Resolved** — provided by Jamee (kit + custom) |
+| 4 | Pixel art assets. | Phase 4–6 | **Resolved** — Gamelabs Studio asset pipeline per amendment §2.2; baked palette variants, no runtime palette swap shader. |
 | 5 | Curated palette count. | Phase 6 | **Resolved** — 12 palettes in v1 |
 | 6 | Type choices. | Phase 4 | **Resolved** — IoskeleyMono NL (brain, open-source), Söhne (chat). |
 | 7 | Sound design source. | Phase 8 | **Resolved** — internal |
