@@ -88,6 +88,34 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 - T27 added `NSCalendarsUsageDescription`, `NSRemindersFullAccessUsageDescription`, `NSHealthShareUsageDescription` to `b0tApp/Info.plist` directly (not via `project.yml` `INFOPLIST_KEY_*`). Phase 2 Task 30 had already documented xcodegen 2.44.1 dropping these keys — same pattern reused.
 - The `JournalWriter.swift:217` (now `:235`-ish) "Conditional cast from any Error to any CustomStringConvertible always succeeds" warning is pre-existing Phase 2 lint, surfaced by SourceKit when nearby files were edited. Out of Phase 3 scope; flagged for a future cleanup sweep.
 - Manual smoke checklist (real-device or simulator with Apple Intelligence enabled) deferred to Jamee — agent harness can't drive the simulator UI deterministically. Spec §10 acceptance criteria #1–#6 (in-conversation calendar/reminders/health flow) are the load-bearing live verification.
-- Docs to refresh in a follow-up sweep (post-phase-close):
-  - PRD §1.5 `b0tModules/` comment reads "EventKit/Mail/HealthKit/Location bridges" — Phase 3 ships EventKit (calendar+reminders) + HealthKit only; Mail/Location/Notes/Weather deferred to Phase 3.5 or later.
-  - PRD §5.3 sketches `Module` with `toolHandles` — superseded by ADR-0009; the PRD section can be marked historical or amended.
+
+### Manual smoke verification (2026-05-05)
+
+Jamee smoke-tested on iPhone 17 Pro simulator (iOS 26.3). End-to-end behaviour confirmed:
+
+- `[b0t] loaded 3 modules: ["calendar", "reminders", "time-awareness"]` at startup.
+- Tool-call rows render inline in `DebugBrainView` (T13): `→ calendar.upcoming_events({})` followed by `← {events: [...], permissionDenied: false}`.
+- `**tools_called:**` sub-section appears in the journal entry for turns that invoke tools (T11).
+- The `Executor` records calendar memory observations: `(high) calendar: Upcoming event 'GRONK' scheduled` → `state_delta: memory/recent.md`.
+- Permission flow works: first calendar question pops the system permission sheet; granting lets the tool query EventKit; the b0t reads real event titles and times.
+- The b0t stays in voice for off-topic prompts (PRD voice-and-copy intact).
+
+Five real bugs surfaced and were fixed during the smoke pass — each had passing unit tests at the time, hence the lessons:
+
+1. **Production heartbeat path missed `tools` wiring** (`b0tApp.initializeHeartbeat`). T26 only updated `DebugBrainView`; the BG-task-fired manager constructed `HeartbeatManager(bot:store:client:)` with no tools. Fixed in commit `98d8bf9`. Lesson: when adding a parameter to a constructor used in multiple call sites, audit every site.
+2. **`BotProvisioner` staleness**: only copies the bundled `default-bot/` into Documents on first launch (`if !fm.fileExists(target)`). Pre-Phase-3 installs in the simulator had no `modules/` directory, so `ModuleRegistry.loadModules` returned `[]` silently. Fix: wipe the simulator's app data so BotProvisioner re-copies. Underlying issue documented as a follow-up; not fixed in Phase 3.
+3. **`NSPredicate(value: true)` rejected by EventKit**: `EKEventStore.eventsMatchingPredicate:` throws `NSInvalidArgumentException` on any predicate not built via its own factory. The `FakeEventKitStore` ignored predicates entirely, masking the live constraint. Fixed by extending `EventKitStore` with `predicateForEvents(withStart:end:calendars:)` (commit `c5b6c78`). Lesson: fakes that ignore inputs hide live-API contracts.
+4. **In-memory `startDate >= now` filter excluded ongoing events** (e.g. a meeting that started before `now` but hasn't ended). EventKit's predicate uses overlap semantics; our filter contradicted it. Fixed to `endDate >= now && startDate <= end` (commit `f037b69`).
+5. **UTC ISO timestamps misled the model**: tool serialised `EKEvent.startDate` as `"2026-05-05T07:00:00Z"`. The model read the digits literally and reported "7am" for an event scheduled at 5pm AEST. Fixed by switching the formatter to `TimeZone.current` with the offset suffix preserved (`"2026-05-05T17:00:00+10:00"`) — same instant, the wall-clock numerals match what the user sees in their Calendar app (commit `2078b2b`). Lesson: ISO-8601 with a `Z` suffix is timezone-erasing for any consumer that doesn't parse the offset.
+
+### Phase 3 follow-ups (out of scope; tracked for Phase 3.5 or later)
+
+- **`reminders.create` not always invoked**: when asked "remind me at 4 about this," the model said "I will remind you at 4 pm" without calling the tool. Tools are wired correctly; the model needs a system-prompt nudge ("if asked to do X, actually call the tool — don't just say you will"). Either tighten the permission addendum or add a separate "actually invoke tools when asked" instruction in `ContextAssembler`.
+- **Calendar "today" semantic**: `calendar.upcoming_events` is forward-looking from `now`. Asking "what was on my calendar this morning?" returns nothing because morning events have already ended. Either add a separate `calendar.events_today` tool with a `[startOfDay, endOfDay]` window, or extend the existing tool with a `lookbackHours` arg.
+- **`BotProvisioner` only copies once**: subsequent updates to the bundled `default-bot/` don't propagate to existing installs. A "sync new files from bundle on launch" pass would fix this, but must be careful not to overwrite user-edited markdown. Out of Phase 3 scope; will become more pressing if Phase 4+ ships new module files.
+- **Pre-existing lint warning** at `JournalWriter.swift:235`: `error as? CustomStringConvertible` always succeeds. Trivial cleanup; not Phase 3 scope.
+
+### Documentation drift to refresh (post-phase-close)
+
+- PRD §1.5 `b0tModules/` comment reads "EventKit/Mail/HealthKit/Location bridges" — Phase 3 ships EventKit (calendar+reminders) + HealthKit only; Mail/Location/Notes/Weather deferred to Phase 3.5 or later.
+- PRD §5.3 sketches `Module` with `toolHandles` — superseded by ADR-0009; the PRD section can be marked historical or amended.

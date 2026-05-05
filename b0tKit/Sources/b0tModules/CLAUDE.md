@@ -32,15 +32,21 @@ Capability bridges. Each Module wraps a slice of system access (calendar, remind
 - `ToolCallRecord.argumentsSummary` is rendered from `GeneratedContent.jsonString` (compact JSON like `{"windowHours":24}`) rather than the verbose `String(describing:)` debug form.
 - `HealthModule` and `LiveHealthStore` are platform-guarded `#if canImport(HealthKit) && os(iOS)`. On macOS-host `swift test`, the registry's factories table omits `HealthModule.id`; `default-bot/modules/health.md` becomes "unknown id, log + skip".
 - Module initialisers that accept a `PermissionGate` are `package` (not `public`) because Swift forbids exposing a package-scoped type in a `public` signature. The Module struct itself is `public`; outside callers get tools via the registry, not by constructing modules directly.
+- **Date serialisation uses local-timezone ISO-8601 with offset suffix**, not UTC `Z`. Format: `2026-05-05T17:00:00+10:00`. Same absolute instant as `Z`, but the wall-clock numerals match what the user sees in their Calendar/Reminders apps — the model reads the digits literally, so `Z`-suffixed UTC strings cause it to report the wrong hour for any non-UTC user. Configure with `formatter.timeZone = .current` and `formatOptions = [.withInternetDateTime, .withColonSeparatorInTimeZone]`. Applies to `CalendarUpcomingEventsTool.Output.Event.startISO/endISO` and `RemindersListTool.Output.Reminder.dueDateISO`. The `RemindersCreateTool.Arguments.dueDateISO` `@Guide` instructs the model to produce offset-aware ISOs in the user's timezone, not UTC.
+- **EventKit predicates must come from `EKEventStore.predicateForEvents(withStart:end:calendars:)`** — `eventsMatchingPredicate:` throws `NSInvalidArgumentException` on any other `NSPredicate`. `EventKitStore.predicateForEvents(...)` exists as the seam for this; `FakeEventKitStore` returns a passthrough but the live impl forwards to `EKEventStore`. The in-memory filter on returned events uses overlap semantics (`endDate >= now && startDate <= end`) to match the predicate's behaviour and include ongoing events.
 
 ## DEBUG launch args
 
 (no new args in Phase 3 — Phase 2's `--use-stub-client` and `--debug-heartbeat-timer` still apply)
 
-## Manual smoke checklist (Phase 3 acceptance)
+## Manual smoke checklist (Phase 3 acceptance — verified 2026-05-05)
 
-1. **Simulator with live FM + granted permissions:** ask "what's on my calendar today?" → grant calendar → see real events. Ask "remind me to email Lin at 4pm" → grant reminders → reminder appears in iOS Reminders app. Flip `default-bot/modules/health.md` `enabled: true` and rebuild → ask "how many steps today?" → grant health → real count.
+1. **Simulator with live FM + granted permissions:** ask "what's on my calendar today?" → grant calendar → see real events with the correct local-timezone wall-clock time. Ask "remind me to email Lin at 4pm" → grant reminders → reminder appears in iOS Reminders app. Flip `default-bot/modules/health.md` `enabled: true` and rebuild → ask "how many steps today?" → grant health → real count.
 2. **Decline path:** decline calendar access → ask the same question → b0t notes the missing access in its own voice.
+3. **Tool-call rendering:** `→ calendar.upcoming_events({})` and `← {events: [...]}` rows appear inline in the chat between user prompt and reply.
+4. **Journal:** `**tools_called:**` sub-section appears under the turn's OpenClaw entry whenever a tool fired.
+
+If you've previously run b0t on this simulator before Phase 3 landed, wipe the app data first (long-press app → Remove App, then reinstall) — `BotProvisioner` only copies the bundled `default-bot/` into Documents on first launch, so a stale install won't have the `modules/` directory.
 
 ## Depends on
 
