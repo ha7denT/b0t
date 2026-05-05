@@ -4,9 +4,10 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 ## Current state
 
-- **Phase:** 4 — Anatomical GUI (default face)
-- **Status:** not started
-- **Plan:** (forthcoming — will live at `docs/plans/phase-4-*.md`)
+- **Phase:** 4 — Anatomical GUI (static face)
+- **Status:** specced
+- **Spec:** [phase-4-anatomical-gui](specs/phase-4-anatomical-gui.md)
+- **Plan:** [phase-4-anatomical-gui](plans/phase-4-anatomical-gui.md)
 
 ## Phase ledger
 
@@ -16,9 +17,9 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 | 1 | Markdown brain (no LLM) | [phase-1](plans/phase-1-markdown-brain.md) | complete (2026-05-01) |
 | 2 | Foundation Models loop | [phase-2](plans/phase-2-foundation-models-loop.md) | complete (2026-05-04) |
 | 3 | Module bridges + Tools | [phase-3](plans/phase-3-modules-and-tools.md) | complete (2026-05-05) |
-| 4 | Anatomical GUI (default face) | — | not started |
+| 4 | Anatomical GUI (static face) | [phase-4](plans/phase-4-anatomical-gui.md) | specced |
 | 5 | Onboarding sequence | — | not started |
-| 6 | Face Creator | — | not started |
+| 6 | Face rig + Parts library + Face Creator | — | not started |
 | 7 | Multi-b0t and Gallery | — | not started |
 | 8 | Audio (TTS + effects) | — | not started |
 | 9 | IAP and trial | — | not started |
@@ -28,11 +29,11 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 (Questions surfaced here are alive — once answered, they're closed in the relevant plan or ADR.)
 
-- (none currently — Phase 0 questions resolved 2026-04-30)
+- Hilfer's three Part PNGs + 9 organ icons + 4 module sub-icons + 1 file icon — Jamee committed to deliver. Implementation can scaffold against placeholders; visual sign-off blocks Phase 4 close-out.
 
 ## Specs in flight
 
-- (none currently — Phase 4 spec to be brainstormed when phase begins)
+- [phase-4-anatomical-gui](specs/phase-4-anatomical-gui.md) — settled 2026-05-05; produces ADR-0010, ADR-0011, face-roster.md, manufacturers.json
 
 ## Notes from Phase 0
 
