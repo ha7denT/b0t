@@ -97,15 +97,20 @@ public struct CalendarUpcomingEventsTool: Tool, PermissionAware, Sendable {
         // `EKEventStore.eventsMatchingPredicate:` throws NSInvalidArgumentException
         // on a generic NSPredicate. Use the store's typed builder. The fake
         // returns its scriptedEvents wholesale; the live impl forwards to
-        // `EKEventStore.predicateForEvents(withStart:end:calendars:)`. The
-        // in-memory `.filter { startDate ... }` is still belt-and-braces:
-        // the predicate may include events that overlap the window from
-        // before `now`, and we want strictly upcoming.
+        // `EKEventStore.predicateForEvents(withStart:end:calendars:)`.
+        //
+        // The in-memory filter uses overlap semantics matching the predicate:
+        // an event whose end is after `now` and whose start is before `end`
+        // intersects the window. This includes ongoing events that began
+        // before `now` (e.g. a meeting that started at 9am when the user
+        // asks at 11am) — strict `startDate >= now` would have excluded
+        // them. The fake's scriptedEvents pass through; the canceled
+        // filter remains because EventKit returns canceled events too.
         let predicate = store.predicateForEvents(withStart: now, end: end, calendars: nil)
         let raw = await store.events(matching: predicate)
         let filtered =
             raw
-            .filter { $0.startDate >= now && $0.startDate <= end }
+            .filter { $0.endDate >= now && $0.startDate <= end }
             .filter { $0.status != .canceled }
 
         let formatter = ISO8601DateFormatter()
