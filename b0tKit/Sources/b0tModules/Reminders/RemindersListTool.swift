@@ -69,8 +69,12 @@ public struct RemindersListTool: Tool, PermissionAware, Sendable {
 
         let predicate = store.predicateForReminders(in: nil)
         let raw = await store.fetchReminders(matching: predicate)
+        // Emit ISO-8601 in local timezone with offset (e.g.
+        // "2026-05-05T17:00:00+10:00") rather than UTC. Same instant; the
+        // wall-clock numerals match what the user sees in Reminders.app.
         let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
+        formatter.formatOptions = [.withInternetDateTime, .withColonSeparatorInTimeZone]
+        formatter.timeZone = .current
         let incomplete = raw.filter { !$0.isCompleted }
 
         let reminders = incomplete.map { ek in

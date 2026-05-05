@@ -20,7 +20,10 @@ public struct RemindersCreateTool: Tool, PermissionAware, Sendable {
     @Generable
     public struct Arguments: Sendable {
         public let title: String
-        @Guide(description: "ISO-8601 due date (e.g. 2026-05-04T16:00:00Z), or omitted for no due date.")
+        @Guide(
+            description:
+                "ISO-8601 due date with timezone offset in the user's local timezone (e.g. '2026-05-04T16:00:00+10:00' for 4pm Sydney time). Use the offset that matches the user's timezone — do not use UTC unless the user explicitly says UTC. Omit for no due date."
+        )
         public let dueDateISO: String?
         @Guide(description: "Optional notes attached to the reminder.")
         public let notes: String?

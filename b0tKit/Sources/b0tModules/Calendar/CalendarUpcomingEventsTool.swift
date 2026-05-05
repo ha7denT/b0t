@@ -40,9 +40,15 @@ public struct CalendarUpcomingEventsTool: Tool, PermissionAware, Sendable {
     public struct Event: Sendable {
         @Guide(description: "Event title.")
         public let title: String
-        @Guide(description: "ISO-8601 UTC start timestamp.")
+        @Guide(
+            description:
+                "ISO-8601 start timestamp in the user's local timezone (e.g. '2026-05-05T17:00:00+10:00'). The wall-clock numerals are what the user expects to read."
+        )
         public let startISO: String
-        @Guide(description: "ISO-8601 UTC end timestamp.")
+        @Guide(
+            description:
+                "ISO-8601 end timestamp in the user's local timezone (e.g. '2026-05-05T18:00:00+10:00')."
+        )
         public let endISO: String
         @Guide(description: "Optional location string.")
         public let location: String?
@@ -144,8 +150,13 @@ public struct CalendarUpcomingEventsTool: Tool, PermissionAware, Sendable {
             .filter { $0.status != .canceled }
         print("[b0t] calendar.upcoming_events: filtered count=\(filtered.count)")
 
+        // Emit ISO-8601 in the user's local timezone with offset suffix
+        // (e.g. "2026-05-05T17:00:00+10:00") rather than UTC ("...Z"). The
+        // wall-clock numerals match what the user sees in their Calendar app,
+        // and the model reads the offset for unambiguous interpretation.
         let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
+        formatter.formatOptions = [.withInternetDateTime, .withColonSeparatorInTimeZone]
+        formatter.timeZone = .current
 
         let events = filtered.map { ek in
             Event(
