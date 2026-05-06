@@ -1,22 +1,31 @@
-# b0tDesign
+# b0tDesign — design tokens and shaders
 
-Design tokens, palettes, fonts, and shared SwiftUI views.
+The single source of truth for colour, type, and visual treatments across the app.
 
-## Public API contracts (target shape)
+## Public surface
 
-- `Palette` — 12 curated palettes (no RGB picker — see PRD non-negotiable #9).
-- `Token` namespace — colours, spacings, type ramps.
-- `Font` — IoskeleyMono NL (brain layer) and Söhne (chat).
-- Shared views: `OrganLabel`, `StatusGlow`, `PhosphorWire`, etc. (added as Phase 4 lands).
+- `WundercogPalette` — Hilfer's 5 colour roles (off-white polymer + mint-green accents).
+- `LCDPalette` — backlit warm-amber LCD inspection panel (4 colour roles).
+- `CRTScanlineShader.make(intensity:lineCount:)` — `SKShader` for the Eye-screen only.
+- `Typography.systemMono(size:weight:)` — IoskeleyMono NL for system / brain UI.
+- `Typography.chatBody(size:)` — Verdana for chat content inside the LCD chrome.
 
-## Patterns
+## Visual languages
 
-- **Warm darks, never pure black.** Phosphor glows are amber/green/cream, never blue. See design doc §3.5.
-- All colour goes through palette slots: `primary`, `accent`, `shadow`, `highlight`. Never raw hex outside this module.
-- All-lowercase for system labels. Sentence-case for the b0t's voice. Never title-case.
+Three distinct treatments — do not mix:
 
-## Read first when working here
+1. **CRT (phosphor + scanline)** — Eye-screen only. Use `CRTScanlineShader`.
+2. **Flat pixel art with painterly lighting** — Skull, Jaw, organs, heart. No shader chrome.
+3. **Backlit LCD (warm amber, calculator sensibility)** — inspection panel only. SwiftUI gradients + `LCDPalette`. No bloom, no scanlines.
 
-- `docs/design_document.md` §3 (the entire aesthetic section)
-- `docs/references/voice-and-copy-guide.md`
-- `assets/palettes/`, `assets/fonts/`
+## Why no runtime palette swap
+
+Per amendment §2.2 — palette variants are baked PNGs from Gamelabs. This module exposes
+named *tokens* for code-drawn elements (wiring, heart pulse colour, LCD chrome, organ
+activity-pulse tints). It does not provide runtime tinting of bitmap Parts.
+
+## What lives elsewhere
+
+- Bitmap Parts for Hilfer (Skull / Eyes / Jaw) — `b0tApp/Resources/Assets.xcassets/`.
+- Wiring lines, organ activity-pulse shapes — `b0tFace/WiringNetwork.swift` etc.
+- The full Manufacturer roster — `docs/references/face-roster.md`.
