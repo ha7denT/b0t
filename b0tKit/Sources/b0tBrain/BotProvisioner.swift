@@ -57,4 +57,21 @@ public enum BotProvisioner {
         try "b0t-01\n".write(to: activePtr, atomically: true, encoding: .utf8)
         return target
     }
+
+    /// Reads the starter `BotModel` from `manufacturers.json` in the given bundle,
+    /// if present and well-formed. Returns `nil` if the file is absent or
+    /// undecodable — callers fall back to whatever defaults the bundled
+    /// `default-bot/` already ships with.
+    ///
+    /// Phase 4 ships only Hilfer (Wundercog tier-1 starter); the bundled
+    /// `default-bot/` markdown is already shaped for Hilfer, so this helper is
+    /// purely informational in v1 (logs the active starter Model). Phase 6+
+    /// expansions will use the returned Model's `defaultModules` /
+    /// `defaultTools` / `defaultPersonalityDir` to drive variant provisioning.
+    public static func starterDefaultsFromCatalogue(bundle: Bundle = .main) -> BotModel? {
+        guard let url = bundle.url(forResource: "manufacturers", withExtension: "json") else {
+            return nil
+        }
+        return try? ManufacturerCatalogue.load(from: url).starterModel()
+    }
 }
