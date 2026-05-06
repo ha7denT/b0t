@@ -3,10 +3,13 @@ import SwiftUI
 
 /// The root SKScene for the anatomy area (top half of HomeView).
 ///
-/// Slice 2 ships face composition only. Slices 3+ add organs, heart, wiring, and
-/// touch-handling for organ taps.
+/// Slice 3 ships face + 9-organ ring + heart + wiring. Slice 4 adds touch-handling
+/// for organ taps; Slice 8 wires tool-event pulses through the wiring network.
 public final class AnatomyScene: SKScene {
     public private(set) var face: FaceComposite?
+    public private(set) var heart: HeartNode?
+    public private(set) var wiring: WiringNetwork?
+    public private(set) var organs: [OrganID: OrganNode] = [:]
 
     public override init(size: CGSize) {
         super.init(size: size)
@@ -20,9 +23,16 @@ public final class AnatomyScene: SKScene {
         fatalError("init(coder:) is not supported")
     }
 
-    /// Installs Hilfer (the static Phase 4 face). Replace with a configurable Model loader
-    /// in Slice 9 when `manufacturers.json` is wired up.
+    /// Installs Hilfer's face plus the 9-organ ring, heart, and wiring network.
+    public func installFullAnatomy(initialBPM: Int) {
+        installHilferFace()
+        installOrgansAndHeart(initialBPM: initialBPM)
+        installWiring()
+    }
+
+    /// Installs Hilfer face only (used by AnatomyView previews and slice 2 tests).
     public func installHilferFace() {
+        guard face == nil else { return }
         let skull = SkullNode(textureName: "HilferSkull", anchorPoints: .hilferDefaults)
         let eyes = EyesNode(textureName: "HilferEyes")
         let jaw = JawNode(textureName: "HilferJaw")
@@ -31,5 +41,40 @@ public final class AnatomyScene: SKScene {
         composite.node.position = .zero
         addChild(composite.node)
         self.face = composite
+    }
+
+    private func installOrgansAndHeart(initialBPM: Int) {
+        for organ in OrganID.allCases where organ != .heart {
+            let node = OrganNode(organ: organ, textureName: textureName(for: organ))
+            node.node.position = AnatomyLayout.position(for: organ, in: size)
+            addChild(node.node)
+            organs[organ] = node
+        }
+        let heart = HeartNode(textureName: "OrganHeart")
+        heart.node.position = AnatomyLayout.position(for: .heart, in: size)
+        addChild(heart.node)
+        heart.startPulsing(bpm: initialBPM)
+        self.heart = heart
+    }
+
+    private func installWiring() {
+        let wiring = WiringNetwork()
+        wiring.installLines(faceCentre: .zero, organSize: size)
+        addChild(wiring.node)
+        self.wiring = wiring
+    }
+
+    private func textureName(for organ: OrganID) -> String {
+        switch organ {
+        case .reasoning: return "OrganReasoning"
+        case .memory: return "OrganMemory"
+        case .identity: return "OrganIdentity"
+        case .modules: return "OrganModules"
+        case .sensors: return "OrganSensors"
+        case .tools: return "OrganTools"
+        case .network: return "OrganNetwork"
+        case .location: return "OrganLocation"
+        case .heart: return "OrganHeart"
+        }
     }
 }
