@@ -1,29 +1,42 @@
-# b0tFace
+# b0tFace — anatomy rendering
 
-The face rig — SpriteKit + SwiftUI rendering of the b0t's animated face.
+The SpriteKit scene tree for the anatomical GUI. Hosts the face (3 Parts + Decal layer),
+the 9 organs, the heart, and the wiring network.
 
-## Public API contracts (target shape)
+## Public surface
 
-- `FaceScene: SKScene` — hosts face parts as `SKSpriteNode`s.
-- `FaceRig` — orchestrates parts into the 8 mood states (idle, speaking, thinking, surprised, sleepy, attentive, worried, delighted).
-- `MoodStateMachine` — transitions between mood states.
-- `CRTOverlay: SKEffectNode` — optional scanline shader.
-- SwiftUI host: `FaceView` wrapping `SpriteView`.
+- `FacePart` protocol — implemented by `SkullNode`, `EyesNode`, `JawNode`. Three Parts only,
+  per amendment §2.1 (Ears removed from scope).
+- `SkullAnchorPoints` — `eyesSocket`, `jawHinge` in normalised (0-1) coords. Per-Part defaults
+  live as static factories (`.hilferDefaults`, etc.).
+- `DecalNode` — additive layer on top of Parts. Empty for Hilfer; populated as Decal assets land.
+- `FaceComposite` — composes (Skull, Eyes, Jaw, Decals) with correct z-order and anchor-driven
+  positioning.
+- `AnatomyScene` — root SKScene; `installHilferFace()` for Phase 4. Slices 3+ add organs / heart /
+  wiring; Slice 9 makes the installed Model configurable from `manufacturers.json`.
+- `AnatomyView` — SwiftUI `SpriteView` wrapper.
 
-## Patterns
+## Phase 4 vs Phase 6
 
-- **Nearest-neighbour scaling always.** `SKTexture.filteringMode = .nearest`. Never bilinear. Pixel grid must survive retina scaling.
-- Every shipped face part has all 8 mood states baked in. New parts must conform.
-- Animations are `SKAction` sequences in Swift — diffable in git.
-- Pixel art assets are provided by Jamee; we integrate, we do not generate.
+Phase 4 ships *static* Parts (one PNG each). Phase 6 introduces:
+- `SKTextureAtlas` per Part with 8 mood-state frames (idle, speaking, thinking, surprised,
+  sleepy, attentive, worried, delighted) — see ADR-0011.
+- A mood-state machine on `FaceComposite` that drives texture switching + procedural motion
+  (blink, breathing, mouth-open) per the forthcoming `face-creator-procedural-animation.md`.
+- The Parts library and Face Creator UX — composition of unlocked Parts across Manufacturers.
 
-## Depends on
+This module's API is shaped so Phase 6 is additive — no protocol breaking changes anticipated.
 
-- `b0tDesign` (palettes, tokens)
+## Z-order inside FaceComposite
 
-## Read first when working here
+Bottom to top:
+1. **Eyes** — `SKEffectNode` wrapping the eye-screen sprite + `CRTScanlineShader`.
+2. **Skull** — polymer shell with eye-cutout window.
+3. **Jaw** — mounted at `Skull.anchorPoints.jawHinge`.
+4. **Decals** — empty for Hilfer; future content drops add here.
 
-- `docs/prd.md` §5.4
-- `docs/design_document.md` §3 (aesthetic), §2.5 (Face Creator)
-- ADR 0003 (SpriteKit over Rive)
-- `assets/face-parts/`, `assets/palettes/`
+## What lives in b0tHome (not here)
+
+- `AnatomyState` — the @Observable bridge between scene events and SwiftUI views.
+- `HomeView`, LCD inspection panel, chat — all SwiftUI, all in `b0tHome`.
+- Touch handling that mutates `AnatomyState` from this scene's `touchesBegan` (Slice 4).
