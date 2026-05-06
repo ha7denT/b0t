@@ -7,10 +7,10 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 - **Phase:** 5 — Onboarding sequence
 - **Status:** not started
 
-(Phase 4 closed 2026-05-06 with code complete + tests green. T61/T62
-visual sign-off and acceptance smoke pending Jamee on the simulator —
-once they pass, the ledger row below flips from "code complete" to
-"complete." See "Notes from Phase 4" for context.)
+(Phase 4 closed 2026-05-06 — code shipped, tests green at 279, simulator
+smoke passed including the Phase 4.5 chat-wiring fix-ups. The ledger
+row below now reads "complete." See "Notes from Phase 4" for context;
+Phase 4.5 follow-ups remain outstanding.)
 
 ## Phase ledger
 
@@ -20,7 +20,7 @@ once they pass, the ledger row below flips from "code complete" to
 | 1 | Markdown brain (no LLM) | [phase-1](plans/phase-1-markdown-brain.md) | complete (2026-05-01) |
 | 2 | Foundation Models loop | [phase-2](plans/phase-2-foundation-models-loop.md) | complete (2026-05-04) |
 | 3 | Module bridges + Tools | [phase-3](plans/phase-3-modules-and-tools.md) | complete (2026-05-05) |
-| 4 | Anatomical GUI (static face) | [phase-4](plans/phase-4-anatomical-gui.md) | code complete (2026-05-06); visual sign-off pending |
+| 4 | Anatomical GUI (static face) | [phase-4](plans/phase-4-anatomical-gui.md) | complete (2026-05-06) |
 | 5 | Onboarding sequence | — | not started |
 | 6 | Face rig + Parts library + Face Creator | — | not started |
 | 7 | Multi-b0t and Gallery | — | not started |
@@ -32,7 +32,7 @@ once they pass, the ledger row below flips from "code complete" to
 
 (Questions surfaced here are alive — once answered, they're closed in the relevant plan or ADR.)
 
-- Hilfer's three Part PNGs + 9 organ icons + 4 module sub-icons + 1 file icon — Jamee committed to deliver. Code is built against placeholder squares; visual sign-off (T61/T62) blocks the Phase 4 ledger flip from "code complete" to "complete."
+- Hilfer's three Part PNGs + 9 organ icons + 4 module sub-icons + 1 file icon — Jamee committed to deliver. Code shipped against placeholder red-X squares (Phase 4 closed without them); when assets land, drop them into `b0tApp/Resources/Assets.xcassets/` and the home screen lights up.
 
 ## Specs in flight
 
