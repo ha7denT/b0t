@@ -13,11 +13,18 @@ public struct OrganInspectionView: View {
     @Bindable var state: AnatomyState
     let organ: OrganID
     let file: BotFile
+    @State private var isEditing: Bool = false
 
     public init(state: AnatomyState, organ: OrganID, file: BotFile) {
         self.state = state
         self.organ = organ
         self.file = file
+    }
+
+    /// Synthesised pseudo-files (Reasoning / Sensors / Location / Network) live under
+    /// `<rootURL>/_synth/` and have no on-disk backing — not editable.
+    private var isEditable: Bool {
+        !file.fileURL.path.contains("/_synth/")
     }
 
     public var body: some View {
@@ -39,6 +46,23 @@ public struct OrganInspectionView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(LCDPalette.bgWarm)
+        .overlay(alignment: .topTrailing) {
+            if isEditable {
+                Button("edit") { isEditing = true }
+                    .font(Typography.systemMono(size: 11))
+                    .foregroundStyle(LCDPalette.textAmber)
+                    .padding(8)
+            }
+        }
+        #if os(iOS)
+            .fullScreenCover(isPresented: $isEditing) {
+                EditorView(file: file, store: state.store, onClose: { isEditing = false })
+            }
+        #else
+            .sheet(isPresented: $isEditing) {
+                EditorView(file: file, store: state.store, onClose: { isEditing = false })
+            }
+        #endif
     }
 
     @ViewBuilder
