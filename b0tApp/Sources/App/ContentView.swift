@@ -1,5 +1,6 @@
 import SwiftUI
 import b0tBrain
+import b0tHome
 
 struct ContentView: View {
     let bootstrap: Bootstrap
@@ -9,22 +10,21 @@ struct ContentView: View {
     #endif
 
     var body: some View {
-        VStack(spacing: 8) {
-            Text("b0t")
-                .font(.system(.largeTitle, design: .monospaced))
-            statusLine
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.secondary)
-
-            #if DEBUG
-                if case .ready = bootstrap {
-                    Button("debug brain") { showDebugBrain = true }
-                        .font(.system(.caption, design: .monospaced))
-                        .padding(.top, 16)
-                }
-            #endif
+        ZStack {
+            switch bootstrap {
+            case .pending:
+                pendingView
+            case .ready(let bot, let store):
+                HomeView(bot: bot, store: store, initialHeartBPM: 4)
+                    #if DEBUG
+                        .onLongPressGesture(minimumDuration: 1.5) {
+                            showDebugBrain = true
+                        }
+                    #endif
+            case .failed(let reason):
+                failedView(reason)
+            }
         }
-        .padding()
         #if DEBUG
             .sheet(isPresented: $showDebugBrain) {
                 if case .ready(let bot, let store) = bootstrap {
@@ -41,16 +41,23 @@ struct ContentView: View {
         #endif
     }
 
-    @ViewBuilder
-    private var statusLine: some View {
-        switch bootstrap {
-        case .pending:
-            Text("provisioning...")
-        case .ready(let bot, _):
-            Text("active: \(bot.rootURL.lastPathComponent)")
-        case .failed(let reason):
-            Text("bootstrap failed: \(reason)")
+    private var pendingView: some View {
+        VStack {
+            Text("device starting…")
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.secondary)
         }
+    }
+
+    private func failedView(_ reason: String) -> some View {
+        VStack(spacing: 8) {
+            Text("bootstrap failed")
+                .font(.system(.caption, design: .monospaced))
+            Text(reason)
+                .font(.system(.caption2, design: .monospaced))
+                .foregroundStyle(.secondary)
+        }
+        .padding()
     }
 }
 

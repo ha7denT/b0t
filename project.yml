@@ -42,6 +42,8 @@ targets:
       - package: b0tKit
         product: b0tFace
       - package: b0tKit
+        product: b0tHome
+      - package: b0tKit
         product: b0tAudio
       - package: b0tKit
         product: b0tDesign
