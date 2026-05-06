@@ -11,6 +11,10 @@ public final class AnatomyScene: SKScene {
     public private(set) var wiring: WiringNetwork?
     public private(set) var organs: [OrganID: OrganNode] = [:]
 
+    /// Closure invoked when the user taps a named organ in the scene.
+    /// `SceneStateBridge` sets this to mutate `AnatomyState.selectedOrgan`.
+    public var tapHandler: ((OrganID) -> Void)?
+
     public override init(size: CGSize) {
         super.init(size: size)
         scaleMode = .aspectFit
@@ -63,6 +67,20 @@ public final class AnatomyScene: SKScene {
         addChild(wiring.node)
         self.wiring = wiring
     }
+
+    #if canImport(UIKit)
+        public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+            guard let touch = touches.first else { return }
+            let location = touch.location(in: self)
+            let hits = nodes(at: location)
+            for node in hits {
+                if let name = node.name, let organ = OrganID(rawValue: name) {
+                    tapHandler?(organ)
+                    return
+                }
+            }
+        }
+    #endif
 
     private func textureName(for organ: OrganID) -> String {
         switch organ {
