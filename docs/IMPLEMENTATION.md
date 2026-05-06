@@ -4,12 +4,18 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 ## Current state
 
-- **Phase:** 5 — Onboarding sequence
-- **Status:** not started
+- **Phase:** 5 deferred 2026-05-06; next phase to be selected
+- **Status:** Phase 5 paused mid-brainstorm, deferred until the features it
+  showcases are built. Roughly a third of the 24 onboarding beats reference
+  modules that don't yet exist (mail, location, notes, weather) or features
+  in later phases (face creator → Phase 6, multi-b0t → Phase 7). Shipping
+  onboarding now would have the b0t introduce features it can't actually
+  perform — a credibility problem on day one. The brainstorm settled
+  enough to make resumption cheap (see "Specs in flight" below).
 
 (Phase 4 closed 2026-05-06 — code shipped, tests green at 279, simulator
 smoke passed including the Phase 4.5 chat-wiring fix-ups. The ledger
-row below now reads "complete." See "Notes from Phase 4" for context;
+row below reads "complete." See "Notes from Phase 4" for context;
 Phase 4.5 follow-ups remain outstanding.)
 
 ## Phase ledger
@@ -21,7 +27,7 @@ Phase 4.5 follow-ups remain outstanding.)
 | 2 | Foundation Models loop | [phase-2](plans/phase-2-foundation-models-loop.md) | complete (2026-05-04) |
 | 3 | Module bridges + Tools | [phase-3](plans/phase-3-modules-and-tools.md) | complete (2026-05-05) |
 | 4 | Anatomical GUI (static face) | [phase-4](plans/phase-4-anatomical-gui.md) | complete (2026-05-06) |
-| 5 | Onboarding sequence | — | not started |
+| 5 | Onboarding sequence | — | deferred (2026-05-06) |
 | 6 | Face rig + Parts library + Face Creator | — | not started |
 | 7 | Multi-b0t and Gallery | — | not started |
 | 8 | Audio (TTS + effects) | — | not started |
@@ -36,7 +42,7 @@ Phase 4.5 follow-ups remain outstanding.)
 
 ## Specs in flight
 
-- [phase-5-onboarding](specs/phase-5-onboarding.md) — **brainstorming in flight**, paused mid-conversation 2026-05-06. Q1 settled (scope = first-60-seconds + 24-beat module; Face Creator entry deferred to Phase 6). Q2–Q9 open. See the spec file for the question list and the pre-constrained inputs to re-read when resuming.
+- [phase-5-onboarding](specs/phase-5-onboarding.md) — **deferred 2026-05-06.** Brainstorm reached a working baseline before the deferral: Q1 revised (scope reduced to the 24-beat heartbeat tutorial only; first-60-seconds chat experience dropped); Q3 dissolved (`enabled && current_beat <= total_beats` is the source of truth for "in onboarding"); Q5 settled (runtime short-circuits the LLM, reads the beat verbatim, increments the counter, writes the journal entry — no urgency check in v1); Q6 settled (skip via the existing Phase 4 frontmatter-toggle on `enabled`, zero new GUI work). Q8 (implementation surface) and Q9 (test strategy) were the remaining open questions when we paused. Resume only after the features the beats reference are built or the beat content is pruned to match what ships.
 
 ## Notes from Phase 0
 

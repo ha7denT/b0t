@@ -1,6 +1,6 @@
 # Phase 5 — Onboarding sequence
 
-**Status:** Brainstorming in flight (paused mid-conversation 2026-05-06).
+**Status:** Deferred 2026-05-06. Phase 5 paused before completion of the brainstorm because roughly a third of the 24 onboarding beats reference modules (mail, location, notes, weather) or features (face creator, multi-b0t) that aren't built yet. Resume only after those features ship, or after the beat content is pruned to match what's available. The brainstorm reached a working baseline before the deferral — see the "Settled so far" section; resumption picks up at Q8 / Q9.
 **Started:** 2026-05-06
 **Process:** `superpowers:brainstorming` skill — see `~/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/`.
 
@@ -20,92 +20,75 @@ The Phase 5 design is heavily pre-constrained by existing material — most of t
 
 ## Settled so far
 
-### Q1 — Scope (decided 2026-05-06)
+### Q1 — Scope (decided 2026-05-06; revised 2026-05-06)
 
-**Decision: Option A.** Phase 5 ships items 1 + 2 only — first-60-seconds scripted state machine + 24-beat onboarding module. **Face Creator entry point is deferred to Phase 6** alongside the Creator itself.
+**Original decision (superseded):** Option A — Phase 5 ships items 1 + 2 (first-60-seconds scripted state machine + 24-beat onboarding module). Face Creator deferred to Phase 6.
 
-Rationale: the "third wow moment" needs a real Face Creator to land as a wow moment — a stub button is a worse experience than nothing. Phase 5 closes when the conversation flow lands; the user keeps Hilfer's face until Phase 6 inserts the Face Creator hand-off.
+**Revised decision:** Phase 5 ships **item 2 only** — the heartbeat-driven 24-beat tutorial as authored in `default-bot/modules/onboarding.md`. Item 1 (the design doc §6.1 first-60-seconds button-choice + Path A/B chat experience) is dropped from Phase 5 entirely. Face Creator stays deferred to Phase 6.
 
-The state machine ends with something like "I think I know enough to start. I'll be here when you need me." (or similar — copy TBD), and the home screen settles into steady state. Phase 6's first task will be inserting the Face Creator hand-off at that point.
+Rationale: keeping the first-60-seconds in scope was forcing complex architectural decisions (prepend-new-beats, branching, per-beat trigger DSL, parallel checklist files) that weren't clearly load-bearing for launch. The 24-beat tutorial is already authored, coherent, and handles the "introduce yourself one beat at a time" job. Beat 1's existing welcome ("I just woke up for the first time…") covers the §6.1 "oh — hi" intent at the structural level; exact wording is malleable and will be revised before launch. Phase 5 becomes a small, clean phase. Item 1 may be reintroduced as a Phase 5.5 or Phase 6 follow-up if the launch experience needs more.
+
+What this means for the rest of the brainstorm:
+
+- **Q2** (scripted prompts vs LLM responses for Path B): moot — no Path B chat in Phase 5.
+- **Q3** (first-launch detection): still settled as dissolved — `modules/onboarding.md` frontmatter (`enabled: true && current_beat <= total_beats`) is the source of truth. Detection mechanism survives the scope reduction.
+- **Q4** (visible memory-write pulse during Path B): moot for Phase 5. The Phase 4 wiring/organ pulse mechanism still works for normal operation.
+- **Q-Arch / Q-Trigger** (architecture for prepended beats, per-beat trigger model): walked back; both moot.
+- **Q5** (heartbeat integration mechanism): now the central remaining question. How does `HeartbeatManager.tick` pick up onboarding beats from `modules/onboarding.md`?
+- **Q6** (skip mechanic): still applies — what does `dismissible: true` mean in UX terms beyond editing the frontmatter?
+- **Q7** ("glance occasionally" in Path A): moot.
+- **Q8** (implementation surface): now narrower — where does the onboarding-aware tick path live (inside `HeartbeatManager`, in `Executor`, in a new mini-module)?
+- **Q9** (test strategy): simpler — tick-path determinism testing, no LLM stubs for onboarding beats.
+
+### Q3 — First-launch detection (decided 2026-05-06)
+
+**Decision: Dissolved.** No new state file, no new flag. First-launch detection is the existing `modules/onboarding.md` frontmatter: `enabled: true && current_beat <= total_beats`. The b0t is "in onboarding" iff that condition holds.
+
+Rationale: the 24-beat module already establishes the "checklist in markdown frontmatter, advance via tick" pattern. Inventing `_state/onboarding.md` would parallel-track the same information.
 
 ## Open questions in flight
 
-(Answer these in order when resuming the brainstorm. Each unlocks the next.)
+(Answer these in order. Each unlocks the next.)
 
-### Q2 — First-60-seconds: hand-scripted vs scripted-then-LLM
+### Q5 — How `HeartbeatManager.tick` picks up onboarding beats (decided 2026-05-06)
 
-PRD §5.7 says first-60-seconds is "hand-scripted, not generated... the b0t's words at this stage are written by humans, not produced by the LLM." But design doc §6 Path B describes a real conversation ("b0t starts a low-pressure conversation. No interview. No form-filling. Just talking. As the user shares, b0t writes notes to memory/about_me.md visibly").
+**Decision: Option B + sub-(i).**
 
-These are in tension if Path B lasts ~3 minutes and the user is typing back. Options:
+**B — runtime short-circuit, no LLM.** Before the regular tick decision, the runtime checks if onboarding is `enabled: true && current_beat <= total_beats`. If so, it reads the beat's literal text from `modules/onboarding.md`, emits it as the tick's output, increments `current_beat`, writes the journal entry, and returns. The LLM is not invoked for onboarding ticks.
 
-- **A) Fully hand-scripted** — Path B is a deterministic decision tree of pre-written exchanges (the b0t's responses are picked from a small set based on user input keywords or sentiment). No LLM in the first 60 seconds. Heaviest authoring lift; most predictable.
-- **B) Scripted opening then LLM-driven** — the first ~3 messages (the welcome + "talk" / "hang out" prompt + the path-A-or-B kickoff) are scripted; once Path B begins, the existing `ConversationManager` takes over with a system-prompt addendum priming the b0t to write to `memory/about_me.md` after each turn. Lightest implementation; uses Phase 4's chat surface as-is.
-- **C) Scripted prompts, LLM-generated b0t responses** — every turn in Path B emits a hand-written *prompt* to the LLM ("the user just said X, respond casually and note one thing about them"), capturing the user's reply, with a strict turn cap (~5-7 turns). More predictable than B, more work than B.
+**Sub-(i) — no urgency check in Phase 5.** Phase 5 always fires the onboarding beat when active. The module's "they don't crowd out other observations — if there's something more urgent to surface, the tutorial waits" promise is deferred to a Phase 5.5 follow-up. At default heartbeat cadence (~30 min), 24 beats span ~12 hours, so collisions are low-probability and a collision just means the urgent thing surfaces on the next tick.
 
-### Q3 — First-launch detection mechanic
+Rationale: the 24 beats are verbatim prose. Any LLM involvement is paraphrasing roulette on a 3B local model. Option A (Module-injected instruction) is symmetric with Phase 3 but odd — a `Module` whose only job is to short-circuit the LLM. Option C (system-prompt addendum) is the most fragile. Phase 5 stays small, deterministic, testable.
 
-What flips the home screen from "first-60-seconds mode" to "steady state"? Options:
+### Q6 — Skip mechanic UX (decided 2026-05-06)
 
-- **A) A flag in `identity/core.md`** — frontmatter key like `onboarding_completed: false` set to `true` after the first-60-seconds finishes.
-- **B) A separate state file** — `_state/onboarding.md` with a state-machine cursor (`phase: opening | path_a_idle | path_b_chat | post_face_creator | done`). More granular, cleaner separation from identity.
-- **C) Detect by emptiness** — if `memory/about_me.md` is empty AND no journal entries exist AND no chat history exists, run first-60-seconds. Simpler, no new state.
+**Decision: Option B, zero-new-work form.** The skip mechanic reuses Phase 4's existing frontmatter-as-controls pattern. Tapping the modules organ → onboarding sub-icon opens the standard inspection view; `enabled` renders as a frontmatter toggle (already implemented in Phase 4 T41–T44). Flipping `enabled: true → false` halts the tutorial. Beat 1 of the module already teaches this affordance ("if you'd rather I stop, edit `enabled: false` above").
 
-### Q4 — Visible memory-write pulse during Path B
+The `dismissible` frontmatter field stays in the markdown but is **not implemented** in Phase 5 — `dismissible: false` would gate a more prominent skip affordance, which doesn't exist yet. Phase 5.5+ may introduce one and at that point should respect `dismissible`.
 
-Design doc §6 Path B: "b0t writes notes to `memory/about_me.md` *visibly* — a small organ on the body lights up, the user can tap to see what b0t has written."
-
-Phase 4 already has `state.activeWiring` and the wiring/organ pulse mechanism (commit `2f6db39`). What hooks the memory-write to that?
-
-- **A) Executor publishes a memory-write event** — extend `b0tCore.Executor` with a `nonisolated(unsafe) memoryWriteEvents = PassthroughSubject<MemoryObservation, Never>()` (mirrors the `ConversationManager.toolCallEvents` pattern from Phase 4.5). HomeView subscribes and pulses the Memory organ.
-- **B) ChatView observes the turn's `memoryObservations`** — after `await manager.respond(to:)` returns, ChatView checks `turn.response.memoryObservations` (the `[MemoryObservation]` field on `ConversationResponse`) and mutates `state.activeWiring.insert(.memory)` with the same delayed-removal Task pattern.
-- **C) ToolInvocationListener gains a memory variant** — extend the existing listener to also handle memory observations (rename to `AnatomyEventListener`?).
-
-B is simplest and stays inside the existing wiring chain.
-
-### Q5 — 24-beat module integration with the heartbeat tick
-
-The existing heartbeat tick (`HeartbeatManager.tick`) calls `LanguageModelClient.generate` with a `TickDecision` request. The 24-beat module needs to override the regular tick when `current_beat <= total_beats` and `enabled: true`.
-
-- **A) New module type that participates in tick decision-making** — `OnboardingModule` is a `Module` per `b0tModules`, but instead of providing `tools` it injects a special instruction into the next tick's context ("if onboarding is active, emit beat N's pre-written text instead of generating freely"). Heartbeat picks this up via the assembler.
-- **B) `Executor` short-circuit** — before the regular tick decision, `Executor` (or `HeartbeatManager` itself) checks if `modules/onboarding.md` is enabled and `current_beat <= total_beats`. If so, skips the LLM, emits the beat's literal text, increments `current_beat`, and writes the journal entry. Cleanest separation; the LLM doesn't see onboarding at all.
-- **C) System-prompt addendum** — the assembler appends an onboarding addendum to every tick's instructions ("you are on beat N of onboarding. say exactly: <text>"). The LLM produces output but is constrained. Riskier (LLM may deviate).
-
-B is cleanest but means a new code path in `HeartbeatManager`.
-
-### Q6 — Skip mechanic UX
-
-Onboarding can be skipped at any time per PRD §5.7. The 24-beat module supports this via `enabled: false` in its frontmatter. Two questions:
-
-- During the **first-60-seconds**, is there a visible "skip" affordance? Or is "hang out" Path A effectively the skip (no skip control needed)?
-- During the **24-beat tutorial**, the user dismisses by editing the module file (`enabled: false`) — is there a one-tap "stop the tutorial" affordance that does this for them?
-
-### Q7 — "Glance occasionally" in Path A
-
-Design doc §6 Path A: "b0t glances at them occasionally."
-
-- What's a "glance"? An eye animation (Phase 6 face rig — not available)? A wiring/organ pulse with no chat message? A short LCD status line ("..." or a short observational message)?
-- Frequency? Every N seconds? Random?
-
-This may be deferable to Phase 5.5 if Phase 6 face-rig is the natural home for glance animations.
+Rationale: honours the b0t's "your settings live in markdown" philosophy. Zero new GUI code. The b0t's own words walk the user through the skip path. PRD §5.7's "skippable" requirement is satisfied via the existing markdown-edit path.
 
 ### Q8 — Implementation surface
 
-Where does the first-60-seconds state machine live?
+Where does the onboarding-aware tick path live in code?
 
-- **A) New module in b0tHome** — `OnboardingFlow.swift` + `OnboardingState.swift`. HomeView gates on `state.onboardingCompleted` and renders the OnboardingFlow overlay until done.
-- **B) Special `Bootstrap` state** — Bootstrap detects first-launch and emits `.firstRun(bot, store)` instead of `.ready(...)`. ContentView shows an `OnboardingView` for `.firstRun`, which then transitions to `HomeView`.
-- **C) Phase-5 module in b0tHome that hijacks ChatView's first messages** — leans on existing chat surface, just primes it differently.
+- **A) Inside `HeartbeatManager.tick`.** A method-level conditional checks the onboarding module before invoking the regular tick logic. Smallest code change; concentrates onboarding awareness in one place.
+- **B) New short-circuit in `Executor`.** Symmetric with how regular `TickDecision` is processed today. Keeps `HeartbeatManager` thin; `Executor` already owns "decide what happens this tick."
+- **C) New `OnboardingDriver` mini-module.** A standalone helper (in `b0tCore` or a new `b0tOnboarding`) that `HeartbeatManager` consults per tick. Most isolated; most ceremony for a single feature.
 
 ### Q9 — Test strategy
 
-The state machine is deterministic (per PRD §5.7), so it should be unit-testable. Path B's LLM-driven portion (if Q2 → B or C) needs the same stub-client pattern Phase 2/3 use. The 24-beat module's tick path needs integration tests against a fake heartbeat trigger.
+The 24-beat tick path is deterministic (verbatim text emit, frontmatter counter increment). Tests:
+- Unit: `HeartbeatManager` (or whichever surface from Q8) with onboarding `enabled` / `disabled` / mid-flow / completed. Assert correct beat text emitted, `current_beat` advanced, journal entry written.
+- Integration: production `default-bot` with onboarding enabled, fake heartbeat trigger, run through all 24 beats, assert each journal entry matches the corresponding beat content.
+- No live LLM tests needed for the onboarding path (no LLM call expected). The regular-tick path's existing live tests (gated by `LIVE_TESTS=1`) keep working as today.
 
 ## Hand-off when resuming
 
 1. Re-read the pre-constrained inputs above.
-2. Confirm Q1 still holds (Option A — defer Face Creator to Phase 6).
-3. Resume at Q2.
-4. After all questions answered, present design sections per the brainstorming skill, then write the spec to *this* file (replacing the brainstorm state with the settled spec — keep Q1's settled answer in the spec, archive Q2-Q9 as an "open-questions-settled-during-brainstorming" appendix following the Phase 1-4 spec convention).
+2. Confirm the Q1 revision still holds (Phase 5 = 24-beat heartbeat tutorial only).
+3. Resume at Q5.
+4. After Q5 / Q6 / Q8 / Q9 are settled, present design sections per the brainstorming skill, then write the spec to *this* file (replacing the brainstorm state with the settled spec — archive the question-trail as an "open-questions-settled-during-brainstorming" appendix following the Phase 1-4 spec convention).
 
 ## Spec-in-progress location
 
