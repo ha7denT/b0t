@@ -12,6 +12,7 @@ let package = Package(
         .library(name: "b0tBrain", targets: ["b0tBrain"]),
         .library(name: "b0tModules", targets: ["b0tModules"]),
         .library(name: "b0tFace", targets: ["b0tFace"]),
+        .library(name: "b0tHome", targets: ["b0tHome"]),
         .library(name: "b0tAudio", targets: ["b0tAudio"]),
         .library(name: "b0tDesign", targets: ["b0tDesign"]),
     ],
@@ -28,6 +29,10 @@ let package = Package(
         ),
         .target(name: "b0tModules", dependencies: ["b0tBrain", "b0tCore"]),
         .target(name: "b0tFace", dependencies: ["b0tDesign"]),
+        .target(
+            name: "b0tHome",
+            dependencies: ["b0tFace", "b0tDesign", "b0tBrain", "b0tCore"]
+        ),
         .target(name: "b0tAudio"),
         .target(name: "b0tDesign"),
 
@@ -56,6 +61,11 @@ let package = Package(
         ),
         .testTarget(name: "b0tModulesLiveTests", dependencies: ["b0tModules"]),
         .testTarget(name: "b0tFaceTests", dependencies: ["b0tFace"]),
+        .testTarget(
+            name: "b0tHomeTests",
+            dependencies: ["b0tHome"],
+            resources: [.copy("Fixtures")]
+        ),
         .testTarget(name: "b0tAudioTests", dependencies: ["b0tAudio"]),
         .testTarget(name: "b0tDesignTests", dependencies: ["b0tDesign"]),
     ],
