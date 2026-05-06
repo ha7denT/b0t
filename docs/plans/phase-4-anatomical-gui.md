@@ -25,6 +25,11 @@
 - Tasks are TDD-shaped: failing test → minimal implementation → passing test → commit. Each task is a single atomic commit.
 - Walking-skeleton discipline: every slice ends with the package compiling, all unit tests green, and a `RenderPreview` available where applicable.
 
+**Code conventions surfaced during execution (apply to all verbatim snippets below):**
+- **Identifier naming follows project `.swift-format`** — `AlwaysUseLowerCamelCase` is enforced by the pre-commit hook. Where a verbatim snippet uses `snake_case` (e.g. test helpers like `calendar_aliased_to_tools()`), rename to `lowerCamelCase` (`calendarAliasedToTools()`) when implementing. Functional intent is unchanged; the spec/plan text was authored before the formatter rule landed.
+- **Test classes touching SKNode action APIs need `@MainActor`** under Swift 6 strict concurrency. Methods like `SKNode.action(forKey:)` are `@MainActor`-isolated and return non-Sendable `SKAction?` values — calling them from a nonisolated `XCTestCase` method fails to compile. Add `@MainActor` to the test class declaration when verbatim test snippets exercise these APIs (HeartNodeTests, WiringNetworkTests, AnatomyScene_OrgansAndHeartTests are the precedent). Tests that only construct nodes and inspect immutable shape (size, name, children count) do not need the annotation.
+- **Pre-commit hook is authoritative on formatting** — alphabetised imports, blank line before `@testable`, trailing commas in multiline literals, 4-space indentation. Match the formatter's style up front to avoid a re-format/re-stage cycle. Never bypass with `--no-verify`.
+
 **Reference docs to consult during execution:**
 - `docs/specs/phase-4-anatomical-gui.md` — the design contract
 - `docs/b0t-amendment-2026-05-04.md` — vocabulary and architectural locks (Manufacturer/Model/Part)
