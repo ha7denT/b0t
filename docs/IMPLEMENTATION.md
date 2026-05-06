@@ -36,7 +36,7 @@ Phase 4.5 follow-ups remain outstanding.)
 
 ## Specs in flight
 
-(none — Phase 4 spec closed with the implementation; Phase 5 spec not yet started.)
+- [phase-5-onboarding](specs/phase-5-onboarding.md) — **brainstorming in flight**, paused mid-conversation 2026-05-06. Q1 settled (scope = first-60-seconds + 24-beat module; Face Creator entry deferred to Phase 6). Q2–Q9 open. See the spec file for the question list and the pre-constrained inputs to re-read when resuming.
 
 ## Notes from Phase 0
 
