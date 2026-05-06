@@ -12,7 +12,12 @@ public enum Typography {
     public static let chatBodyFamily = "Verdana"
 
     public static func systemMono(size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        Font.custom(systemMonoFamily, size: size).weight(weight)
+        let base = Font.custom(systemMonoFamily, size: size)
+        // SwiftUI's `.weight(.regular)` resolves to numeric weight 0.0, which
+        // logs a benign-but-noisy "Unable to update Font Descriptor's weight"
+        // warning on every render of a custom font. Skip the modifier when the
+        // weight is the default — the font already ships in Regular.
+        return weight == .regular ? base : base.weight(weight)
     }
 
     public static func chatBody(size: CGFloat) -> Font {
