@@ -4,10 +4,13 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 ## Current state
 
-- **Phase:** 4 — Anatomical GUI (static face)
-- **Status:** implementing — Slice 0 complete (`c07fbec`); Slice 1 ready (b0tDesign palettes & shaders)
-- **Spec:** [phase-4-anatomical-gui](specs/phase-4-anatomical-gui.md)
-- **Plan:** [phase-4-anatomical-gui](plans/phase-4-anatomical-gui.md)
+- **Phase:** 5 — Onboarding sequence
+- **Status:** not started
+
+(Phase 4 closed 2026-05-06 with code complete + tests green. T61/T62
+visual sign-off and acceptance smoke pending Jamee on the simulator —
+once they pass, the ledger row below flips from "code complete" to
+"complete." See "Notes from Phase 4" for context.)
 
 ## Phase ledger
 
@@ -17,7 +20,7 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 | 1 | Markdown brain (no LLM) | [phase-1](plans/phase-1-markdown-brain.md) | complete (2026-05-01) |
 | 2 | Foundation Models loop | [phase-2](plans/phase-2-foundation-models-loop.md) | complete (2026-05-04) |
 | 3 | Module bridges + Tools | [phase-3](plans/phase-3-modules-and-tools.md) | complete (2026-05-05) |
-| 4 | Anatomical GUI (static face) | [phase-4](plans/phase-4-anatomical-gui.md) | specced |
+| 4 | Anatomical GUI (static face) | [phase-4](plans/phase-4-anatomical-gui.md) | code complete (2026-05-06); visual sign-off pending |
 | 5 | Onboarding sequence | — | not started |
 | 6 | Face rig + Parts library + Face Creator | — | not started |
 | 7 | Multi-b0t and Gallery | — | not started |
@@ -29,11 +32,11 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 (Questions surfaced here are alive — once answered, they're closed in the relevant plan or ADR.)
 
-- Hilfer's three Part PNGs + 9 organ icons + 4 module sub-icons + 1 file icon — Jamee committed to deliver. Implementation can scaffold against placeholders; visual sign-off blocks Phase 4 close-out.
+- Hilfer's three Part PNGs + 9 organ icons + 4 module sub-icons + 1 file icon — Jamee committed to deliver. Code is built against placeholder squares; visual sign-off (T61/T62) blocks the Phase 4 ledger flip from "code complete" to "complete."
 
 ## Specs in flight
 
-- [phase-4-anatomical-gui](specs/phase-4-anatomical-gui.md) — settled 2026-05-05; produces ADR-0010, ADR-0011, face-roster.md, manufacturers.json
+(none — Phase 4 spec closed with the implementation; Phase 5 spec not yet started.)
 
 ## Notes from Phase 0
 
@@ -120,3 +123,54 @@ Five real bugs surfaced and were fixed during the smoke pass — each had passin
 
 - PRD §1.5 `b0tModules/` comment reads "EventKit/Mail/HealthKit/Location bridges" — Phase 3 ships EventKit (calendar+reminders) + HealthKit only; Mail/Location/Notes/Weather deferred to Phase 3.5 or later.
 - PRD §5.3 sketches `Module` with `toolHandles` — superseded by ADR-0009; the PRD section can be marked historical or amended.
+
+## Notes from Phase 4
+
+- Spec at `docs/specs/phase-4-anatomical-gui.md` settled 2026-05-05 from a brainstorm pivoted by Jamee mid-stream (defer parts/animation to Phase 6, ship one static face first). Plan at `docs/plans/phase-4-anatomical-gui.md` decomposed the spec into 64 tasks across 11 slices. Slice 0 (housekeeping + ADRs + face-roster + manufacturers.json stub) landed earlier as commit set ending `626345d`. Slices 1–9 (T10–T60) implemented in a single session on 2026-05-06 — 46 commits from `e59d1ae` (T10 WundercogPalette) to `202ac6c` (T59 BotProvisioner catalogue helper). T61/T62 visual sign-off and acceptance smoke pending Jamee on the simulator; T63 (this entry) closes the docs side; T64 will run the final test pass once visual sign-off is in.
+- ADRs landed in Slice 0: 0010 (organs are anatomical subsystems — supersedes part of 0007), 0011 (defer face rig to Phase 6).
+- Final test count: 279 passing across the b0tKit package suite (203 baseline → +76 across Slices 1–9). Zero failures, zero regressions. iOS app target builds for the simulator after every slice.
+- New module shipped: `b0tHome` — SwiftUI shell, LCD inspection panel, frontmatter-as-controls, chat default content, full-screen markdown editor, tool-event wiring listener. Depends on `b0tFace`, `b0tDesign`, `b0tBrain`, `b0tCore`. ~15 source files + ~13 test files.
+- Other public surface added: `b0tBrain.Bot.empty(at:)` factory (test ergonomics), `b0tBrain.Catalogue/{Manufacturer,BotModel,ManufacturerCatalogue}` (manufacturers.json reader), `b0tBrain.BotProvisioner.starterDefaultsFromCatalogue(bundle:)` helper, `b0tCore.ConversationManager.toolCallEvents` Combine publisher.
+- Visual languages stay distinct per spec §6: Eye-screen carries the only CRT scanline overlay (`SKEffectNode` + GLSL fragment shader); LCD inspection panel is backlit warm-amber with no bloom/no scanlines (calculator/OP-1 sensibility); Skull / Jaw / organs / heart are flat pixel art with painterly lighting (nearest-neighbour filtering throughout).
+- Subagent-driven development with worktree isolation worked well for parallel-friendly tasks: four cycles of parallel-implementer dispatch (Slice 2 T17–T20 four-way; Slice 3 T28–T30 three-way; Slice 5 T42–T45 four-way; Slice 6 T48–T49 two-way), every cycle merged cleanly via cherry-pick onto main with no conflicts. Worktree base was consistently stale (cut from `8409c7e` pre-Phase-4 main); the explicit "rebase onto main first" instruction in every parallel brief was load-bearing — three of four agents in Slice 2 detected the staleness independently and the explicit instruction in Slices 3/5/6 made it boilerplate.
+- The plan amendment commit (`dca01f1`) recording the two recurring deviation patterns — `snake_case` → `lowerCamelCase` per `.swift-format` `AlwaysUseLowerCamelCase`, and `@MainActor` on test classes touching `SKNode.action(forKey:)` / SwiftUI `View.init` under Swift 6 strict concurrency — saved every downstream parallel agent from re-deriving the adaptations.
+
+### Mid-phase plan-vs-as-built adaptations (well-documented in commit bodies)
+
+- **Catalogue lives in `b0tBrain`, not `b0tCore`** as the plan specified. The plan's location would have created a circular dep (`b0tCore` already depends on `b0tBrain`; the plan also wanted `BotProvisioner` to import `b0tCore`). `b0tBrain` is the right home — same layer as `Frontmatter`/`YAMLValue` Codable shapes.
+- **`BotStore(rootURL:)` doesn't exist** — `BotStore()` is parameterless (stateless actor; URLs passed per-operation). Plan's verbatim test snippets used the wrong constructor across multiple tasks.
+- **`Bot.empty(at:)` didn't exist before this phase** — plan's tests called it but `Bot`'s memberwise init is internal because `BotStore` is internal. Added as a public static factory on `Bot` in commit `6f65a6c` for test ergonomics; complements the existing `BotStore().load(at: fixturesURL)` pattern.
+- **`KnownFiles.heartbeatSchedule` doesn't exist** — `KnownFiles.swift` is a frontmatter-accessor extension (`mutable`/`enabled`/`botName` etc.), not URL constants. The heartbeat schedule URL lives at `bot.heartbeat.scheduleURL`. Plan kept referencing the wrong path; corrected to use `state.bot.heartbeat.scheduleURL` everywhere.
+- **`BotStore.read`/`write` are async on an actor** — plan used `try? store.read(...)` and `try? store.write(...)` synchronously throughout. Corrected to `await store.read(...)` inside `async` test functions and `Task { try? await store.write(...) }` inside SwiftUI button actions to bridge the actor isolation.
+- **`BotFile.synthetic(...)`, `BotFile.parse(...)`, `BotFile.serialise()`, `BotFile.relativePath` don't exist** — actual `BotFile` API is `init(fileURL:text:) throws`, `originalText: String` (raw source), `prose: String` (computed), `frontmatter[key]` (subscript), `frontmatter.keys` (public let), `settingFrontmatter(_:to:)` (returns new instance — BotFile is immutable). Plan tasks 36/45/46/49/52 used the imagined API; every task got reshaped accordingly.
+- **`YAMLValue` cases:** `.string`/`.int`/`.double`/`.bool`/`.array`/`.dictionary`/`.null`. Plan used `.integer` throughout; corrected to `.int` (both in T41–T44 controls and T46 dispatch).
+- **`Bootstrap` has 3 cases, not 2** — plan's T39 ContentView edit only handled `.pending` and `.ready`; `.failed(reason)` exists too. Added the missing case with a "bootstrap failed" placeholder view.
+- **SwiftUI `.toolbar { ToolbarItem(.topBarTrailing) }` requires a NavigationStack** which doesn't wrap `OrganInspectionView`. T52 used `.overlay(alignment: .topTrailing)` instead.
+- **`.fullScreenCover` is iOS-only** — `b0tKit` builds for macOS host tests too. T52 guards with `#if os(iOS)` and falls back to `.sheet` on macOS.
+- **`Bundle.module.url(forResource:withExtension:)` doesn't auto-search subdirectories** — fixtures shipped via `.copy("Fixtures")` need explicit `Bundle.module.resourceURL.appendingPathComponent("Fixtures/...")` lookup. Affected T58 ManufacturerCatalogueTests.
+- **`PassthroughSubject` is not declared `Sendable`** — used `nonisolated(unsafe)` storage on the actor-bound publisher in `ConversationManager`, with `@preconcurrency import Combine` to suppress the rest of the noise.
+- **`HomeView` gained an optional `toolCallEvents` parameter** beyond plan scope — plan T55 only added `.onChange`, but without listener-construction the wiring chain doesn't close. Made the publisher injection opt-in so `ContentView(bootstrap:)` callers don't break (currently passes `nil`; chat-pipeline integration in Phase 4.5 will pass `ConversationManager.toolCallEvents`).
+
+### Phase 4 follow-ups (out of scope; tracked for Phase 4.5 or later)
+
+- **Chat surface not wired to ConversationManager.** `ChatView.sendMessage` is a TODO from T36 — the input is captured but not routed to a `ConversationManager`. Tool-event wiring chain (publisher → listener → `state.activeWiring` → scene pulses) is built end-to-end but the chat-message trigger is missing, so the spec §14 #4 manual smoke (calendar tool call → wiring lights up) can't be exercised yet. Phase 4.5: wire `ChatView.sendMessage` to call `ConversationManager.respond(to:)`, and have `ContentView` pass that manager's `toolCallEvents` publisher into `HomeView`.
+- **Tools organ surfaces a static list of the 4 shipped tools** in `ToolsDirectoryView`. Wire to a live `ToolRegistry` once one is exposed by `b0tCore`/`b0tModules`.
+- **HeartInspectionContainer file goes stale after edit.** `.task(id: scheduleURL)` only re-runs when the URL changes; editing the heartbeat schedule via the EditorView writes to disk but the displayed BotFile in the container's `@State` doesn't auto-refresh. User sees the persisted content on next heart-organ re-tap. Live reload on `.fullScreenCover` dismiss is future polish.
+- **Module sub-icons are interim bespoke.** Spec §7.2 calls for replacement from the eventual 12–24-symbol module-icon vocabulary (amendment §2.3); vocabulary itself is a separate design exercise.
+- **Hilfer's Part PNGs + organ icons + module sub-icons + file icon** still pending Jamee delivery from Gamelabs Studio. `assets/face-parts/placeholder/Wundercog/Hilfer/` holds placeholder squares; `b0tApp/Resources/Assets.xcassets/` is empty for the Hilfer Parts and organs. Slice 10 visual sign-off (T61) blocks ledger flip from "code complete" to "complete."
+- **`BotProvisioner` once-only-on-first-launch behaviour** — Phase 3 follow-up still open and now more pressing since Phase 4 ships visual assets that won't propagate to existing installs.
+- **`BotProvisioner.starterDefaultsFromCatalogue(bundle:)` is informational only** in v1 — returns the starter `BotModel` but doesn't drive provisioning behavior (the bundled `default-bot/` already ships Hilfer-shaped content). Phase 6+ multi-Model expansions will use the returned defaults for variant provisioning.
+- **Verdana for chat content** is a Phase-4 brainstorm decision (2026-05-05) replacing the originally-spec'd Söhne. Revisit if readability isn't right on real device — Verdana is system-provided so swappable without bundling.
+- **Sendable closure warnings in tests** — capturing `var captured: YAMLValue?` inside `@Sendable` closures (T42, T43 patterns) flagged transient warnings during agent builds; didn't reproduce in clean post-merge builds. SPM's `swift test` doesn't enforce `SWIFT_TREAT_WARNINGS_AS_ERRORS` (that's iOS-app-target only). If Xcode builds start surfacing these as errors, refactor with a class-wrapped capture.
+
+### Manual smoke verification (deferred — pending Jamee)
+
+- **T61 RenderPreview pass:** visual fidelity check against `AnatomyView`, `ChatView`, `InspectionPanel` (heart/modules/identity), `OrganInspectionView` (heart), `EditorView` via Apple Xcode MCP `RenderPreview`. Tune `WundercogPalette` / `LCDPalette` / `CRTScanlineShader.make(intensity:lineCount:)` if needed.
+- **T62 Acceptance smoke per spec §14:** walk all 10 acceptance criteria live on the simulator. Heart BPM round-trip (#6, #7) and tool-event wiring pulse (#4 — gated on the Phase 4.5 chat-pipeline wiring above) are the load-bearing ones.
+- **T64 final verification:** `swift test` (already 279 green) + commit summary, gated on T61/T62 outcome.
+
+### Documentation drift to refresh (post-phase-close)
+
+- `CLAUDE.md` project-structure section doesn't list `b0tHome/` as a module — add to the b0tKit/Sources tree.
+- `b0tApp/Sources/App/ContentView.swift` was rewritten in T39; the old `statusLine` variant in CLAUDE.md examples (if any) should be updated. None spotted as of close-out.
+- The plan-amendment conventions block (`dca01f1`) should likely move to a project-wide convention reference if these patterns repeat in Phase 5+ — the snake_case-in-tests issue and SKNode-actor-isolation issue are not Phase-4-specific.
