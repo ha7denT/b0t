@@ -1,0 +1,30 @@
+{
+  "manufacturers": [
+    {
+      "id": "wundercog",
+      "name": "Wundercog Industries",
+      "base_prompt_template": "Pixel art at 256×256, forward-facing portrait, pure black background, head and jaw only, no neck or body, bot looking directly at camera, perfectly centered. Manufacturer design language (constant): matte off-white polymer shell, soft bulbous forms, no sharp edges, friendly utility aesthetic. Universal interchange (constant across entire roster): the eye-panel underneath is a standard rectangle with content visible only through the skull's cutout window; the jaw is a separate part that mounts to a standard hinge point at the lower edge of the skull, with the jaw seam positioned just above where a 'mouth' would sit so the upper lip-equivalent is part of the jaw module; the skull occludes the sides of the jaw and houses the speaker behind the jaw plane (no speaker grille on the jaw itself). Stålenhag/Cobb design logic: plausible polymer construction, subtle wear at contact points.",
+      "palettes": ["wundercog_offwhite_mint", "wundercog_offwhite_butter", "wundercog_pearlescent_plum"],
+      "identity_description": "Friendly utility aesthetic, plausible polymer construction, subtle wear at contact points."
+    }
+  ],
+  "models": [
+    {
+      "id": "hilfer",
+      "manufacturer": "wundercog",
+      "tier": 1,
+      "is_starter": true,
+      "parts": {
+        "skull": "wundercog_skull_egg_offwhite_mint",
+        "eyes": "wundercog_eyes_mint_idle",
+        "jaw": "wundercog_jaw_small_offwhite_mint"
+      },
+      "palette": "wundercog_offwhite_mint",
+      "decals": [],
+      "default_personality_dir": "identity/",
+      "default_modules": ["calendar", "reminders", "time-awareness", "health"],
+      "default_tools": ["calendar.upcoming_events", "reminders.create", "health.steps_today"],
+      "heartbeat_unlock_threshold": null
+    }
+  ]
+}
