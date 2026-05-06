@@ -1,3 +1,4 @@
+@preconcurrency import Combine
 import Foundation
 import FoundationModels
 import b0tBrain
@@ -23,6 +24,13 @@ public actor ConversationManager {
 
     private var nextTurnNumber: Int = 1
     private var didLoadTurnNumber: Bool = false
+
+    /// Tool-name events for each invocation observed during a conversation turn.
+    /// `b0tHome.ToolInvocationListener` subscribes to drive wiring-network pulses
+    /// in the anatomy GUI. `nonisolated(unsafe)` because PassthroughSubject is a
+    /// class with internal locking — safe to send from any context, but Swift 6
+    /// can't prove it without the explicit annotation.
+    nonisolated(unsafe) public let toolCallEvents = PassthroughSubject<String, Never>()
 
     public init(
         bot: Bot,
@@ -56,6 +64,9 @@ public actor ConversationManager {
 
         do {
             let (response, toolCalls) = try await respondWithFallback(userPrompt: userPrompt, level: 0)
+            for record in toolCalls {
+                toolCallEvents.send(record.toolName)
+            }
             let delta = try await executor.apply(response)
             try await journalWriter.appendConversationTurn(
                 prompt: userPrompt,
