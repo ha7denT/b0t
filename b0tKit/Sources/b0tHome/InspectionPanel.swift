@@ -41,16 +41,33 @@ public struct InspectionPanel: View {
         switch organ {
         case .heart:
             HeartInspectionContainer(state: state)
-        default:
-            VStack(spacing: 12) {
-                Text(organ.rawValue.uppercased())
-                    .font(Typography.systemMono(size: 16))
-                    .foregroundStyle(LCDPalette.textAmber)
-                Text("inspection forthcoming (slice 6)")
-                    .font(Typography.systemMono(size: 11))
-                    .foregroundStyle(LCDPalette.textDim)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .modules:
+            DirectoryNavigatorView(
+                state: state, organ: .modules, directoryRelativePath: "modules")
+        case .memory:
+            DirectoryNavigatorView(
+                state: state, organ: .memory, directoryRelativePath: "memory")
+        case .identity:
+            DirectoryNavigatorView(
+                state: state, organ: .identity, directoryRelativePath: "identity")
+        case .tools:
+            ToolsDirectoryView(state: state)
+        case .reasoning:
+            OrganInspectionView(
+                state: state, organ: .reasoning,
+                file: ReasoningStateFile.make(state: state))
+        case .sensors:
+            OrganInspectionView(
+                state: state, organ: .sensors,
+                file: SensorsStateFile.make(state: state))
+        case .location:
+            OrganInspectionView(
+                state: state, organ: .location,
+                file: LocationStateFile.make(state: state))
+        case .network:
+            OrganInspectionView(
+                state: state, organ: .network,
+                file: NetworkStateFile.make(state: state))
         }
     }
 }
