@@ -31,7 +31,7 @@ let package = Package(
         .target(name: "b0tFace", dependencies: ["b0tDesign"]),
         .target(
             name: "b0tHome",
-            dependencies: ["b0tFace", "b0tDesign", "b0tBrain", "b0tCore"]
+            dependencies: ["b0tFace", "b0tDesign", "b0tBrain", "b0tCore", "b0tModules"]
         ),
         .target(name: "b0tAudio"),
         .target(name: "b0tDesign"),

@@ -2,6 +2,7 @@ import Foundation
 import Observation
 
 import b0tBrain
+import b0tCore
 import b0tFace
 
 /// The single @Observable source-of-truth that bridges SpriteKit scene events and
@@ -18,11 +19,17 @@ public final class AnatomyState {
     public let bot: Bot
     public let store: BotStore
 
+    /// The active ConversationManager. `nil` while HomeView's .task is still
+    /// loading modules + initializing the model client; views that depend on it
+    /// (currently `ChatView`) check for nil and disable input until ready.
+    public var manager: ConversationManager?
+
     public init(bot: Bot, store: BotStore, initialHeartBPM: Int) {
         self.bot = bot
         self.store = store
         self.selectedOrgan = nil
         self.activeWiring = []
         self.heartBPM = initialHeartBPM
+        self.manager = nil
     }
 }
