@@ -58,5 +58,11 @@
 	<string>So I can create reminders when you ask, and list ones you already have.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>So I can mention your step count when it's relevant — quietly, never as advice.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>IoskeleyMonoNL-Regular.ttf</string>
+		<string>IoskeleyMonoNL-Medium.ttf</string>
+		<string>IoskeleyMonoNL-Bold.ttf</string>
+	</array>
 </dict>
 </plist>

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04A756DABD87C9188CB7B193 /* IoskeleyMonoNL-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CFAC73B59733BCBAD187C8D9 /* IoskeleyMonoNL-Bold.ttf */; };
 		1657F0033948CC6E58164B2F /* b0tCore in Frameworks */ = {isa = PBXBuildFile; productRef = DCAB6B34E6DCAB50BB736458 /* b0tCore */; };
 		1C47AFBE1FC5D310794439C9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E91319360B3AF9F60F37C9 /* ContentView.swift */; };
 		35017C62846B82978924F904 /* b0tFace in Frameworks */ = {isa = PBXBuildFile; productRef = 196A7880D576DA8B5936303B /* b0tFace */; };
@@ -17,6 +18,9 @@
 		A78B13C574B7EA676D887AB1 /* b0tApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419303501712CAB6314A7455 /* b0tApp.swift */; };
 		B89D3BA46042B0830DC9742E /* b0tBrain in Frameworks */ = {isa = PBXBuildFile; productRef = B6FE8E3C008A965D697C367F /* b0tBrain */; };
 		C8AD557AF341DC4AFAF50D4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 021B489B8DCAFAC3F72F0E3C /* Assets.xcassets */; };
+		CF8B6DD0654A4C4DC8DDECBC /* manufacturers.json in Resources */ = {isa = PBXBuildFile; fileRef = F93EAAF4517E080BF196F9D0 /* manufacturers.json */; };
+		E780959558D34828C5556178 /* IoskeleyMonoNL-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 485820129C53232BE513468F /* IoskeleyMonoNL-Medium.ttf */; };
+		EA27F01E98BF93B87DE2E2C7 /* IoskeleyMonoNL-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6A0DB0C4F9B1A5F0DE0A3E89 /* IoskeleyMonoNL-Regular.ttf */; };
 		F5A7F332C369477D81669E3A /* b0tDesign in Frameworks */ = {isa = PBXBuildFile; productRef = EAC9282E0B9790D0812E07EB /* b0tDesign */; };
 /* End PBXBuildFile section */
 
@@ -25,9 +29,13 @@
 		11E91319360B3AF9F60F37C9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		419303501712CAB6314A7455 /* b0tApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = b0tApp.swift; sourceTree = "<group>"; };
 		4697E672E444B47FF9B58EE0 /* b0tKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = b0tKit; path = b0tKit; sourceTree = SOURCE_ROOT; };
+		485820129C53232BE513468F /* IoskeleyMonoNL-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "IoskeleyMonoNL-Medium.ttf"; sourceTree = "<group>"; };
 		577740E81715D5E498229C81 /* b0t.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = b0t.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A0DB0C4F9B1A5F0DE0A3E89 /* IoskeleyMonoNL-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "IoskeleyMonoNL-Regular.ttf"; sourceTree = "<group>"; };
 		933F2AE957C01B79FA72B32D /* default-bot */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "default-bot"; sourceTree = SOURCE_ROOT; };
 		B7A06500FFF84C51E4C2E4EB /* DebugBrainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugBrainView.swift; sourceTree = "<group>"; };
+		CFAC73B59733BCBAD187C8D9 /* IoskeleyMonoNL-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "IoskeleyMonoNL-Bold.ttf"; sourceTree = "<group>"; };
+		F93EAAF4517E080BF196F9D0 /* manufacturers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manufacturers.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,7 +58,9 @@
 		248227FDAA1151AB83FEC8E4 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F3483A01EAE4128A283493F2 /* Fonts */,
 				021B489B8DCAFAC3F72F0E3C /* Assets.xcassets */,
+				F93EAAF4517E080BF196F9D0 /* manufacturers.json */,
 			);
 			name = Resources;
 			path = b0tApp/Resources;
@@ -108,6 +118,16 @@
 			);
 			name = Sources;
 			path = b0tApp/Sources;
+			sourceTree = "<group>";
+		};
+		F3483A01EAE4128A283493F2 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				CFAC73B59733BCBAD187C8D9 /* IoskeleyMonoNL-Bold.ttf */,
+				485820129C53232BE513468F /* IoskeleyMonoNL-Medium.ttf */,
+				6A0DB0C4F9B1A5F0DE0A3E89 /* IoskeleyMonoNL-Regular.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -181,7 +201,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				C8AD557AF341DC4AFAF50D4E /* Assets.xcassets in Resources */,
+				04A756DABD87C9188CB7B193 /* IoskeleyMonoNL-Bold.ttf in Resources */,
+				E780959558D34828C5556178 /* IoskeleyMonoNL-Medium.ttf in Resources */,
+				EA27F01E98BF93B87DE2E2C7 /* IoskeleyMonoNL-Regular.ttf in Resources */,
 				9E7FE541C355795463F2E047 /* default-bot in Resources */,
+				CF8B6DD0654A4C4DC8DDECBC /* manufacturers.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
