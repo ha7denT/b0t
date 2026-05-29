@@ -2,8 +2,8 @@
 
 **Document type:** Design Document
 **Audience:** Designer (you), Claude Code (coder), future collaborators
-**Status:** v1.0 — design lock for v1 development
-**Last updated:** 2026-04-29
+**Status:** v1.0 — design lock for v1 development; amended 2026-05-29 (tool-first positioning, engine-agnostic inference, single-b0t v1 scope, LCD/semantic-palette aesthetic). See `b0t-amendment-2026-05-29.md` and ADRs 0012–0016.
+**Last updated:** 2026-05-30
 
 ---
 
@@ -17,11 +17,13 @@ b0t is a personal AI companion you grow yourself, on your phone, in plain text.
 
 ### 1.1 The thesis
 
-Every AI companion app on the market is a service. You rent a personality. You rent a memory. You rent a relationship with software you don't own and can't see inside. When the company changes the model, your companion changes. When the company shuts down, your companion dies.
+b0t is first a genuinely useful local-AI tool. It watches your calendar, mail, reminders, and the shape of your day, and acts on them — quietly, on-device, for free. The companion layer is texture over that utility, never a tax on it. *Productivity can be fun.*
+
+What makes it different is ownership. Every other AI companion app on the market is a service. You rent a personality. You rent a memory. You rent a relationship with software you don't own and can't see inside. When the company changes the model, your companion changes. When the company shuts down, your companion dies.
 
 b0t inverts this. Your b0t lives entirely on your device. Its personality is a markdown file. Its memories are markdown files. Its modules are markdown files. You can open them, read them, edit them, share them, version them, back them up. The app is a body for files you own.
 
-The on-device LLM (Apple's Foundation Models framework) is the engine that animates these files. It's small, free, private, and offline. It is not a vast intelligence. b0t doesn't pretend otherwise.
+The on-device LLM is the engine that animates these files — Apple's Foundation Models where the device supports it, or a small downloadable open-weight model the user chooses and owns (see [ADR-0012](decisions/0012-inference-engine-agnostic.md)). It's small, free, private, and offline. It is not a vast intelligence. b0t doesn't pretend otherwise. On a downloadable-model device the user owns the brain itself, a file like any other; on a Foundation Models device the brain is issued with the OS — either way, the files are always yours.
 
 ### 1.2 The five principles
 
@@ -33,13 +35,16 @@ The on-device LLM (Apple's Foundation Models framework) is the engine that anima
 
 ### 1.3 What b0t is not
 
-- A productivity tool with a face on it.
+b0t *is* a tool — a local-AI utility you own — so the boundaries are about what kind of tool it isn't:
+
+- A gimmick: a cartoon face slapped on a todo list.
 - A friend who solves your loneliness.
 - A character chatbot.
-- A general-purpose assistant.
+- A general-purpose assistant or chat window.
 - A novelty.
+- A service you rent.
 
-b0t is closer in category to Obsidian, Things, or a really good notebook than to ChatGPT or Replika. It's a tool the user develops a long relationship with because the more they put in, the more it becomes theirs.
+b0t is closer in category to Obsidian, Things, or a really good notebook than to ChatGPT or Replika. It's a tool the user develops a long relationship with because the more they put in, the more it becomes theirs. The companionship is the differentiator, not the thesis — the thesis is a useful, owned, local-AI utility.
 
 ---
 
@@ -110,8 +115,8 @@ The heartbeat is the central metaphor. It is also the actual scheduling mechanis
 1. b0t wakes (background task, event trigger, or app-foreground tick).
 2. Loads the active b0t's identity core, memory core, and the current beat's instructions from `heartbeat/actions.md`.
 3. Loads any module files relevant to the current context.
-4. Runs a fresh `LanguageModelSession` with this assembled context.
-5. Returns a typed `@Generable` decision: observe, act, notify, sleep.
+4. Runs a fresh inference session on the active engine with this assembled context.
+5. Returns a typed decision — observe, act, notify, sleep — decoded into a Swift struct (`@Generable` on the Foundation Models engine, grammar-constrained decoding on the downloadable engine; see [ADR-0012](decisions/0012-inference-engine-agnostic.md) and [ADR-0015](decisions/0015-content-format-boundary-slot-assembly.md)).
 6. If acting, executes via tool calls (read calendar, write reminder, post notification).
 7. Writes a journal entry recording what happened.
 8. Updates `memory/recent.md` with any new observations.
@@ -160,6 +165,8 @@ The in/out distinction by eye-line is preserved. See [ADR-0010](decisions/0010-o
 
 ### 2.4 Multi-b0t and Face Creator
 
+> **v2 — deferred 2026-05-29 (see [ADR-0013](decisions/0013-v1-single-non-modular-bot.md)).** v1 ships a single b0t with one face, no roster, no Gallery. This section describes the v2 design. The heartbeat *scheduler* (§2.2) stays in v1; only the multi-b0t roster and the unlock economy defer.
+
 **The roster.** The user can create multiple b0ts. Each lives in its own directory. Only one is active (has a beating heart) at any time. Inactive b0ts retain memory, identity, and files; they're just dormant.
 
 **The gallery.** A wallet-style picker showing all the user's b0ts. The active b0t is visibly alive (breathing, heart beating, eyes tracking). Dormant b0ts are still, eyes closed. Switching is a deliberate gesture (hold-and-drag or pull-to-activate) — friction here is good.
@@ -169,6 +176,8 @@ The in/out distinction by eye-line is preserved. See [ADR-0010](decisions/0010-o
 **Soft cap of 6 b0ts in v1.** Justified as "your inner circle." Lift later if there's demand.
 
 ### 2.5 Face Creator
+
+> **v2 — deferred 2026-05-29 (see [ADR-0013](decisions/0013-v1-single-non-modular-bot.md)).** v1 ships one pre-composed face as a single sprite-sheet unit — no parts/decals/palette composition, no Creator. Speech is signalled by an illuminated grille, not a moving jaw ([ADR-0014](decisions/0014-speech-via-illuminated-grille.md)). This section describes the v2 modular Face Creator.
 
 The Face Creator is a feature-grade sub-product. Designing the face is part of how the user bonds with their b0t.
 
@@ -205,6 +214,8 @@ The Face Creator is a feature-grade sub-product. Designing the face is part of h
 
 ### 3.3 Visual language layers
 
+> **Reconciliation pending (§14 Q1/Q2).** The amendment moves the panel/organ idiom to LCD-forward (backlit monochrome, **no bloom/glow**), which conflicts with the "CRT / slight bloom and scanline" language below. Two questions await Jamee's incoming UI designs: whether the b0t **face** stays painterly or goes 1-bit (Q1), and whether the **CRT eye-screen** keeps its scanline treatment or also goes LCD (Q2). The colour system is already updated (§3.5); this layer-by-layer prose is rewritten once Q1/Q2 land via [ADR-0016](decisions/0016-aesthetic-reconciliation.md).
+
 The app uses register shifts between layers, each matching its content:
 
 - **The b0t themselves** — pixel art with painterly lighting. Limited palette per b0t. Animated rig. This is where personality lives.
@@ -223,15 +234,23 @@ These layers share palette, grid, and underlying logic. Transitions between them
 
 ### 3.5 Colour
 
-- **App-wide base:** warm dark — not pure black. Think aged plastic, dimmed CRT, dark amber background. Cool blacks are clinical; warm darks are domestic.
-- **Phosphor glow:** the wiring and active organs glow in a warm phosphor — amber, green, or cream. Never blue. Blue is sterile and tech-coded; warm phosphor is alive.
-- **b0t palettes:** curated. 3-5 colours per palette, designed together. Earthy bases, muted tones, single saturated accent. Stålenhag-disciplined.
+> **Updated 2026-05-29 (§14 Q3 — "never blue" overridden; see [ADR-0016](decisions/0016-aesthetic-reconciliation.md), pending).** The display idiom is LCD-forward and the highlight system is three deliberate semantic colours. The old "warm phosphor — never blue" rule below is superseded.
+
+- **App-wide base:** muted dark — not pure black. Aged plastic, dimmed backlit LCD, unsaturated. Most of the surface stays dark and quiet; colour is emphasis-only.
+- **Three semantic highlight colours**, used for buttons, highlights, and per-organ panel backlights:
+  - **yellow `#EAFF3D`** — tokens, text, brainpower.
+  - **aqua `#3DEAFF`** — the functional medium (I/O, plumbing, modules).
+  - **pink `#FF3DEA`** — the heartbeat, core ideas, emotional states.
+- **Backlight colour is semantic per organ:** Directory panels back-light aqua, `.md` panels yellow, the heartbeat's `.md` pink.
+- **b0t palettes (v2 modular faces):** curated, 3–5 colours, designed together. Earthy bases, muted tones. Stålenhag-disciplined. (Deferred with the v2 Face Creator.)
+
+*Superseded:* the prior rule was "warm phosphor — amber, green, or cream; never blue." Aqua and pink deliberately override it (§14 Q3).
 
 ### 3.6 Motion
 
 - **Idle:** breathing (face), beating (heart), occasional blink, occasional glance off-screen. Always present, never distracting.
 - **Active:** wiring lights up, organ pulses, optional brief motion of face toward the active region.
-- **Transitions:** register shifts (chat ↔ inspect, normal ↔ edit) use diegetic motion — the chat surface dims and slides, the inspection layer fades up like a CRT warming.
+- **Transitions:** register shifts (chat ↔ inspect, normal ↔ edit) use diegetic motion — the chat surface dims and slides, the inspection layer fades up. (The "like a CRT warming" character depends on the §3.3 LCD reconciliation, pending §14 Q1/Q2; an LCD-idiom transition reads more as backlight settling than phosphor warming.)
 - **Restraint:** every animation should feel earned. Most of the time, b0t is quiet.
 
 ### 3.7 Sound
@@ -326,7 +345,7 @@ The b0t's identity is split across three files, each with a different role and l
 
 ### 5.2 Memory architecture
 
-The 4096-token context window of Foundation Models is the central constraint. b0t's memory architecture solves for it through aggressive separation of always-loaded vs. on-demand state:
+The context window is the central constraint — and it is now **variable per loaded model** (~4K tokens on Foundation Models; model-dependent for downloadable engines, often smaller). b0t's memory architecture solves for it through aggressive separation of always-loaded vs. on-demand state, with budgets re-based on the active model's actual window rather than a fixed 4096 (see [ADR-0012](decisions/0012-inference-engine-agnostic.md), and the token-metering gauge in amendment 2026-05-29 §8). The token figures below are illustrative at a ~4K window:
 
 **Always loaded (~550 tokens total):**
 - `identity/core.md` — voice anchor (~250)
@@ -469,7 +488,7 @@ Files stay on disk, fully readable and editable. The user can keep talking to th
 
 ## 9. Risks
 
-- **Foundation Models is a small model.** Personality coherence over long timescales is a real concern. Mitigations: strong system prompts, periodic identity-reinforcement passes, ruthless context budgeting. LoRA adapter entitlement would help if obtainable.
+- **The local model is small** — Foundation Models, or a ~1–2B downloadable open-weight model. Personality coherence over long timescales is a real concern and varies by chosen model. Mitigations: strong system prompts, periodic identity-reinforcement passes, ruthless context budgeting against the model's *actual* window. Per-model behaviour and budget differences are surfaced honestly in the Processor organ rather than hidden.
 - **iOS background execution is grudging.** Heartbeat reliability degrades at higher BPMs. Mitigation: be honest about it in the UI, lean on event triggers where possible.
 - **Face Creator is a substantial feature.** ~2-3 months of design and engineering on its own. Budget accordingly.
 - **The "wow" depends on a single scripted sequence.** First-60-seconds quality determines retention. Disproportionate care on this moment.
@@ -481,28 +500,30 @@ Files stay on disk, fully readable and editable. The user can keep talking to th
 
 ## 10. v1 versus v2
 
-### v1 (this design lock)
+### v1 (amended 2026-05-29)
 
-- Multi-b0t roster (cap 6)
-- Face Creator (parts + decals + palettes)
+- **Single b0t, single face** — one pre-composed face (sprite-sheet mood states) + illuminated speaker grille; no roster, no Gallery, no Face Creator ([ADR-0013](decisions/0013-v1-single-non-modular-bot.md))
+- **Engine-agnostic inference** — Foundation Models default-when-available, downloadable open-weight (via llama.cpp) otherwise, switchable everywhere ([ADR-0012](decisions/0012-inference-engine-agnostic.md))
 - Markdown brain (full architecture)
-- Configurable heartbeat with onboarding sequence
-- Anatomical GUI (face, body, organs, wiring, heart)
+- Configurable heartbeat (scheduler/proactive loop) with onboarding sequence
+- Anatomical GUI (face, body, organs, wiring, heart) with token metering
 - v1 module library (10 modules, all hand-curated)
-- TTS with audio filter system (8 filters)
+- Minimal TTS (system speech synthesis, no filter chain)
 - Notifications with mood-variant face icons
-- Local files in Documents directory; optional iCloud Drive sync
+- Local files in Documents directory
 - 7-day trial → one-time purchase
-- iPhone only (iPadOS support is largely free given SwiftUI; ship if low-cost)
+- iPhone only, iOS 26 + 6GB RAM floor (iPadOS support is largely free given SwiftUI; ship if low-cost)
 
 ### v2
 
+- **Multi-b0t roster + Gallery** (cap 6, single-active-heartbeat) and the heartbeat-as-unlock economy ([ADR-0013](decisions/0013-v1-single-non-modular-bot.md))
+- **Modular face**: the Parts/Decals/Palette Face Creator + the Manufacturers/Models roster (the 2026-05-04 amendment, retained as the v2 design)
+- **TTS audio-filter system** (8 filters: Clean/Warm/Tape/FM/Radio/Distant/Vintage/Hi-Fi)
 - Online module repo / marketplace (with vetting)
 - macOS companion app (the same b0t accessible from Mac)
 - Apple Watch glance (b0t face + heart on wrist)
 - Live Activities and Dynamic Island integration
 - Personal Voice integration for the b0t having the user's voice
-- More sophisticated Face Creator (procedural decals, animation customisation)
 - Module creation tools (visual editors for custom modules without writing markdown)
 
 ### Beyond v2
