@@ -20,15 +20,15 @@ When this document says **REQUIRED**, that is a hard constraint. When it says **
 
 ## 1. Project summary
 
-b0t is a native iOS app that gives users a personal AI companion they can compose, edit, and grow themselves through markdown files. The companion runs entirely on-device using Apple's Foundation Models framework, has a configurable heartbeat for proactive behaviour, and is presented through an anatomical GUI (face, body, organs, wiring, heart).
+b0t is a native iOS app: a genuinely useful local-AI tool, with companion styling, that users compose, edit, and grow themselves through markdown files. It runs entirely on-device — Apple Foundation Models by default where the device supports it, or a downloadable open-weight model the user chooses and owns ([ADR-0012](decisions/0012-inference-engine-agnostic.md)). It has a configurable heartbeat for proactive behaviour and is presented through an anatomical GUI (face, body, organs, wiring, heart).
 
-**One-line pitch:** A personal AI device — issued, not subscribed.
+**One-line pitch:** A personal AI device — issued, not subscribed. *Productivity can be fun.*
 
 **Price:** AUD $29.99 / USD $19.99 one-time purchase, with a 7-day free trial. No subscription, no ads, no telemetry, no account.
 
 **Platforms:** iPhone (primary). iPad if free from SwiftUI's adaptive layout. macOS / watchOS / visionOS in v2+.
 
-**Minimum OS:** iOS 26 / iPadOS 26. No backwards compatibility.
+**Minimum OS / device floor:** iOS 26 / iPadOS 26 (for Liquid Glass), **plus 6GB RAM** for model residency — excludes 4GB-class devices (iPhone 11 / SE2/SE3). iPhone 13 Pro (A15) is an explicit target (§14 Q9). No backwards compatibility.
 
 **Full design context:** see `b0t_design_document.md` for philosophy, aesthetic, and rationale.
 
@@ -40,14 +40,14 @@ These decisions are locked. Do not re-open without explicit developer approval.
 
 | # | Decision | Rationale |
 |---|---|---|
-| 1 | **All AI inference is on-device via Apple Foundation Models.** | Privacy, cost, philosophy. No cloud LLM calls in v1. |
+| 1 | **All AI inference is on-device and engine-agnostic.** Apple Foundation Models is the default where the device supports it; a downloadable open-weight model (via llama.cpp) otherwise, switchable everywhere. No cloud LLM calls in v1. *(Amended 2026-05-29 — [ADR-0012](decisions/0012-inference-engine-agnostic.md); was "exclusively Apple Foundation Models". The on-device/no-cloud principle is unchanged.)* | Privacy, cost, philosophy, device reach, ownership of the brain. |
 | 2 | **All b0t data is plain markdown files** in the user's Documents directory. | The "you own your b0t" thesis. No proprietary database for b0t content. |
 | 3 | **No telemetry, no analytics, no tracking.** App Store privacy manifest declares zero tracking. | Privacy is a feature. |
 | 4 | **iOS 26+ only.** Aggressive Liquid Glass adoption where it serves the cassette-futurism aesthetic; do not add availability guards for older OSes. | Single-target codebase. |
 | 5 | **Heartbeat uses BGAppRefreshTask + event triggers.** | iOS background reality. No silent fallback to fake heartbeats. |
 | 6 | **One-time purchase via non-consumable IAP, with 7-day trial tracked locally.** | No subscription. |
 | 7 | **All UI copy follows the cassette-futurism voice guide** (see design document §11). | Aesthetic discipline. |
-| 8 | **Multi-b0t enforces single-active-heartbeat. Soft-cap at 6 b0ts.** | iOS background budget reality + user attention model. |
+| 8 | **v1 ships a single b0t** (no roster, no Gallery). *(Softened 2026-05-29 — [ADR-0013](decisions/0013-v1-single-non-modular-bot.md); the multi-b0t roster with single-active-heartbeat and soft-cap 6 moves to v2.)* | iOS background budget reality + user attention model; tool-first v1 scope. |
 | 9 | **No raw-RGB colour pickers.** All b0t colour customisation goes through curated palettes. | Aesthetic discipline. |
 | 10 | **No emoji or whimsy decals in Face Creator.** Issued-equipment aesthetic only. | Aesthetic discipline. |
 
@@ -65,7 +65,7 @@ b0t/
 ├── b0tKit/                              # Swift Package — shared logic
 │   ├── Package.swift
 │   └── Sources/
-│       ├── b0tCore/                     # Foundation Models loop, heartbeat, agent state
+│       ├── b0tCore/                     # inference engine(s), heartbeat, agent state
 │       ├── b0tBrain/                    # Markdown file system, parsing, frontmatter, linking
 │       ├── b0tModules/                  # Module registry, EventKit/Mail/HealthKit/Location bridges
 │       ├── b0tFace/                     # Face rig, animation, rendering
@@ -77,8 +77,8 @@ b0t/
 │       ├── Home/                        # Anatomical GUI, chat surface
 │       ├── Inspect/                     # Organ inspection (.md viewer)
 │       ├── Edit/                        # Markdown editor (full-screen)
-│       ├── FaceCreator/                 # Face composition tool
-│       ├── Gallery/                     # Multi-b0t selector
+│       ├── FaceCreator/                 # Face composition tool — v2 (ADR-0013)
+│       ├── Gallery/                     # Multi-b0t selector — v2 (ADR-0013)
 │       ├── Heartbeat/                   # Heartbeat config sheet
 │       └── Onboarding/                  # First-60-seconds and 24-beat tutorial
 ├── default-bot/                          # source-of-truth for the shipped b0t (markdown)
@@ -107,8 +107,8 @@ b0t/
 ### 3.2 Data flow
 
 ```
-User ←→ Home View ←→ ConversationManager ←→ b0tCore.LanguageModelSession
-                          │
+User ←→ Home View ←→ ConversationManager ←→ b0tCore.InferenceEngine
+                          │                    (FM conformer | llama.cpp conformer)
                           ↓
                     b0tBrain (reads/writes .md files)
                           │
@@ -116,7 +116,8 @@ User ←→ Home View ←→ ConversationManager ←→ b0tCore.LanguageModelSes
                     b0tModules (calls EventKit, Mail, HealthKit, etc.)
                           │
                           ↓
-              Foundation Models @Generable typed responses
+              Typed responses, decoded per engine
+              (@Generable on FM; GBNF/JSON-schema on llama.cpp — ADR-0015)
                           │
                           ↓
                     Heartbeat journal (writes journal/YYYY-MM-DD.md)
@@ -124,43 +125,42 @@ User ←→ Home View ←→ ConversationManager ←→ b0tCore.LanguageModelSes
 
 A heartbeat tick is the same flow without a user prompt — the heartbeat manager wakes via `BGAppRefreshTask`, runs through the same pipeline, surfaces output as a notification or stored journal entry.
 
-### 3.3 The Foundation Models session pattern
+### 3.3 The inference session pattern
 
-Every interaction is a fresh `LanguageModelSession`. Sessions are short-lived. State persists in markdown files, not session memory.
+Every interaction is a fresh inference session on the **active engine** (an `InferenceEngine` conformer — Foundation Models where available, else a llama.cpp-backed open-weight model; [ADR-0012](decisions/0012-inference-engine-agnostic.md)). Sessions are short-lived. State persists in markdown files, not session memory. The engine is chosen by capability detection and user override; the same call site runs against either.
 
 ```swift
 // pseudocode
-func runTick(forBot bot: Bot) async throws -> TickResult {
+func runTick(forBot bot: Bot, engine: any InferenceEngine) async throws -> TickResult {
     let context = try await ContextAssembler.assemble(
         bot: bot,
-        identityFiles: [.core, .voice],
+        identityFiles: [.core, .principles],
         memoryFiles: [.core, .recent],
         moduleFiles: bot.modules.relevantToCurrentContext(),
         recentJournal: bot.journal.lastN(5),
-        tokenBudget: 3500  // leave room for response
+        tokenBudget: engine.contextWindow.budgetForPrompt  // model-derived, variable
     )
-    
-    let session = LanguageModelSession(
-        instructions: context.systemPrompt,
-        tools: bot.modules.toolHandles
+
+    // The engine applies the model's own format layer (chat template) to the
+    // slot-tagged messages, and decodes structured output its own way:
+    // @Generable on FM, GBNF/JSON-schema on llama.cpp (ADR-0015).
+    let decision: TickDecision = try await engine.respond(
+        messages: context.slottedMessages,
+        tools: bot.modules.tools,
+        decoding: TickDecision.self
     )
-    
-    let decision: TickDecision = try await session.respond(
-        to: context.userPrompt,
-        generating: TickDecision.self
-    )
-    
+
     try await Executor.apply(decision, for: bot)
     try await JournalWriter.append(decision, to: bot.todaysJournal)
     return TickResult(decision: decision)
 }
 ```
 
-`TickDecision` is `@Generable` — the model returns a typed Swift struct, not free text. Same pattern for all major LLM interactions.
+The engine returns a typed Swift struct, not free text. On Foundation Models this is `@Generable`; on the llama.cpp engine it is grammar-constrained / JSON-schema decoding to the same type. Same pattern for all major LLM interactions. The content/format boundary and slot-based assembly are specified in [ADR-0015](decisions/0015-content-format-boundary-slot-assembly.md).
 
 ### 3.4 Context budgeting
 
-The 4096-token Foundation Models context window is the hardest constraint. Strict policy:
+The context window is the hardest constraint, and it is now **variable per loaded model** — derived from the active engine, not a fixed 4096 ([ADR-0012](decisions/0012-inference-engine-agnostic.md)). Budgets are computed against the active model's actual window. The proportions below are illustrative at a ~4K window:
 
 - `identity/core.md` + `identity/principles.md`: ~450 tokens, always loaded
 - `memory/core.md`: ~150 tokens, always loaded
@@ -170,9 +170,11 @@ The 4096-token Foundation Models context window is the hardest constraint. Stric
 - Response budget: ~500 tokens
 - Buffer: ~500 tokens
 
+On a smaller downloadable model these scale down proportionally; the always-loaded floor (identity + memory core) is fixed and the conditional/working budget absorbs the difference.
+
 `identity/about_b0t.md`, `memory/about_me.md`, full `memory/recent.md`, and `memory/archive/` are loaded *only on demand* via tool call when the user asks meta questions or specific recall is needed. They are never in the always-loaded set.
 
-The `ContextAssembler` is responsible for staying under budget. **REQUIRED:** every assembled prompt logs its token count in debug builds. **REQUIRED:** if assembly exceeds budget, the assembler logs which file pushed it over and falls back to a more aggressive memory digest.
+The `ContextAssembler` is responsible for staying under budget. **REQUIRED:** token counts are computed with the **active model's tokenizer** and recomputed on content change or model swap (not per frame), including structural/template overhead, not just organ content. **REQUIRED:** per-slot/per-organ token subtotals are exposed for the token-metering gauge (a resource gauge with the model's context window as denominator — amendment 2026-05-29 §8); each `.md` reports its own token count. **REQUIRED:** every assembled prompt logs its token count in debug builds. **REQUIRED:** if assembly exceeds budget, the assembler logs which file pushed it over and falls back to a more aggressive memory digest.
 
 ### 3.5 Persistence
 
@@ -210,13 +212,14 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - Implement `BotLoader` that reads a b0t directory into memory and `BotWriter` that persists changes.
 - **Acceptance:** unit tests load the default b0t, parse all files, navigate links, write modifications. No UI needed.
 
-### Phase 2 — Foundation Models loop
-- Implement `b0tCore`: `ContextAssembler`, `LanguageModelSession` wrapper, `TickDecision` and other `@Generable` types.
+### Phase 2 — inference loop *(shipped 2026-05-04 against Foundation Models; re-opened 2026-05-29 for the engine abstraction — [ADR-0012](decisions/0012-inference-engine-agnostic.md))*
+- Implement `b0tCore`: `ContextAssembler`, the inference session wrapper, `TickDecision` and other typed-output types. *(As-built: FM `LanguageModelSession` + `@Generable`.)*
 - Implement the conversation flow (user prompt → context → typed response → applied effects).
 - Implement the heartbeat tick flow with `BGAppRefreshTask` registration.
 - Wire to the markdown brain for state persistence.
 - Implement journal writing in adapted-OpenClaw format.
 - **Acceptance:** a CLI test harness or minimal SwiftUI view can hold a conversation with the default b0t. Heartbeats fire and write journal entries.
+- **Re-open (2026-05-29):** introduce the `InferenceEngine` protocol (FM as one conformer, llama.cpp as another), structured-output parity (`@Generable` ↔ GBNF/JSON-schema), variable model-derived context window, the content/format boundary + slot-based assembly ([ADR-0015](decisions/0015-content-format-boundary-slot-assembly.md)), and the model download manager + lifecycle. Planned and approved separately.
 
 ### Phase 3 — Module bridges + Tools
 - Implement `b0tModules`: typed bridges to EventKit, Mail (read-only via MailKit if available, else `MFMailComposeViewController` for compose), HealthKit, Core Location, Notes (via NotesKit if available, else surface limitation), Reminders (EventKit).
@@ -239,14 +242,18 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - Implement Face Creator entry point at the third wow moment.
 - **Acceptance:** fresh install plays through the first-60-seconds sequence smoothly. The 24-beat tutorial fires across subsequent heartbeats.
 
-### Phase 6 — Face rig + Parts library + Face Creator
+### Phase 6 — Single face rig + grille *(re-scoped 2026-05-29 — [ADR-0013](decisions/0013-v1-single-non-modular-bot.md))*
+
+> v1 re-scope: a **single sprite-sheet face rig** (8 mood states) + illuminated grille, no moving jaw. The **Parts library + Face Creator below move to v2.** The rig/MoodController/motion-library are net-new (never shipped), now targeting the single-unit model.
 - Implement face rig per `docs/specs/face-creator-procedural-animation.md` (forthcoming): mood-state machine over Part atlases, blink loop, breathing, mouth-open cycle. 8 mood states per Part: idle, speaking, thinking, surprised, sleepy, attentive, worried, delighted.
 - Implement Parts library (Skull / Eyes / Jaw variants from across the roster).
 - Implement Face Creator UX (composition, randomise, save).
 - Implement mood-variant notification icons (rendered to disk at face-creation time).
 - **Acceptance:** user can compose, save, and revisit a custom face composed of unlocked Parts. Home screen shows the user's face animating across mood states. Notifications use the right mood variant.
 
-### Phase 7 — Multi-b0t and Gallery
+### Phase 7 — Multi-b0t and Gallery *(→ v2, 2026-05-29 — [ADR-0013](decisions/0013-v1-single-non-modular-bot.md))*
+
+> Deferred to v2. v1 ships a single b0t. The section below is the v2 design.
 - Implement multi-b0t directory model with `_active` pointer.
 - Implement Gallery view (wallet-style selector).
 - Implement b0t switching (deliberate gesture, friction).
@@ -254,7 +261,9 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 - Soft-cap at 6 b0ts.
 - **Acceptance:** user can create up to 6 b0ts, switch between them, converse with dormant ones, only the active one has a heartbeat firing in the background.
 
-### Phase 8 — Audio (TTS + effects)
+### Phase 8 — Audio (minimal TTS + UI sounds) *(shrunk 2026-05-29 — §14 Q7)*
+
+> v1: system `AVSpeechSynthesizer` (no effect chain) + restrained UI sounds; speech amplitude drives the grille. The 8-filter effect chain below is **v2.**
 - Implement `b0tAudio`: `AVSpeechSynthesizer` piped through `AVAudioEngine` effect chain.
 - Implement 8 audio filters: Clean, Warm, Tape, FM, Radio, Distant, Vintage, Hi-Fi.
 - Add filter selection to b0t's `identity/audio.md` file.
@@ -294,11 +303,13 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 
 **REQUIRED:** the brain layer does not hold a permanent in-memory model — files are read on demand and cached via `NSCache` with explicit invalidation when the file changes on disk.
 
-### 5.2 b0tCore (Foundation Models loop)
+### 5.2 b0tCore (inference loop)
 
-**REQUIRED:** every `LanguageModelSession` is short-lived. Do not retain sessions across user turns.
+> **Engine-agnostic (amended 2026-05-29 — [ADR-0012](decisions/0012-inference-engine-agnostic.md)).** The requirements below are mediated by an `InferenceEngine` protocol. The FM conformer satisfies them with `LanguageModelSession` + `@Generable` (as shipped); the llama.cpp conformer satisfies the same contracts with its own session + grammar-constrained decoding.
 
-**REQUIRED:** all major model interactions use `@Generable` typed output. Specific types to define:
+**REQUIRED:** every inference session is short-lived. Do not retain sessions across user turns.
+
+**REQUIRED:** all major model interactions use **typed output decoded to a `Codable` shape** — `@Generable` on the FM engine, GBNF/JSON-schema decoding on the llama.cpp engine ([ADR-0015](decisions/0015-content-format-boundary-slot-assembly.md)). Specific types to define:
 - `TickDecision` — heartbeat tick output (action, organ_used, journal_entry, memory_update)
 - `ConversationResponse` — chat reply (text, mood, tool_calls)
 - `MemoryObservation` — when b0t notices something to remember (about_who, what, importance)
@@ -307,7 +318,7 @@ These are ordered. Each phase produces a buildable, testable artefact. Do not sk
 
 **REQUIRED:** `ContextAssembler` produces a typed `AssembledContext` with fields for each component (identity, memory, modules, recent journal). The system prompt is built from this struct, never concatenated ad-hoc.
 
-**REQUIRED:** if `Foundation Models` returns `.exceededContextWindowSize`, gracefully start a new session with the current state digest and surface the event to the user via the b0t ("oh — let me start fresh, I was getting muddled").
+**REQUIRED:** if the active engine signals a context-window overflow (FM's `.exceededContextWindowSize`, or the equivalent on the llama.cpp engine), gracefully start a new session with the current state digest and surface the event to the user via the b0t ("oh — let me start fresh, I was getting muddled").
 
 **SHOULD:** instrument every model call with a debug-build-only metric: tokens-in, tokens-out, latency, decision type. Used for development tuning.
 
@@ -332,23 +343,25 @@ protocol Module {
 
 ### 5.4 b0tFace (rig + rendering)
 
-**Phase note:** Phase 4 ships a single static face composed of three baked Parts. The rig requirements below ship in Phase 6 per ADR-0011.
+**Phase note (amended 2026-05-29 — [ADR-0013](decisions/0013-v1-single-non-modular-bot.md)/[ADR-0014](decisions/0014-speech-via-illuminated-grille.md)):** Phase 4 shipped a static three-part composite. v1's face is now a **single pre-composed unit** (not runtime-composited from Skull/Eyes/Jaw), with ~8 mood states authored as **sprite-sheet animations** that the rig *selects*. **No moving jaw** — speech is signalled by an **illuminated speaker grille** (pulsing in token-yellow, driven by TTS amplitude or token-emission rate). The modular Parts rig + Face Creator defer to v2. The runtime-composited rig, MoodController, and motion-vocabulary library are **net-new Phase 6 work** (they were never shipped), now targeting the single-unit sprite-sheet model. The face's *visual register* (1-bit vs painterly) and the CRT eye-screen treatment await Jamee's UI designs (§14 Q1/Q2).
 
 **REQUIRED:** the face is rendered using **SpriteKit embedded in SwiftUI via `SpriteView`**. Each face part is an `SKSpriteNode`. Animation is driven by `SKAction` sequences (idle blink, breathing, glance, mood transitions). Sprite frames are bundled in `SKTextureAtlas` per part. Mood states are state-machine-driven on the scene level.
 
 **Why SpriteKit + SwiftUI:** native Apple frameworks (per project goals), full code-level access for Claude Code (every animation parameter, sequence, and state is in Swift, diffable in git, editable by the agent), pixel-perfect nearest-neighbour rendering out of the box, mature sprite-atlas tooling. Trade-off: more code than a Rive `.riv` import would be for the same animation, but every line is editable and reviewable.
 
-**REQUIRED:** every shipped face part has all 8 mood states baked in (idle, speaking, thinking, surprised, sleepy, attentive, worried, delighted). New parts added later must conform to the same animation-state contract.
+**REQUIRED:** the single v1 face unit ships all 8 mood states as sprite-sheet animations (idle, speaking, thinking, surprised, sleepy, attentive, worried, delighted). The grille is an independent channel (speech/activity); mood sprites carry emotion only — no mood-×-mouth combinations. v2 Parts must conform to the same mood-state contract.
 
 **REQUIRED:** the face renders at native resolution scaled for retina displays without losing the pixel-art grid. Use nearest-neighbour scaling (`SKTexture.filteringMode = .nearest`), never bilinear.
 
-**SHOULD:** add CRT/scanline overlay as an `SKEffectNode` with a fragment shader, user-toggleable in settings. Default: on, very subtle.
+**SHOULD (pending §14 Q2):** the shipped CRT/scanline overlay (`SKEffectNode` + fragment shader, currently on the eye-screen) may stay as the one emissive element or give way to the LCD-no-bloom idiom (amendment §9). Resolve with Jamee's UI designs before changing it.
 
-**Pixel-art assets are provided by the developer (Jamee)** — sourced from a purchased kit, custom design, or a combination. Claude Code does not generate assets; it integrates them.
+**Pixel-art assets are provided by the developer (Jamee)** — v1 chrome/organs from piiixl 1-bit packs (scaled up, runtime mask-tinted; amendment §10), the face as a single sprite-sheet unit. Claude Code does not generate assets; it integrates them.
 
 ### 5.5 b0tAudio (TTS pipeline)
 
-**REQUIRED:** TTS uses `AVSpeechSynthesizer` writing to a buffer (`write(_:toBufferCallback:)`), routed through `AVAudioEngine` with a chain of `AVAudioUnit` effects per filter.
+> **v1 scope (amended 2026-05-29 — §14 Q7):** v1 ships **minimal TTS** — system `AVSpeechSynthesizer`, **no `AVAudioEngine` effect chain.** The speech amplitude envelope drives the illuminated grille ([ADR-0014](decisions/0014-speech-via-illuminated-grille.md)); text-only turns fall back to token-emission rate. The full 8-filter effect chain below is **v2.** Phase 8 shrinks to minimal TTS + UI sounds.
+
+**REQUIRED (v2):** TTS uses `AVSpeechSynthesizer` writing to a buffer (`write(_:toBufferCallback:)`), routed through `AVAudioEngine` with a chain of `AVAudioUnit` effects per filter.
 
 **Filter specifications (REQUIRED, exact parameters open for tuning):**
 - Clean: passthrough.
@@ -419,10 +432,12 @@ All app copy must follow these rules. **Run any user-facing string through this 
 
 ## 7. Privacy
 
-- **App Store privacy manifest:** declares zero tracking, zero data collection, zero linked data.
+- **App Store privacy manifest:** declares zero tracking, zero data collection, zero linked data. Model downloads (below) transfer no user data and are not tracking.
 - **No analytics, no telemetry, no crash reporting that ships data off-device.** If crash logging is needed, use Apple's built-in MetricKit which keeps data on-device unless the user explicitly shares.
 - **All system permissions** (calendar, mail, health, location, notifications) are requested only when the user enables a module that needs them, with explicit explanations.
-- **No ad SDK, no third-party SDKs that phone home.** Third-party Swift packages must be audited for network calls before inclusion.
+- **No ad SDK, no third-party SDKs that phone home.** Third-party Swift packages must be audited for network calls before inclusion — including the llama.cpp runtime ([ADR-0012](decisions/0012-inference-engine-agnostic.md)).
+- **The one sanctioned outbound network call is user-initiated model downloads** from a pinned, declared source (model weights, hundreds of MB to >1GB). **Inference itself is always local; no cloud LLM calls.** A Foundation Models user may never trigger any network call. The download manager is storage/RAM-aware and fails gracefully.
+- **Model licensing/attribution** (per [ADR-0012](decisions/0012-inference-engine-agnostic.md)): each model's license/disclosure is shown in the Processor organ inspector. Llama models require "Built with Llama" displayed prominently + license copy + a `NOTICE` file *whenever Llama is the active engine*; Qwen (Apache-2.0) requires license/notice retention; Foundation Models needs no attribution. "Built with Llama" is a legally-required verbatim string — **exempt from the all-lowercase voice rule** (see voice-and-copy guide).
 - **iCloud Drive sync is opt-in,** with the disclosure that files will sync to the user's iCloud (under their Apple ID, never to b0t servers).
 
 ---
@@ -511,7 +526,7 @@ These CLAUDE.md files are loaded automatically by Claude Code in each working co
 ### 10.5 Workflow expectations
 
 - **Read the design doc and PRD before any major task.** Re-read when scope shifts.
-- **Use Apple's Foundation Models documentation** (via `DocumentationSearch`) as the source of truth for the framework. The framework is new and evolving; do not rely on memory.
+- **Use the active runtime's documentation as the source of truth** — Apple's Foundation Models docs (via `DocumentationSearch`) for the FM engine, and the llama.cpp / GGUF docs (via context7 or upstream) for the downloadable engine. Both are evolving; do not rely on memory.
 - **Use `RenderPreview`** to verify UI changes visually. Do not assume; verify.
 - **Surface ambiguity, don't resolve silently.** When the PRD is unclear or contradicts the design doc, ask the developer.
 - **One concern per commit.** Atomic, reversible, with clear commit messages.
@@ -531,7 +546,7 @@ The v1.0 release ships when all of these are true:
 - [ ] Battery impact: less than 5% per day of background heartbeat at default BPM, measured on iPhone 14 Pro.
 - [ ] Memory: app idle holds under 150MB.
 - [ ] First-60-seconds sequence completes smoothly on cold install in under 10 seconds to "talk / hang out" prompt.
-- [ ] Foundation Models response latency: median first-token under 800ms on iPhone 15 Pro.
+- [ ] Inference latency: median first-token under 800ms on the Foundation Models path (iPhone 15 Pro); a per-engine target for the llama.cpp path on the 6GB floor device (iPhone 13 Pro) is set once a model is selected and measured (§14 Q6).
 - [ ] All accessibility requirements in §8 met.
 - [ ] App Store privacy manifest declares zero tracking, validated.
 - [ ] TestFlight beta with at least 20 real users for 14 days, with feedback addressed.
@@ -549,8 +564,12 @@ These are explicitly open. Do not silently fill them in.
 | 1 | Final pricing. Decided pre-launch. | Phase 9 | Open |
 | 2 | Default `identity/core.md` content. | Phase 1 | **Resolved** — drafted, in revision |
 | 3 | Face rigging tool. | Phase 4 | **Resolved** — SpriteKit + SwiftUI |
-| 4 | Pixel art assets. | Phase 4–6 | **Resolved** — Gamelabs Studio asset pipeline per amendment §2.2; baked palette variants, no runtime palette swap shader. |
-| 5 | Curated palette count. | Phase 6 | **Resolved** — 12 palettes in v1 |
+| 4 | Pixel art assets. | Phase 4–6 | **Re-answered 2026-05-29** — v1 uses piiixl 1-bit asset packs (`2000+ Pixel Icons`, `1bit_UI`) scaled up + Aseprite slicing, runtime mask-tinted; the face is a single sprite-sheet unit. Gamelabs Studio baked-palette pipeline defers to v2 with the modular face ([ADR-0013](decisions/0013-v1-single-non-modular-bot.md), amendment §10). |
+| 5 | Curated palette count. | Phase 6 | **→ v2 (2026-05-29)** — b0t palettes belong to the modular Face Creator, deferred with it. v1 uses the three-colour semantic highlight system (§3.5), not per-b0t palettes. |
+| 12 | Downloadable model lineup + default. | Phase 2 | **Open (§14 Q6)** — FM + 3 downloadable models; exact trio + quant levels pending on-device validation (RAM fit, context window). Proposed: Qwen3 1.7B default, Llama 3.2 1B opt-in, + a third. |
+| 13 | Face visual register: 1-bit vs painterly. | Phase 6 | **Open (§14 Q1)** — awaiting Jamee's UI layout designs; gates ADR-0016. |
+| 14 | CRT eye-screen vs all-LCD. | Phase 4/6 | **Open (§14 Q2)** — awaiting UI designs; gates ADR-0016. |
+| 15 | Trial length (3 vs 7 days). | Phase 9 | **Open (§14 Q8)** — pre-launch; one-time $19.99/$29.99 either way. |
 | 6 | Type choices. | Phase 4 | **Resolved** — IoskeleyMono NL (brain, open-source), Söhne (chat). |
 | 7 | Sound design source. | Phase 8 | **Resolved** — internal |
 | 8 | Mail framework access vs `MFMailComposeViewController`. | Phase 3 | Open |
