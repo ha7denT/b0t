@@ -1,6 +1,6 @@
 # 0011 — Defer face rig to Phase 6
 
-**Status:** Accepted
+**Status:** Superseded by [0013](0013-v1-single-non-modular-bot.md) — v1 ships a single non-modular sprite-sheet face; the modular Parts rig + Face Creator defer to v2, and Phase 6 is re-scoped to the single-face rig.
 **Date:** 2026-05-05
 **Deciders:** Jamee
 **Amends:** PRD §3 Phase 4, §5.4

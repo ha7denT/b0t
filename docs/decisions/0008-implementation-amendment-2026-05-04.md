@@ -1,6 +1,6 @@
 # 0008 — Implementation amendment — 2026-05-04 vocabulary and architectural locks
 
-**Status:** Accepted
+**Status:** Partially superseded by [0012](0012-inference-engine-agnostic.md) and [0013](0013-v1-single-non-modular-bot.md) — for **v1**, the Gamelabs baked-palette pipeline, the gallery (cap 6), heartbeat-unlock currency, and Manufacturers-as-content defer to v2. This amendment is **retained as the v2 design.** The vocabulary lock, three-Part ontology, MCP-for-Tools, and marketplace-compatible architecture still stand.
 **Date:** 2026-05-04
 **Deciders:** Jamee
 **Supersedes:** prior decisions on parts ontology, Tools mechanism, vocabulary, and unlock structure where they conflict with this amendment.
