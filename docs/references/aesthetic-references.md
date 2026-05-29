@@ -1,5 +1,7 @@
 # aesthetic references
 
+> **Amended 2026-05-29 — read with the reconciliation in mind.** Two shifts override parts of this doc: (1) **Colour — "never blue" is overridden** (§14 Q3, decided). The highlight system is now three semantic colours — yellow `#EAFF3D` (tokens/text), aqua `#3DEAFF` (function/IO), pink `#FF3DEA` (heartbeat/core) — over a muted dark base; see design doc §3.5. The "warm phosphor / never blue" lines below are superseded. (2) **Display idiom — LCD-forward, no bloom/glow** for panels and organs (amendment §9). Whether the b0t **face** stays painterly or goes 1-bit (§14 Q1), and whether the **CRT eye-screen** keeps its scanlines or goes LCD (§14 Q2), await Jamee's UI designs and are settled in ADR-0016 (pending). Until then, treat the CRT/bloom language below as **under reconciliation**, not current law. The Stålenhag/Cobb/Lumon/Teenage-Engineering discipline and the honesty principle are unchanged.
+
 Visual and cultural references that define the b0t aesthetic. When making any aesthetic decision — colour, motion, type, sound, copy, art direction — return to this list. The synthesis at the bottom is the brief; the references above explain why.
 
 ## the references
