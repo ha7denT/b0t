@@ -1,8 +1,10 @@
 # b0t implementation amendment — 2026-05-04
 
-**Status:** Active
+**Status:** Largely deferred to v2 by amendment 2026-05-29 (see [ADR-0013](decisions/0013-v1-single-non-modular-bot.md) and [ADR-0012](decisions/0012-inference-engine-agnostic.md)). **Retained as the v2 design — do not delete.**
 **Supersedes:** prior decisions on parts ontology, Tools mechanism, naming, and unlock structure
 **Scope of impact:** No GUI or face creator components have been built yet, so this amendment is largely additive. Existing non-GUI work (rig protocol, mood system, scene scaffolding) should be reviewed against the updated terminology but is unlikely to require deep refactoring.
+
+> **v1/v2 split (2026-05-29).** v1 ships a single non-modular b0t (ADR-0013). The modular apparatus in this document — the Parts system (§2.1), Gamelabs baked-palette pipeline (§2.2), Manufacturers (§2.4), the Gallery (§3.1), heartbeat-unlock economy (§3.2), and pre-built/build-your-own paths (§3.3) — is **v2 — deferred 2026-05-29**, conceptually preserved here as the v2 design. The asset pipeline for v1 is piiixl 1-bit packs + Aseprite (amendment 2026-05-29 §10), superseding §2.2/§2.3's Gamelabs tiers for v1. **Still v1:** the vocabulary lock (§1), MCP-for-Tools (§2.5), marketplace-compatible architecture (§2.6), and the naming migration (§4).
 
 ## 1. Vocabulary — locked
 
@@ -24,9 +26,13 @@ Removed terms: **Ears, Accoutrements, Overlays, Voice, Skills.** Any references 
 
 ### 2.1 Parts system — three parts, not four
 
+> **v2 — deferred 2026-05-29.** v1 ships a single pre-composed face unit (ADR-0013); the runtime-composited three-Part rig is v2.
+
 Drop Ears entirely from the rig, the manifest, the protocol, and the asset pipeline. The `FacePart` protocol now has three conformers: `SkullNode`, `EyesNode`, `JawNode`. The skull's `anchor_points` no longer needs `ear_left` or `ear_right` entries.
 
 ### 2.2 Asset generation — Gamelabs Studio, baked palette variants
+
+> **v2 — deferred 2026-05-29.** v1 uses piiixl 1-bit packs + Aseprite with runtime mask-tinting (amendment 2026-05-29 §10). The Gamelabs baked-palette pipeline returns with the v2 modular face.
 
 Asset production uses Gamelabs Studio (gamelabstudio.co), not hand-authored Aseprite. The pipeline:
 
@@ -72,6 +78,8 @@ The 4× ratio between tiers is intentional and should be preserved. Asset genera
 
 ### 2.4 Manufacturers — origins, not silos
 
+> **v2 — deferred 2026-05-29.** Multiple Manufacturers arrive with the v2 modular system. v1 ships one b0t (ADR-0013); the `manufacturers.json` *shape* is preserved with a single entry.
+
 Parts from any unlocked Manufacturer can be combined freely once unlocked. Manufacturers are *origins* (where a Part came from) not *constraints* (what it can be used with). The "Frankenstein b0t" path is explicitly supported.
 
 Visual cohesion across Manufacturers is enforced through three mechanisms — **all three are required, not optional**:
@@ -100,6 +108,8 @@ No marketplace ships with v1. The on-device experience is the entire product. Ho
 This is *forward-compatibility hygiene*, not active marketplace work.
 
 ## 3. Gallery and progression — new in this amendment
+
+> **v2 — deferred 2026-05-29 (entire section).** v1 ships a single b0t with no Gallery and no unlock economy (ADR-0013). The heartbeat *scheduler* stays in v1; only the heartbeat-as-unlock-currency role defers. §3.1–§3.3 are the v2 design.
 
 ### 3.1 Gallery
 
