@@ -43,6 +43,8 @@ Used for: error messages, status indicators, settings labels, alerts, technical 
 | "Edit Profile" | "edit identity." |
 | "Permission denied" | "access refused." |
 
+**Exemption — legally-required verbatim strings.** Some model licenses mandate an exact attribution string that must not be altered. **"Built with Llama"** (required whenever a Llama model is the active engine — see [ADR-0012](../decisions/0012-inference-engine-agnostic.md) and PRD §7) is one such string: keep it **exactly as written, including its capitalisation** — do *not* lowercase it to "built with llama." This is the one sanctioned break in the all-lowercase rule. Surround it with lowercase system voice as normal (e.g. "engine: llama 3.2 · Built with Llama"). Apache-2.0 models (Qwen) and Foundation Models carry no such verbatim requirement.
+
 ### 2. b0t voice (the character)
 
 Used for: the b0t's own conversation, heartbeat messages, journal entries surfaced to the user, mood-driven responses.

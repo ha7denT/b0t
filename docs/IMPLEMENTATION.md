@@ -4,14 +4,42 @@ A living document. Updated at the end of each phase, or when a blocker appears.
 
 ## Current state
 
-- **Phase:** 5 deferred 2026-05-06; next phase to be selected
+- **Phase:** 5 deferred 2026-05-06; **Phase 2 re-opened 2026-05-29** (engine
+  abstraction). Next phase to be selected after the Phase 2 re-open is planned.
 - **Status:** Phase 5 paused mid-brainstorm, deferred until the features it
   showcases are built. Roughly a third of the 24 onboarding beats reference
   modules that don't yet exist (mail, location, notes, weather) or features
-  in later phases (face creator → Phase 6, multi-b0t → Phase 7). Shipping
+  in later phases (face creator → Phase 6, multi-b0t → now v2). Shipping
   onboarding now would have the b0t introduce features it can't actually
   perform — a credibility problem on day one. The brainstorm settled
   enough to make resumption cheap (see "Specs in flight" below).
+
+### Amendment 2026-05-29 (recorded 2026-05-30)
+
+`docs/b0t-amendment-2026-05-29.md` reframes b0t as **tool-first**, makes
+inference **engine-agnostic** (Foundation Models default-when-available;
+llama.cpp-backed downloadable open-weight models otherwise, switchable
+everywhere — [ADR-0012](decisions/0012-inference-engine-agnostic.md)), and
+**contracts v1 to a single non-modular b0t** (modular face, multi-b0t/Gallery,
+and the unlock economy → v2 — [ADR-0013](decisions/0013-v1-single-non-modular-bot.md)).
+Speech is signalled by an illuminated grille, no moving jaw
+([ADR-0014](decisions/0014-speech-via-illuminated-grille.md)); prompts use a
+content/format boundary + slot-based assembly
+([ADR-0015](decisions/0015-content-format-boundary-slot-assembly.md)); the
+aesthetic goes LCD-forward with a yellow/aqua/pink semantic palette
+("never blue" overridden — ADR-0016, **pending** Jamee's UI designs).
+Impact map: `docs/plans/amendment-2026-05-29-interpretation.md`.
+
+- **§14 resolved 2026-05-30:** Q3 (palette override), Q4 (single b0t), Q5
+  (FM default-but-switchable everywhere; llama.cpp downloadable path), Q6
+  (FM + 3 downloadable models; disclosures in the Processor inspector — exact
+  trio + quant levels pending on-device validation), Q7 (minimal TTS), Q9
+  (iOS 26 + 6GB-RAM floor).
+- **§14 deferred:** Q1 (face register) and Q2 (CRT eye-screen) await Jamee's
+  UI layout designs (gate ADR-0016); Q8 (trial length) is a pre-launch call.
+- **Code untouched.** This was a docs + ADRs pass only. The Phase 2 re-open
+  (engine abstraction, structured-output parity, download/lifecycle) is a
+  separate implementation effort with its own plan and approval gate.
 
 (Phase 4 closed 2026-05-06 — code shipped, tests green at 279, simulator
 smoke passed including the Phase 4.5 chat-wiring fix-ups. The ledger
@@ -24,13 +52,13 @@ Phase 4.5 follow-ups remain outstanding.)
 |---|---|---|---|
 | 0 | Project setup | [phase-0](plans/phase-0-project-setup.md) | complete (2026-04-30) |
 | 1 | Markdown brain (no LLM) | [phase-1](plans/phase-1-markdown-brain.md) | complete (2026-05-01) |
-| 2 | Foundation Models loop | [phase-2](plans/phase-2-foundation-models-loop.md) | complete (2026-05-04) |
+| 2 | Inference loop | [phase-2](plans/phase-2-foundation-models-loop.md) | complete (2026-05-04) · **re-opened 2026-05-29** (engine abstraction — ADR-0012) |
 | 3 | Module bridges + Tools | [phase-3](plans/phase-3-modules-and-tools.md) | complete (2026-05-05) |
 | 4 | Anatomical GUI (static face) | [phase-4](plans/phase-4-anatomical-gui.md) | complete (2026-05-06) |
 | 5 | Onboarding sequence | — | deferred (2026-05-06) |
-| 6 | Face rig + Parts library + Face Creator | — | not started |
-| 7 | Multi-b0t and Gallery | — | not started |
-| 8 | Audio (TTS + effects) | — | not started |
+| 6 | Single face rig + grille | — | not started · **re-scoped 2026-05-29** (single sprite-sheet unit; Parts/Face Creator → v2 — ADR-0013) |
+| 7 | ~~Multi-b0t and Gallery~~ | — | **→ v2 (2026-05-29 — ADR-0013)** |
+| 8 | Audio (minimal TTS + UI sounds) | — | not started · **shrunk 2026-05-29** (filter chain → v2 — §14 Q7) |
 | 9 | IAP and trial | — | not started |
 | 10 | Polish and ship | — | not started |
 
@@ -38,7 +66,7 @@ Phase 4.5 follow-ups remain outstanding.)
 
 (Questions surfaced here are alive — once answered, they're closed in the relevant plan or ADR.)
 
-- Hilfer's three Part PNGs + 9 organ icons + 4 module sub-icons + 1 file icon — Jamee committed to deliver. Code shipped against placeholder red-X squares (Phase 4 closed without them); when assets land, drop them into `b0tApp/Resources/Assets.xcassets/` and the home screen lights up.
+- ~~Hilfer's three Part PNGs + 9 organ icons + 4 module sub-icons + 1 file icon — Jamee to deliver via Gamelabs.~~ **Superseded for v1 (2026-05-29 — ADR-0013/amendment §10):** v1 chrome/organs come from piiixl 1-bit packs (scaled up, runtime mask-tinted) and the face is a single sprite-sheet unit. The Gamelabs three-Part placeholders defer to v2 with the modular face. New asset task: source/slice the piiixl packs (Aseprite) + author the single-unit face sprite sheet + grille; drop into `b0tApp/Resources/Assets.xcassets/`.
 
 ## Specs in flight
 
