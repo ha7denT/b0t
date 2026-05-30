@@ -29,4 +29,39 @@ final class CodableRoundTripTests: XCTestCase {
         let original = MemoryObservation(about: "Jamee", what: "likes coffee", importance: .high)
         XCTAssertEqual(try jsonRoundTrip(original), original)
     }
+
+    func test_conversationResponse_codableRoundTrips() throws {
+        let original = ConversationResponse(
+            text: "hello",
+            mood: .delighted,
+            memoryObservations: [
+                MemoryObservation(about: "Jamee", what: "likes coffee", importance: .medium)
+            ]
+        )
+        XCTAssertEqual(try jsonRoundTrip(original), original)
+    }
+
+    func test_tickDecision_codableRoundTrips() throws {
+        let original = TickDecision(
+            observed: "afternoon",
+            considered: ["pass", "glance_calendar"],
+            decided: "pass",
+            why: "nothing urgent",
+            acted: "noted silently",
+            mood: .attentive,
+            organUsed: "calendar",
+            memoryObservations: [MemoryObservation(about: "x", what: "y", importance: .low)]
+        )
+        XCTAssertEqual(try jsonRoundTrip(original), original)
+    }
+
+    func test_relationshipNote_codableRoundTrips() throws {
+        let original = RelationshipNote(name: "Sam", relation: "spouse", notes: "likes coffee")
+        XCTAssertEqual(try jsonRoundTrip(original), original)
+    }
+
+    func test_moodTransition_codableRoundTrips() throws {
+        let original = MoodTransition(from: .idle, to: .delighted, why: "warm hello")
+        XCTAssertEqual(try jsonRoundTrip(original), original)
+    }
 }

@@ -11,7 +11,7 @@ import FoundationModels
 /// Apple's `LanguageModelSession` orchestrates tool dispatch automatically
 /// via the session's `tools:` parameter.
 @Generable
-public struct ConversationResponse: Sendable, Equatable {
+public struct ConversationResponse: Sendable, Equatable, Codable {
     @Guide(description: "The reply the b0t says to the user. Sentence case, warm, specific.")
     public let text: String
 

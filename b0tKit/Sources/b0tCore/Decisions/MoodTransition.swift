@@ -7,7 +7,7 @@ import FoundationModels
 /// face rig is the first consumer — it will read transitions to drive
 /// face state changes via SKAction sequences.
 @Generable
-public struct MoodTransition: Sendable, Equatable {
+public struct MoodTransition: Sendable, Equatable, Codable {
     @Guide(description: "The mood you were in.")
     public let from: MoodTag
 

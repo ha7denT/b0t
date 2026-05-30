@@ -7,7 +7,7 @@ import FoundationModels
 /// onboarding sequence is the first consumer — it will branch in `Executor`
 /// to write relationships into `memory/relationships.md`.
 @Generable
-public struct RelationshipNote: Sendable, Equatable {
+public struct RelationshipNote: Sendable, Equatable, Codable {
     @Guide(description: "The person's name as the user refers to them.")
     public let name: String
 
