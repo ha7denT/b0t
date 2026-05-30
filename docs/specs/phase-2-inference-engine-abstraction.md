@@ -65,8 +65,9 @@ public protocol StructuredDecodable: Sendable {
 ```
 
 - FM conformance: decision types remain `@Generable`; the FM engine ignores `jsonSchema` and uses the macro path as today.
-- Llama conformance: decision types also become `Codable`; `jsonSchema` is derived from the type (a small reflection/Codable-mirror helper, single source of truth), converted to **GBNF via llama.cpp's built-in JSON-Schema→GBNF converter** to constrain sampling, and the `@Guide` descriptions are rendered into the prompt (llama.cpp does *not* inject the schema into the prompt — verified).
-- Decision types thus carry `@Generable` **and** `Codable` **and** `StructuredDecodable`. A macro/codegen or a hand-written `jsonSchema` per type — the plan picks the lightest approach that keeps one source of truth.
+- Llama conformance: decision types also become `Codable`; output is constrained by a **GBNF grammar** applied via `llama_sampler_init_grammar`, and the `@Guide`/shape descriptions are rendered into the prompt (llama.cpp does *not* inject the schema into the prompt — verified).
+- **GBNF is pre-generated offline, not converted at runtime (refined 2026-05-30).** Research confirmed `json_schema_to_grammar` lives in llama.cpp's `common/`, which is **not exported by the xcframework**. So we generate the GBNF grammar for each of our small, fixed set of decision types **offline** (via llama.cpp's `examples/json_schema_to_grammar.py`, a documented one-time build step) and commit the result as a `gbnfGrammar` string on each type. Single source of truth = the committed grammar, regenerated when a type changes.
+- Decision types thus carry `@Generable` (FM) **and** `Codable` (llama JSON decode) **and** `StructuredOutput` with a `gbnfGrammar` (llama constraint).
 
 ### 3.3 The format layer
 
@@ -136,7 +137,11 @@ Per the resolved fork: **curate for competence + lighter harness + graceful degr
 1. **Processor config file location** — **Resolved 2026-05-30:** `identity/processor.md` frontmatter (`engine`, `model_id`, inference params), thesis-consistent and surfaced by the Processor organ. Model binaries live in Application Support, not markdown.
 2. **§14 Q6 model lineup + quant** — now coupled to tool-calling competence (§6). The exact trio, quant levels, context windows, and pinned source URLs need on-device validation (RAM fit on the 6GB floor, tool-call reliability).
 3. **`jsonSchema` derivation mechanism** — macro/codegen vs hand-written per type. Plan picks the lightest single-source-of-truth approach during Stage A.
-4. **Bundled test GGUF** — ship a tiny model in the test bundle for deterministic live tests, or download-on-first-test? Affects CI.
+4. **Bundled test GGUF** — **Resolved 2026-05-30 (research-grounded):** SmolLM2-360M-Instruct GGUF Q4_K_M (~271 MB, Apache-2.0, ChatML) **downloaded to a local cache on first run** (`~/Library/Caches/b0t-tests/models/`), not committed to git; llama live tests gated like the existing `LIVE_TESTS` integration tests so default `swift test` stays fast and offline.
+
+5. **Chat-template support is a catalogue constraint (new 2026-05-30).** `llama_chat_apply_template` supports a **pre-defined template list, not arbitrary Jinja**. The §14 Q6 downloadable models must use a supported template family (ChatML, Llama, Gemma, …). Verify per model during Q6 validation.
+
+6. **Risk to watch:** llama.cpp issue #21571 (Apr 2026) reported structured-output sampler-init failures; resolution unconfirmed. The B3 grammar tasks must verify grammar sampling actually works against the pinned build before relying on it.
 
 ---
 
