@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "b0tHome", targets: ["b0tHome"]),
         .library(name: "b0tAudio", targets: ["b0tAudio"]),
         .library(name: "b0tDesign", targets: ["b0tDesign"]),
+        .library(name: "b0tLlama", targets: ["b0tLlama"]),
     ],
     dependencies: [
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.1.0")
@@ -35,6 +36,21 @@ let package = Package(
         ),
         .target(name: "b0tAudio"),
         .target(name: "b0tDesign"),
+
+        .binaryTarget(
+            name: "llama",
+            url:
+                "https://github.com/ggml-org/llama.cpp/releases/download/b9415/llama-b9415-xcframework.zip",
+            checksum: "d77ae589e7c36a65085bb0074120b919b7a4d2a27b8edbd02314ca87965bd5e5"
+        ),
+        .target(
+            name: "b0tLlama",
+            dependencies: ["b0tCore", "llama"]
+        ),
+        .testTarget(
+            name: "b0tLlamaLiveTests",
+            dependencies: ["b0tLlama"]
+        ),
 
         .testTarget(
             name: "b0tCoreTests",
