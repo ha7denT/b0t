@@ -214,7 +214,7 @@ The Face Creator is a feature-grade sub-product. Designing the face is part of h
 
 ### 3.3 Visual language layers
 
-> **Reconciliation pending (§14 Q1/Q2).** The amendment moves the panel/organ idiom to LCD-forward (backlit monochrome, **no bloom/glow**), which conflicts with the "CRT / slight bloom and scanline" language below. Two questions await Jamee's incoming UI designs: whether the b0t **face** stays painterly or goes 1-bit (Q1), and whether the **CRT eye-screen** keeps its scanline treatment or also goes LCD (Q2). The colour system is already updated (§3.5); this layer-by-layer prose is rewritten once Q1/Q2 land via [ADR-0016](decisions/0016-aesthetic-reconciliation.md).
+> **Reconciled 2026-05-30 ([ADR-0016](decisions/0016-aesthetic-reconciliation.md); §14 Q1/Q2 resolved).** A deliberate **two-register** system: a **painterly face** (Q1) inside **1-bit LCD chrome** (backlit monochrome, **no bloom/glow**). The face has exactly two **emissive** elements — the **aqua eye-screen** (Q2: keeps its CRT scanline/glow, recoloured aqua) and the **token-yellow speech grille** (ADR-0014); everything else (panels, organs, wiring, inspection surface) is matte LCD. The layer list below is read through that lens.
 
 The app uses register shifts between layers, each matching its content:
 
@@ -234,7 +234,7 @@ These layers share palette, grid, and underlying logic. Transitions between them
 
 ### 3.5 Colour
 
-> **Updated 2026-05-29 (§14 Q3 — "never blue" overridden; see [ADR-0016](decisions/0016-aesthetic-reconciliation.md), pending).** The display idiom is LCD-forward and the highlight system is three deliberate semantic colours. The old "warm phosphor — never blue" rule below is superseded.
+> **Updated 2026-05-30 (§14 Q3 — "never blue" overridden; [ADR-0016](decisions/0016-aesthetic-reconciliation.md), accepted).** The display idiom is LCD-forward and the highlight system is three deliberate semantic colours. The old "warm phosphor — never blue" rule below is superseded.
 
 - **App-wide base:** muted dark — not pure black. Aged plastic, dimmed backlit LCD, unsaturated. Most of the surface stays dark and quiet; colour is emphasis-only.
 - **Three semantic highlight colours**, used for buttons, highlights, and per-organ panel backlights:
@@ -250,7 +250,7 @@ These layers share palette, grid, and underlying logic. Transitions between them
 
 - **Idle:** breathing (face), beating (heart), occasional blink, occasional glance off-screen. Always present, never distracting.
 - **Active:** wiring lights up, organ pulses, optional brief motion of face toward the active region.
-- **Transitions:** register shifts (chat ↔ inspect, normal ↔ edit) use diegetic motion — the chat surface dims and slides, the inspection layer fades up. (The "like a CRT warming" character depends on the §3.3 LCD reconciliation, pending §14 Q1/Q2; an LCD-idiom transition reads more as backlight settling than phosphor warming.)
+- **Transitions:** register shifts (chat ↔ inspect, normal ↔ edit) use diegetic motion — the chat surface dims and slides, the inspection layer fades up like a **backlight settling** (the LCD-idiom replacement for the old "CRT warming", per [ADR-0016](decisions/0016-aesthetic-reconciliation.md)). The painterly face and its emissive eye-screen/grille are exempt from the matte-LCD rule.
 - **Restraint:** every animation should feel earned. Most of the time, b0t is quiet.
 
 ### 3.7 Sound

@@ -35,8 +35,15 @@ Impact map: `docs/plans/amendment-2026-05-29-interpretation.md`.
   (FM + 3 downloadable models; disclosures in the Processor inspector — exact
   trio + quant levels pending on-device validation), Q7 (minimal TTS), Q9
   (iOS 26 + 6GB-RAM floor).
-- **§14 deferred:** Q1 (face register) and Q2 (CRT eye-screen) await Jamee's
-  UI layout designs (gate ADR-0016); Q8 (trial length) is a pre-launch call.
+- **§14 Q1/Q2 resolved 2026-05-30** against Jamee's home-screen mockup
+  (`assets/ref/`): painterly face (Q1), emissive aqua eye-screen kept (Q2).
+  [ADR-0016](decisions/0016-aesthetic-reconciliation.md) authored; design doc
+  §3.3/§3.5/§3.6 finalized. All §14 aesthetic items now closed. (Q8 trial
+  length remains a pre-launch call.)
+- **Layout (in discussion):** the mockup reorganizes the organ ring (left/right
+  world-vs-mind columns; processor at the crown replacing the Reasoning organ;
+  journal as a new organ) — an ADR-0010 arrangement change to record once the
+  layout is finalized. Speech-grille placement + the memory icon are open.
 - **Code untouched.** This was a docs + ADRs pass only. The Phase 2 re-open
   (engine abstraction, structured-output parity, download/lifecycle) is a
   separate implementation effort with its own plan and approval gate.

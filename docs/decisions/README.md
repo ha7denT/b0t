@@ -29,3 +29,4 @@ Standard sections: Context, Decision, Rationale, Consequences, When to revisit.
 | 0013 | [v1 ships a single non-modular b0t](0013-v1-single-non-modular-bot.md) | Accepted |
 | 0014 | [Speech via illuminated grille; no moving jaw in v1](0014-speech-via-illuminated-grille.md) | Accepted |
 | 0015 | [Content/format boundary; slot-based prompt assembly](0015-content-format-boundary-slot-assembly.md) | Accepted |
+| 0016 | [Aesthetic reconciliation: LCD-forward, painterly face, semantic palette](0016-aesthetic-reconciliation.md) | Accepted |
