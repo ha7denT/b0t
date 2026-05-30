@@ -21,20 +21,20 @@ A deliberate **two-register** aesthetic: a painterly face inside 1-bit LCD chrom
   - pink `#FF3DEA` — the heartbeat / emotional core
   Most of the surface stays dark and unsaturated; colour is emphasis-only (buttons, per-organ backlights, the heart, the token meters). The prior "warm phosphor — amber/green/cream, never blue" rule is **superseded**.
 - **Face register (Q1) — painterly.** The b0t face stays **pixel-art with painterly lighting** (the cream, lit, rounded Wundercog/Hilfer head), *not* 1-bit. This is intentional: the face is the one place painterly lives, set against the 1-bit aqua chrome — the contrast is the point (the character vs. the instrument that carries it).
-- **Eye-screen (Q2) — emissive, kept.** The eye-screen remains the face's primary **emissive** element: an aqua-toned pixel display retaining its CRT-ish scanline/glow treatment (the `SKEffectNode` + shader shipped in Phase 4), now in aqua rather than warm phosphor. It is the one allowed exception to "no bloom" on the face.
-- **Speech grille — second emissive element.** Per [ADR-0014](0014-speech-via-illuminated-grille.md), the speech grille is a separate emissive node layered over the matte painterly face, brightness-driven by the speech signal. Its colour is governed by ADR-0014 (token-yellow), giving the face two independent channels: aqua eyes (aliveness/mood) and yellow grille (speech/tokens out).
-- **1-bit chrome source.** UI/organs are piiixl 1-bit assets (amendment §10), runtime mask-tinted to the semantic palette.
+- **Eye-screen (Q2) — baked in v1, fancy in v2.** In v1 the eye-screen is **part of the painterly sprite art** with **no runtime emissive/CRT treatment** — it can look lit, but nothing animates it. (The Phase-4 `EyesNode` + scanline shader is therefore superseded for v1 and drops out with the single-sprite-sheet rework.) An animated/emissive eye-screen is deferred to **v2** alongside the modular components.
+- **Speech grille — the sole v1 emissive element.** Per [ADR-0014](0014-speech-via-illuminated-grille.md), the grille glows via a **colour-key shader that isolates the reserved token-yellow within the face sprite-sheet** (not a separate node — a fixed overlay can't track a rotating head), brightness-driven by the speech signal. In v1 it is the *only* runtime-emissive element on the face.
+- **Asset pipelines (reconciled 2026-05-30).** The **face** is a **Gamelabs-generated animation sprite-sheet** (mood states), with the grille glow done by colour-key (above) — a v1 use of Gamelabs distinct from the *v2-deferred modular per-part baked-palette* pipeline ([ADR-0013](0013-v1-single-non-modular-bot.md) / amendment §10). The **chrome/organs/icons** are piiixl 1-bit assets, runtime mask-tinted to the semantic palette. Reserved emissive hex (grille-yellow) must appear *only* on its element in the face art.
 
 ## Rationale
 
 - **Honest contrast.** Painterly character + 1-bit instrument tells the truth about the system: a crafted companion riding a constrained, legible device. A fully-1-bit face would lose the warmth; a fully-painterly UI would lie about the hardware.
 - **One palette, three meanings.** Yellow/aqua/pink map cleanly to the token/function/heart semantics already wired through the GUI and token metering.
-- **Emissive discipline.** Exactly two emissive elements on the face (eyes, grille), each carrying a distinct channel; everything else matte LCD. This keeps "activity has weight because it isn't constant" (design §1.2).
+- **Emissive discipline.** In v1, exactly **one** emissive element on the face (the grille); the eyes are baked expression. Everything else is matte LCD. This keeps "activity has weight because it isn't constant" (design §1.2); v2 adds the emissive eye-screen.
 
 ## Consequences
 
 - **Design doc:** §3.5 colour rule rewritten (done); §3.3 layer prose and §3.6 transition prose finalized to LCD-forward + painterly-face + emissive eyes/grille (this ADR unblocks them).
-- **ADR-0003** (SpriteKit + SwiftUI) stands; the Phase 4 eye-screen CRT shader is retained (Q2), recoloured aqua.
+- **ADR-0003** (SpriteKit + SwiftUI) stands. The Phase 4 eye-screen `EyesNode` + CRT scanline shader is **superseded for v1** (the single Gamelabs sprite-sheet has no separate eye node); an emissive eye-screen returns in v2. The v1 emissive implementation is a colour-key glow shader for the grille only.
 - **`b0tDesign`:** the semantic tokens (added per amendment §9) + 1-bit mask-tint utility are the implementation; the eye-screen shader stays.
 - **Layout note (separate concern):** Jamee's mockup also reorganizes the organ ring (left/right world-vs-mind columns; processor at the crown replacing the Reasoning organ; journal as a new organ). That is an *anatomical-arrangement* change to [ADR-0010](0010-organs-are-anatomical-subsystems.md), tracked separately once the layout is finalized — **not** part of this aesthetic ADR.
 

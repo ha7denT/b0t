@@ -43,7 +43,11 @@ Impact map: `docs/plans/amendment-2026-05-29-interpretation.md`.
 - **Layout (in discussion):** the mockup reorganizes the organ ring (left/right
   world-vs-mind columns; processor at the crown replacing the Reasoning organ;
   journal as a new organ) — an ADR-0010 arrangement change to record once the
-  layout is finalized. Speech-grille placement + the memory icon are open.
+  layout is finalized. **Face animation resolved 2026-05-30:** Gamelabs-generated
+  animation sprite-sheet; the grille is the sole v1 emissive element (colour-key
+  glow on reserved yellow within the sprite); eye-screen baked, no v1 emissive
+  (fancy eye-screen → v2). See ADR-0014/0016. Memory-icon swap pending Jamee's
+  asset filenames.
 - **Code untouched.** This was a docs + ADRs pass only. The Phase 2 re-open
   (engine abstraction, structured-output parity, download/lifecycle) is a
   separate implementation effort with its own plan and approval gate.

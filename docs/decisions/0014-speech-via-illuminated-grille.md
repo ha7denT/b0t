@@ -11,9 +11,11 @@ A moving mouth/jaw multiplies the animation surface: every mood state (~8) would
 
 ## Decision
 
-**No moving mouth/jaw in v1.** Speech is signalled by a **speaker grille that illuminates**, separate from the face.
+**No moving mouth/jaw in v1.** Speech is signalled by a **speaker grille that illuminates** within the face sprite-sheet.
 
-- **Two independent channels.** Mood sprites (eyes, brow) carry emotion/aliveness; the grille carries speech/activity. They never need to be combined, which removes the mood-×-mouth combinatorial problem entirely.
+> **Refined 2026-05-30 (emissive mechanism).** The grille is *not* a separate overlaid node — a fixed component can't stay aligned to a Gamelabs-generated head that rotates/shifts across frames. Instead the grille is **baked into the sprite frames and made to glow by a colour-key shader** that isolates the reserved grille-yellow and animates its brightness. In **v1 the grille is the *sole* runtime-emissive element** on the face; the eye-screen is baked painterly art with no emissive shader (animated eye-screen → v2; see [ADR-0016](0016-aesthetic-reconciliation.md)).
+
+- **Independent channels.** Mood is carried by the sprite frames themselves (eyes, brow — baked expression); the grille carries speech/activity as the one colour-keyed glow. They compose freely — no mood-×-mouth combinatorial problem.
 - **Grille intensity is driven by the speech signal.** With minimal TTS in v1 (§14 Q7), the grille tracks the **TTS amplitude envelope** when audio is playing, and **token-emission rate** for text-only output.
 - **The grille pulses in the "tokens" highlight colour (yellow `#EAFF3D`)**, tying it to the token semantics (amendment §8) and the two-directional yellow energy flow (input tokens *into* the processor, output tokens *out* via the grille).
 
@@ -26,7 +28,7 @@ A moving mouth/jaw multiplies the animation surface: every mood state (~8) would
 ## Consequences
 
 - The v1 face rig drops the jaw-open cycle; ADR-0013's sprite-sheet mood states carry expression only.
-- A grille node is added to the face/anatomy composition with an intensity input bound to the active speech signal.
+- The grille glows via a colour-key shader on the reserved yellow (`#EAFF3D`) within the sprite-sheet, with a brightness uniform bound to the active speech signal — not a separate positioned node. The reserved yellow must appear *only* on the grille in the art (palette discipline on the Gamelabs generation).
 - The amplitude path depends on TTS being present; minimal TTS (system `AVSpeechSynthesizer`, no filter chain) ships in v1 (§14 Q7). Text-only turns fall back to token-rate.
 - v2's modular face (ADR-0013) may reintroduce jaw articulation per-Part; the grille channel remains valid regardless.
 

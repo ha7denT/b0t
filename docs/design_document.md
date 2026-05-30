@@ -214,7 +214,7 @@ The Face Creator is a feature-grade sub-product. Designing the face is part of h
 
 ### 3.3 Visual language layers
 
-> **Reconciled 2026-05-30 ([ADR-0016](decisions/0016-aesthetic-reconciliation.md); §14 Q1/Q2 resolved).** A deliberate **two-register** system: a **painterly face** (Q1) inside **1-bit LCD chrome** (backlit monochrome, **no bloom/glow**). The face has exactly two **emissive** elements — the **aqua eye-screen** (Q2: keeps its CRT scanline/glow, recoloured aqua) and the **token-yellow speech grille** (ADR-0014); everything else (panels, organs, wiring, inspection surface) is matte LCD. The layer list below is read through that lens.
+> **Reconciled 2026-05-30 ([ADR-0016](decisions/0016-aesthetic-reconciliation.md); §14 Q1/Q2 resolved).** A deliberate **two-register** system: a **painterly face** (Q1) — a Gamelabs animation sprite-sheet — inside **1-bit LCD chrome** (backlit monochrome, **no bloom/glow**). In **v1 the face's one emissive element is the token-yellow speech grille** (ADR-0014), glowing via a colour-key shader within the sprite-sheet; the **eye-screen is baked painterly art** (Q2: no runtime emissive in v1 — animated eye-screen → v2). Everything else (panels, organs, wiring, inspection surface) is matte LCD. The layer list below is read through that lens.
 
 The app uses register shifts between layers, each matching its content:
 
@@ -250,7 +250,7 @@ These layers share palette, grid, and underlying logic. Transitions between them
 
 - **Idle:** breathing (face), beating (heart), occasional blink, occasional glance off-screen. Always present, never distracting.
 - **Active:** wiring lights up, organ pulses, optional brief motion of face toward the active region.
-- **Transitions:** register shifts (chat ↔ inspect, normal ↔ edit) use diegetic motion — the chat surface dims and slides, the inspection layer fades up like a **backlight settling** (the LCD-idiom replacement for the old "CRT warming", per [ADR-0016](decisions/0016-aesthetic-reconciliation.md)). The painterly face and its emissive eye-screen/grille are exempt from the matte-LCD rule.
+- **Transitions:** register shifts (chat ↔ inspect, normal ↔ edit) use diegetic motion — the chat surface dims and slides, the inspection layer fades up like a **backlight settling** (the LCD-idiom replacement for the old "CRT warming", per [ADR-0016](decisions/0016-aesthetic-reconciliation.md)). The painterly face and its emissive grille are exempt from the matte-LCD rule (the eye-screen is baked art, not runtime-emissive, in v1).
 - **Restraint:** every animation should feel earned. Most of the time, b0t is quiet.
 
 ### 3.7 Sound
