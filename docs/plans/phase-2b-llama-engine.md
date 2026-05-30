@@ -308,7 +308,7 @@ git commit -m "feat(b0tLlama): implement LlamaRuntime over llama.cpp C API + gat
 - Modify: `b0tKit/Package.swift` (add `resources: [.process("Resources")]` to the `b0tCore` target)
 - Test: `b0tKit/Tests/b0tCoreTests/StructuredOutputGrammarTests.swift`
 
-- [ ] **Step 1: Generate the GBNF grammars offline (documented one-time step)**
+- [x] **Step 1: Generate the GBNF grammars offline (documented one-time step)**
 
 For each decision type, write its JSON schema and convert it with llama.cpp's tool. Example for `ConversationResponse` (fields: `text: String`, `mood: MoodTag?` enum, `memoryObservations: [MemoryObservation]`):
 
@@ -341,7 +341,7 @@ python3 llama.cpp/examples/json_schema_to_grammar.py /tmp/ConversationResponse.s
 
 Repeat for `TickDecision` (fields per `TickDecision.swift`), `MemoryObservation`, `RelationshipNote`, `MoodTransition`. Keep each schema's `required`/optionality matching the Swift type's optionals (e.g. `mood`/`organUsed` optional). Commit the schemas alongside the grammars (as `*.schema.json` in the same folder) so regeneration is reproducible.
 
-- [ ] **Step 2: Write the failing unit test**
+- [x] **Step 2: Write the failing unit test**
 
 `StructuredOutputGrammarTests.swift`:
 
@@ -366,12 +366,12 @@ final class StructuredOutputGrammarTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 3: Run it to confirm it fails**
+- [x] **Step 3: Run it to confirm it fails**
 
 Run: `swift test --package-path b0tKit --filter StructuredOutputGrammarTests`
 Expected: FAIL — `gbnfGrammar`/`jsonShapeHint` are not members of `StructuredOutput`.
 
-- [ ] **Step 4: Add the requirements + conformances + Package resources**
+- [x] **Step 4: Add the requirements + conformances + Package resources**
 
 In `Package.swift`, change the `b0tCore` target to:
 
@@ -436,12 +436,12 @@ public protocol StructuredOutput: Generable, Codable, Sendable {
 
 (`gbnfGrammar` has a default via the extension above; `jsonShapeHint` is provided per type.)
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 Run: `swift test --package-path b0tKit --filter StructuredOutputGrammarTests`
 Expected: PASS. Then run `swift test --package-path b0tKit --filter b0tCoreTests` → still 287+ green.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add b0tKit/Package.swift b0tKit/Sources/b0tCore/Model/StructuredOutput.swift \
@@ -461,7 +461,7 @@ git commit -m "feat(b0tCore): pre-generated GBNF grammars + shape hints on Struc
 - Create: `b0tKit/Sources/b0tLlama/LlamaEngine.swift`
 - Modify: `b0tKit/Tests/b0tLlamaLiveTests/LlamaRuntimeLiveTests.swift` (add e2e case)
 
-- [ ] **Step 1: Write the failing end-to-end test**
+- [x] **Step 1: Write the failing end-to-end test**
 
 Add to `LlamaRuntimeLiveTests`:
 
@@ -483,12 +483,12 @@ Add to `LlamaRuntimeLiveTests`:
     }
 ```
 
-- [ ] **Step 2: Run it to confirm it fails**
+- [x] **Step 2: Run it to confirm it fails**
 
 Run: `LIVE_LLAMA=1 swift test --package-path b0tKit --filter b0tLlamaLiveTests/test_llamaEngine_decodesTypedConversationResponse`
 Expected: FAIL — `LlamaEngine` does not exist.
 
-- [ ] **Step 3: Implement `LlamaEngine`**
+- [x] **Step 3: Implement `LlamaEngine`**
 
 `LlamaEngine.swift`:
 
@@ -561,18 +561,18 @@ public struct LlamaEngine: InferenceEngine {
 
 > **Note on `contextWindow`:** Stage A's `InferenceEngine` protocol does not yet declare `contextWindow` (that's the variable-budget work). `LlamaEngine` exposes it as a plain `async` property for now; Stage C adds it to the protocol and re-bases budgeting. If the compiler requires protocol conformance only, this extra property is harmless.
 
-- [ ] **Step 4: Run the e2e test to verify it passes**
+- [x] **Step 4: Run the e2e test to verify it passes**
 
 Run: `LIVE_LLAMA=1 swift test --package-path b0tKit --filter b0tLlamaLiveTests/test_llamaEngine_decodesTypedConversationResponse`
 Expected: PASS — a `ConversationResponse` with non-empty `text` is decoded from grammar-constrained output.
 
 > **If grammar sampling fails** (cf. issue #21571): first confirm via a `grammar: <ConversationResponse.gbnfGrammar>` call in the B1 smoke test. If `llama_sampler_init_grammar` errors against the pinned build, fall back to grammar-off generation + `firstJSONObject` + tolerant decode for Stage B, and file the grammar issue as a Stage C blocker. Record the decision in the commit body. Do NOT silently ship without structured-output enforcement — surface it.
 
-- [ ] **Step 5: Full regression + app build**
+- [x] **Step 5: Full regression + app build**
 
 Run: `swift test --package-path b0tKit` (non-live green), then `xcodebuild build -project b0t.xcodeproj -scheme b0t -destination 'generic/platform=iOS Simulator'` → BUILD SUCCEEDED (note: `b0tApp` does not yet link `b0tLlama` until Stage C wiring; this confirms no regression).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add b0tKit/Sources/b0tLlama/LlamaEngine.swift b0tKit/Tests/b0tLlamaLiveTests/LlamaRuntimeLiveTests.swift
@@ -585,15 +585,15 @@ git commit -m "feat(b0tLlama): LlamaEngine — grammar-constrained typed output 
 - Create: `b0tKit/Sources/b0tLlama/CLAUDE.md`
 - Modify: `b0tKit/Sources/b0tCore/CLAUDE.md` (note the grammar additions)
 
-- [ ] **Step 1: Write `b0tLlama/CLAUDE.md`**
+- [x] **Step 1: Write `b0tLlama/CLAUDE.md`**
 
 Document: the xcframework dependency + pinned build, `LlamaRuntime` (one resident model, applies embedded chat template, optional GBNF), `LlamaEngine` (InferenceEngine conformer, no tools in Stage B, GBNF+JSON decode), the gated `LIVE_LLAMA=1` test pattern + the cached SmolLM2 model, and the "no Swift/C++ interop — pure C" fact. Note Stage C will add capability detection, the download manager, and `identity/processor.md` selection.
 
-- [ ] **Step 2: Update `b0tCore/CLAUDE.md`**
+- [x] **Step 2: Update `b0tCore/CLAUDE.md`**
 
 Add to the `StructuredOutput` line: "Stage B added `gbnfGrammar` (pre-generated, committed under `Resources/Grammars/`) and `jsonShapeHint` for the llama path."
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add b0tKit/Sources/b0tLlama/CLAUDE.md b0tKit/Sources/b0tCore/CLAUDE.md
