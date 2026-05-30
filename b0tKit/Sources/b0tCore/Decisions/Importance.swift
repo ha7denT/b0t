@@ -7,7 +7,7 @@ import FoundationModels
 /// Executor (Task 12). `.low` is logged in DEBUG only; it represents
 /// transient noticing that doesn't warrant a memory write.
 @Generable
-public enum Importance: String, Sendable, Equatable, CaseIterable {
+public enum Importance: String, Codable, Sendable, Equatable, CaseIterable {
     case low
     case medium
     case high
