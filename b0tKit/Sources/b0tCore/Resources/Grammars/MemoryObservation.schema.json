@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "about": { "type": "string" },
+    "what": { "type": "string" },
+    "importance": { "type": "string", "enum": ["low", "medium", "high"] }
+  },
+  "required": ["about", "what", "importance"]
+}

@@ -1,0 +1,8 @@
+about-kv ::= "\"about\"" space ":" space string
+char ::= [^"\\\x7F\x00-\x1F] | [\\] (["\\bfnrt] | "u" [0-9a-fA-F]{4})
+importance ::= ("\"low\"" | "\"medium\"" | "\"high\"") space
+importance-kv ::= "\"importance\"" space ":" space importance
+root ::= "{" space about-kv "," space what-kv "," space importance-kv "}" space
+space ::= | " " | "\n"{1,2} [ \t]{0,20}
+string ::= "\"" char* "\"" space
+what-kv ::= "\"what\"" space ":" space string

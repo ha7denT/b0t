@@ -1,0 +1,16 @@
+char ::= [^"\\\x7F\x00-\x1F] | [\\] (["\\bfnrt] | "u" [0-9a-fA-F]{4})
+memoryObservations ::= "[" space (memoryObservations-item ("," space memoryObservations-item)*)? "]" space
+memoryObservations-item ::= "{" space memoryObservations-item-about-kv "," space memoryObservations-item-what-kv "," space memoryObservations-item-importance-kv "}" space
+memoryObservations-item-about-kv ::= "\"about\"" space ":" space string
+memoryObservations-item-importance ::= ("\"low\"" | "\"medium\"" | "\"high\"") space
+memoryObservations-item-importance-kv ::= "\"importance\"" space ":" space memoryObservations-item-importance
+memoryObservations-item-what-kv ::= "\"what\"" space ":" space string
+memoryObservations-kv ::= "\"memoryObservations\"" space ":" space memoryObservations
+mood ::= mood-0 | mood-1
+mood-0 ::= ("\"idle\"" | "\"speaking\"" | "\"thinking\"" | "\"surprised\"" | "\"sleepy\"" | "\"attentive\"" | "\"worried\"" | "\"delighted\"" | "null") space
+mood-1 ::= ("\"idle\"" | "\"speaking\"" | "\"thinking\"" | "\"surprised\"" | "\"sleepy\"" | "\"attentive\"" | "\"worried\"" | "\"delighted\"" | "null") space
+mood-kv ::= "\"mood\"" space ":" space mood
+root ::= "{" space text-kv "," space memoryObservations-kv ( "," space ( mood-kv ) )? "}" space
+space ::= | " " | "\n"{1,2} [ \t]{0,20}
+string ::= "\"" char* "\"" space
+text-kv ::= "\"text\"" space ":" space string

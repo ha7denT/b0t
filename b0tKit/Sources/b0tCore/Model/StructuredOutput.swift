@@ -8,10 +8,17 @@ import FoundationModels
 /// the same type. The two paths produce the same Swift value; the engine
 /// chooses how to populate it.
 ///
-/// Stage B adds a `static var jsonSchema` requirement here (used to derive a
-/// GBNF grammar and a prompt-side description); it is intentionally absent now
-/// so we don't author schemas ahead of the engine that consumes them.
-public protocol StructuredOutput: Generable, Codable, Sendable {}
+/// Stage B added two requirements for the llama path: `gbnfGrammar` (a
+/// pre-generated GBNF grammar, committed under `Resources/Grammars/`, that
+/// constrains llama.cpp output to this type's JSON shape) and `jsonShapeHint`
+/// (a concise human-readable field description rendered into the prompt, since
+/// llama.cpp does not inject the schema). `gbnfGrammar` has a default
+/// implementation (loads the resource by type name); `jsonShapeHint` is
+/// provided per type. See `StructuredOutput+Grammar.swift`.
+public protocol StructuredOutput: Generable, Codable, Sendable {
+    static var gbnfGrammar: String { get }
+    static var jsonShapeHint: String { get }
+}
 
 extension ConversationResponse: StructuredOutput {}
 extension TickDecision: StructuredOutput {}

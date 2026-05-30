@@ -21,7 +21,7 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.1.0")
     ],
     targets: [
-        .target(name: "b0tCore", dependencies: ["b0tBrain"]),
+        .target(name: "b0tCore", dependencies: ["b0tBrain"], resources: [.process("Resources")]),
         .target(
             name: "b0tBrain",
             dependencies: [
