@@ -40,4 +40,18 @@ extension BotFile {
         if case .string(let s) = frontmatter["b0t_name"] { return s }
         return nil
     }
+
+    // MARK: - Processor (identity/processor.md) — Stage C2
+
+    /// `engine` key (identity/processor.md). `"foundation_models"` or `"llama"`. `nil` if absent.
+    public var processorEngine: String? {
+        if case .string(let s) = frontmatter["engine"] { return s }
+        return nil
+    }
+
+    /// `model_id` key (identity/processor.md). `nil` if absent.
+    public var processorModelId: String? {
+        if case .string(let s) = frontmatter["model_id"] { return s }
+        return nil
+    }
 }

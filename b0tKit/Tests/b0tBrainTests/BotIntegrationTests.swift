@@ -40,6 +40,7 @@ final class BotIntegrationTests: XCTestCase {
             try await identity.about,
             try await identity.appearance,
             try await identity.audio,
+            try await identity.processor,
         ] {
             XCTAssertNil(
                 file.parseError,
