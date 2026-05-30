@@ -24,4 +24,9 @@ final class CodableRoundTripTests: XCTestCase {
             XCTAssertEqual(try jsonRoundTrip(value), value)
         }
     }
+
+    func test_memoryObservation_codableRoundTrips() throws {
+        let original = MemoryObservation(about: "Jamee", what: "likes coffee", importance: .high)
+        XCTAssertEqual(try jsonRoundTrip(original), original)
+    }
 }

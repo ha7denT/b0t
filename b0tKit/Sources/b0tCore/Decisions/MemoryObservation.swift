@@ -7,7 +7,7 @@ import FoundationModels
 /// `what` is the observation itself. `importance` controls whether the
 /// Executor persists it (medium/high → `memory/recent.md`) or just logs it.
 @Generable
-public struct MemoryObservation: Sendable, Equatable {
+public struct MemoryObservation: Sendable, Equatable, Codable {
     @Guide(description: "Who or what the observation is about — a person's name, a project name, or a topic.")
     public let about: String
 
