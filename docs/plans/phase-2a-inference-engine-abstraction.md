@@ -50,7 +50,7 @@ These are nested inside the decision structs, so they must be `Codable` before t
 - Modify: `b0tKit/Sources/b0tCore/Decisions/Importance.swift`
 - Test: `b0tKit/Tests/b0tCoreTests/CodableRoundTripTests.swift` (create)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `b0tKit/Tests/b0tCoreTests/CodableRoundTripTests.swift`:
 
@@ -84,12 +84,12 @@ final class CodableRoundTripTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `swift test --package-path b0tKit --filter CodableRoundTripTests`
 Expected: FAIL — compile error, `MoodTag`/`Importance` do not conform to `Codable` (`Decodable`/`Encodable`).
 
-- [ ] **Step 3: Add `Codable` to both enums**
+- [x] **Step 3: Add `Codable` to both enums**
 
 In `MoodTag.swift`, change the declaration line:
 
@@ -103,12 +103,12 @@ In `Importance.swift`, change the declaration line:
 public enum Importance: String, Codable, Sendable, Equatable, CaseIterable {
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `swift test --package-path b0tKit --filter CodableRoundTripTests`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add b0tKit/Sources/b0tCore/Decisions/MoodTag.swift \
@@ -127,7 +127,7 @@ git commit -m "refactor(b0tCore): Codable on MoodTag and Importance (Stage A)"
 - Modify: `b0tKit/Sources/b0tCore/Decisions/MemoryObservation.swift`
 - Test: `b0tKit/Tests/b0tCoreTests/CodableRoundTripTests.swift`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `CodableRoundTripTests`:
 
@@ -138,12 +138,12 @@ Add to `CodableRoundTripTests`:
     }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `swift test --package-path b0tKit --filter CodableRoundTripTests/test_memoryObservation_codableRoundTrips`
 Expected: FAIL — `MemoryObservation` does not conform to `Codable`.
 
-- [ ] **Step 3: Add `Codable`**
+- [x] **Step 3: Add `Codable`**
 
 In `MemoryObservation.swift`, change the declaration line:
 
@@ -151,12 +151,12 @@ In `MemoryObservation.swift`, change the declaration line:
 public struct MemoryObservation: Sendable, Equatable, Codable {
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `swift test --package-path b0tKit --filter CodableRoundTripTests/test_memoryObservation_codableRoundTrips`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add b0tKit/Sources/b0tCore/Decisions/MemoryObservation.swift \
@@ -177,7 +177,7 @@ git commit -m "refactor(b0tCore): Codable on MemoryObservation (Stage A)"
 - Modify: `b0tKit/Sources/b0tCore/Decisions/MoodTransition.swift`
 - Test: `b0tKit/Tests/b0tCoreTests/CodableRoundTripTests.swift`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `CodableRoundTripTests`:
 
@@ -218,12 +218,12 @@ Add to `CodableRoundTripTests`:
     }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `swift test --package-path b0tKit --filter CodableRoundTripTests`
 Expected: FAIL — the four types do not conform to `Codable`.
 
-- [ ] **Step 3: Add `Codable` to each declaration**
+- [x] **Step 3: Add `Codable` to each declaration**
 
 `ConversationResponse.swift`:
 
@@ -241,17 +241,17 @@ public struct TickDecision: Sendable, Equatable, Codable {
 
 `MoodTransition.swift` — change its declaration line to append `, Codable` (preserve the existing protocol list and `@Generable`).
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `swift test --package-path b0tKit --filter CodableRoundTripTests`
 Expected: PASS (all CodableRoundTrip tests).
 
-- [ ] **Step 5: Run the whole b0tCore suite to confirm no regression**
+- [x] **Step 5: Run the whole b0tCore suite to confirm no regression**
 
 Run: `swift test --package-path b0tKit --filter b0tCoreTests`
 Expected: PASS — existing `GenerableRoundTripTests` and all others still green (adding `Codable` does not affect the `@Generable` macro path).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add b0tKit/Sources/b0tCore/Decisions/ConversationResponse.swift \
@@ -272,7 +272,7 @@ The engine-neutral output contract. It refines `Generable` (so the FM engine can
 - Create: `b0tKit/Sources/b0tCore/Model/StructuredOutput.swift`
 - Test: `b0tKit/Tests/b0tCoreTests/StructuredOutputConformanceTests.swift` (create)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `b0tKit/Tests/b0tCoreTests/StructuredOutputConformanceTests.swift`:
 
@@ -300,12 +300,12 @@ final class StructuredOutputConformanceTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `swift test --package-path b0tKit --filter StructuredOutputConformanceTests`
 Expected: FAIL — `StructuredOutput` is not defined; `accepts` won't compile.
 
-- [ ] **Step 3: Define the protocol and conform the types**
+- [x] **Step 3: Define the protocol and conform the types**
 
 Create `b0tKit/Sources/b0tCore/Model/StructuredOutput.swift`:
 
@@ -332,12 +332,12 @@ extension RelationshipNote: StructuredOutput {}
 extension MoodTransition: StructuredOutput {}
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `swift test --package-path b0tKit --filter StructuredOutputConformanceTests`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add b0tKit/Sources/b0tCore/Model/StructuredOutput.swift \
@@ -354,7 +354,7 @@ Rename the protocol and its error enum, add transition `typealias`es so existing
 **Files:**
 - Modify: `b0tKit/Sources/b0tCore/Model/LanguageModelClient.swift`
 
-- [ ] **Step 1: Edit the protocol file**
+- [x] **Step 1: Edit the protocol file**
 
 Replace the body of `b0tKit/Sources/b0tCore/Model/LanguageModelClient.swift` (keep the file name) with:
 
@@ -402,14 +402,14 @@ public enum InferenceEngineError: Error, Sendable, Equatable {
 public typealias LanguageModelClientError = InferenceEngineError
 ```
 
-- [ ] **Step 2: Run the full package to verify it still builds and passes**
+- [x] **Step 2: Run the full package to verify it still builds and passes**
 
 Run: `swift test --package-path b0tKit`
 Expected: PASS — `LiveLanguageModelClient` and `StubLanguageModelClient` still satisfy the protocol (their `generate<Output: Generable>` signatures are about to mismatch the new `StructuredOutput` constraint; if the compiler flags this here, it is fixed in Tasks 6–7). If a compile error appears in `LiveLanguageModelClient`/`StubLanguageModelClient`, proceed to Task 6 before re-running.
 
 > Note: Tasks 5–7 form one compiling unit (the conformers must match the renamed protocol). Commit at the end of Task 7. This step's "expected" is the compile error that Tasks 6–7 resolve — do not commit a broken build.
 
-- [ ] **Step 3: (No commit yet — see Task 7.)**
+- [x] **Step 3: (No commit yet — see Task 7.)**
 
 ---
 
@@ -420,7 +420,7 @@ Rename the struct, add a `typealias` so `b0tApp` (which constructs `LiveLanguage
 **Files:**
 - Modify: `b0tKit/Sources/b0tCore/Model/LiveLanguageModelClient.swift`
 
-- [ ] **Step 1: Rename the type and add the alias**
+- [x] **Step 1: Rename the type and add the alias**
 
 In `LiveLanguageModelClient.swift`, change the declaration:
 
@@ -436,7 +436,7 @@ Immediately after the closing brace of the struct (end of file), add:
 public typealias LiveLanguageModelClient = FoundationModelsEngine
 ```
 
-- [ ] **Step 2: Widen the generic constraint and update the error type**
+- [x] **Step 2: Widen the generic constraint and update the error type**
 
 In the same file, change the `generate` signature:
 
@@ -449,7 +449,7 @@ In the same file, change the `generate` signature:
 
 The `catch` block throws `LanguageModelClientError.*` cases — these still resolve via the `typealias`, so no change is required there. (Leave the body otherwise untouched.)
 
-- [ ] **Step 3: (No commit yet — see Task 7.)**
+- [x] **Step 3: (No commit yet — see Task 7.)**
 
 Run: `swift build --package-path b0tKit`
 Expected: `b0tCore` compiles (the stub is fixed in Task 7; if the stub is the only remaining error, proceed).
@@ -463,7 +463,7 @@ Rename the test seam, add a `typealias` so existing tests compile untouched, and
 **Files:**
 - Modify: `b0tKit/Sources/b0tCore/Model/StubLanguageModelClient.swift`
 
-- [ ] **Step 1: Rename the type, add the alias, widen the constraint**
+- [x] **Step 1: Rename the type, add the alias, widen the constraint**
 
 In `StubLanguageModelClient.swift`, change the struct declaration:
 
@@ -490,12 +490,12 @@ At the end of the file, add:
 public typealias StubLanguageModelClient = StubInferenceEngine
 ```
 
-- [ ] **Step 2: Run the full package to verify the whole refactor builds and passes**
+- [x] **Step 2: Run the full package to verify the whole refactor builds and passes**
 
 Run: `swift test --package-path b0tKit`
 Expected: PASS — all 279 existing tests green plus the new Codable/conformance tests. No behaviour change.
 
-- [ ] **Step 3: Commit the protocol rename + conformers together**
+- [x] **Step 3: Commit the protocol rename + conformers together**
 
 ```bash
 git add b0tKit/Sources/b0tCore/Model/LanguageModelClient.swift \
@@ -517,7 +517,7 @@ Reflect the rename and the engine-agnostic intent so future tasks (Stage B) star
 **Files:**
 - Modify: `b0tKit/Sources/b0tCore/CLAUDE.md`
 
-- [ ] **Step 1: Update the heading and the client bullet**
+- [x] **Step 1: Update the heading and the client bullet**
 
 In `b0tKit/Sources/b0tCore/CLAUDE.md`, change the first line from:
 
@@ -541,7 +541,7 @@ Then update the `LanguageModelClient` bullet under "Public API contracts" to rea
 - `InferenceEngine` protocol (was `LanguageModelClient`, kept as a `typealias`); `generate<Output: StructuredOutput>(context:generating:)` returns `(Output, [ToolCallRecord])`. Conformers: `FoundationModelsEngine` (was `LiveLanguageModelClient`, aliased) wraps `LanguageModelSession`; `StubInferenceEngine` (was `StubLanguageModelClient`, aliased) is the test seam. `StructuredOutput` refines `Generable` and adds `Codable`; Stage B adds a `jsonSchema` requirement for schema→GBNF. Tool-descriptor decoupling is deferred to Stage B.
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add b0tKit/Sources/b0tCore/CLAUDE.md
