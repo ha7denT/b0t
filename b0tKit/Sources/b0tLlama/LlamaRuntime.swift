@@ -218,6 +218,11 @@ public actor LlamaRuntime {
             throw LlamaRuntimeError.contextCreationFailed
         }
         if let grammar, !grammar.isEmpty {
+            // Grammar-constrained generation: grammar first (masks invalid
+            // tokens), then a repetition penalty to break greedy loops on
+            // small models (SmolLM2-360M gets stuck repeating tokens without
+            // it), then greedy (argmax). Fully deterministic — no temperature,
+            // no stochastic dist — which eliminates flaky JSON output.
             let grammarSampler = grammar.withCString { gPtr in
                 "root".withCString { rootPtr in
                     llama_sampler_init_grammar(vocab, gPtr, rootPtr)
@@ -226,9 +231,17 @@ public actor LlamaRuntime {
             if let grammarSampler {
                 llama_sampler_chain_add(chain, grammarSampler)
             }
+            // Penalise recently generated tokens to prevent greedy repetition
+            // loops. penalty_last_n=64, penalty_repeat=1.1 is a mild penalty
+            // that breaks infinite loops without suppressing content generation;
+            // freq/present penalties remain off.
+            llama_sampler_chain_add(chain, llama_sampler_init_penalties(64, 1.1, 0.0, 0.0))
+            llama_sampler_chain_add(chain, llama_sampler_init_greedy())
+        } else {
+            // Free-text generation: stochastic sampling with temperature.
+            llama_sampler_chain_add(chain, llama_sampler_init_temp(0.7))
+            llama_sampler_chain_add(chain, llama_sampler_init_dist(LLAMA_DEFAULT_SEED))
         }
-        llama_sampler_chain_add(chain, llama_sampler_init_temp(0.7))
-        llama_sampler_chain_add(chain, llama_sampler_init_dist(LLAMA_DEFAULT_SEED))
         return chain
     }
 }
