@@ -29,11 +29,19 @@ public struct ContextAssembler: Sendable {
     private let store: BotStore
     private let tools: [any Tool]
     private let toolsRequirePermission: Bool
+    private let limit: Int
 
     private static let logger = Logger(
         subsystem: "com.toppeross.b0t.b0tCore", category: "ContextAssembler"
     )
-    private static let limit = 3500
+
+    /// Tokens reserved for the model's response within the context window.
+    ///
+    /// Chosen so that the default path (contextWindow: 4096) yields a budget
+    /// limit of exactly 3500 — preserving the previously hardcoded constant.
+    ///   4096 − 596 = 3500
+    public static let responseReserve = 596
+
     private static let permissionHandlingInstruction = """
 
         Some of your tools may return a result with `permissionDenied: true`. \
@@ -47,12 +55,14 @@ public struct ContextAssembler: Sendable {
         bot: Bot,
         store: BotStore,
         tools: [any Tool] = [],
-        toolsRequirePermission: Bool = false
+        toolsRequirePermission: Bool = false,
+        contextWindow: Int = 4096
     ) {
         self.bot = bot
         self.store = store
         self.tools = tools
         self.toolsRequirePermission = toolsRequirePermission
+        self.limit = max(0, contextWindow - Self.responseReserve)
     }
 
     public func assemble(mode: AssemblyMode) async throws -> AssembledContext {
@@ -141,7 +151,7 @@ public struct ContextAssembler: Sendable {
 
         let budget = TokenBudget(
             estimated: total,
-            limit: Self.limit,
+            limit: self.limit,
             breakdown: [
                 "identity": identityTokens,
                 "memory": memoryTokens,
@@ -198,7 +208,7 @@ public struct ContextAssembler: Sendable {
 
         let budget = TokenBudget(
             estimated: total,
-            limit: Self.limit,
+            limit: self.limit,
             breakdown: ["identity": identityTokens, "userPrompt": promptTokens],
             didFallBackToDigest: true
         )
@@ -269,7 +279,7 @@ public struct ContextAssembler: Sendable {
 
         let budget = TokenBudget(
             estimated: total,
-            limit: Self.limit,
+            limit: self.limit,
             breakdown: breakdown,
             didFallBackToDigest: false
         )
@@ -356,7 +366,7 @@ public struct ContextAssembler: Sendable {
         ]
         let budget = TokenBudget(
             estimated: total,
-            limit: Self.limit,
+            limit: self.limit,
             breakdown: breakdown,
             didFallBackToDigest: false
         )

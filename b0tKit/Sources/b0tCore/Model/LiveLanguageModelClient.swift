@@ -36,6 +36,14 @@ public struct FoundationModelsEngine: InferenceEngine {
         category: "LiveLanguageModelClient"
     )
 
+    /// Apple's on-device Foundation Models window.
+    ///
+    /// The FoundationModels framework does not expose a query API for the actual
+    /// context length of `SystemLanguageModel.default`, so this is set to the
+    /// documented 4096-token window for the 3B on-device model. Update if Apple
+    /// revises the model or exposes a programmatic accessor.
+    public var contextWindow: Int { 4096 }
+
     public init() throws {
         guard SystemLanguageModel.default.isAvailable else {
             Self.logger.error(

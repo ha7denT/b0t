@@ -41,9 +41,15 @@ public struct StubInferenceEngine: InferenceEngine {
         }
     }
 
+    /// The simulated context window reported by this stub engine.
+    /// Defaults to 4096 so existing call sites (`StubLanguageModelClient { ... }`)
+    /// continue to compile unchanged and existing tests see the same budget as before.
+    public let contextWindow: Int
+
     private let handler: Handler
 
-    public init(handler: @escaping Handler) {
+    public init(contextWindow: Int = 4096, handler: @escaping Handler) {
+        self.contextWindow = contextWindow
         self.handler = handler
     }
 

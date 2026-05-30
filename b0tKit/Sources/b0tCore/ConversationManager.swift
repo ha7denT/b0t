@@ -48,7 +48,8 @@ public actor ConversationManager {
             bot: bot,
             store: store,
             tools: tools,
-            toolsRequirePermission: toolsRequirePermission
+            toolsRequirePermission: toolsRequirePermission,
+            contextWindow: client.contextWindow
         )
         self.executor = Executor(bot: bot, store: store)
         self.journalWriter = JournalWriter(bot: bot, store: store, clock: clock)

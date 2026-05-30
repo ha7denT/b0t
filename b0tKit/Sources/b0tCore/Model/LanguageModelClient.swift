@@ -13,6 +13,11 @@ import b0tBrain
 /// invocations during generation. `Output` is `StructuredOutput` (refines
 /// `Generable`, adds `Codable`) so both engines can populate the same type.
 public protocol InferenceEngine: Sendable {
+    /// The maximum number of tokens the engine's model can process in a single
+    /// request (context window). Used by `ContextAssembler` to derive the token
+    /// budget limit at init time instead of relying on a hardcoded constant.
+    var contextWindow: Int { get }
+
     func generate<Output: StructuredOutput>(
         context: AssembledContext,
         generating outputType: Output.Type
