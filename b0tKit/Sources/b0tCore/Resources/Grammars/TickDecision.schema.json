@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "observed": { "type": "string" },
+    "considered": { "type": "array", "items": { "type": "string" } },
+    "decided": { "type": "string" },
+    "why": { "type": "string" },
+    "acted": { "type": "string" },
+    "mood": {
+      "type": ["string", "null"],
+      "enum": ["idle", "speaking", "thinking", "surprised", "sleepy", "attentive", "worried", "delighted", null]
+    },
+    "organUsed": { "type": ["string", "null"] },
+    "memoryObservations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "about": { "type": "string" },
+          "what": { "type": "string" },
+          "importance": { "type": "string", "enum": ["low", "medium", "high"] }
+        },
+        "required": ["about", "what", "importance"]
+      }
+    }
+  },
+  "required": ["observed", "considered", "decided", "why", "acted", "memoryObservations"]
+}

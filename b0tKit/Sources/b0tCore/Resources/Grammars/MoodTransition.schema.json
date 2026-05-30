@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "enum": ["idle", "speaking", "thinking", "surprised", "sleepy", "attentive", "worried", "delighted"]
+    },
+    "to": {
+      "type": "string",
+      "enum": ["idle", "speaking", "thinking", "surprised", "sleepy", "attentive", "worried", "delighted"]
+    },
+    "why": { "type": "string" }
+  },
+  "required": ["from", "to", "why"]
+}

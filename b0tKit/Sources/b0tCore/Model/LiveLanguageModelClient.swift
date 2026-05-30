@@ -30,7 +30,7 @@ import b0tBrain
 /// not `LanguageModelSession.Transcript`).
 ///
 /// See spec §5.3.
-public struct LiveLanguageModelClient: LanguageModelClient {
+public struct FoundationModelsEngine: InferenceEngine {
     private static let logger = Logger(
         subsystem: "com.toppeross.b0t.b0tCore",
         category: "LiveLanguageModelClient"
@@ -45,7 +45,7 @@ public struct LiveLanguageModelClient: LanguageModelClient {
         }
     }
 
-    public func generate<Output: Generable>(
+    public func generate<Output: StructuredOutput>(
         context: AssembledContext,
         generating outputType: Output.Type
     ) async throws -> (Output, [ToolCallRecord]) {
@@ -162,3 +162,6 @@ public struct LiveLanguageModelClient: LanguageModelClient {
         arguments.jsonString
     }
 }
+
+/// Transition alias — `b0tApp` constructs `LiveLanguageModelClient()`.
+public typealias LiveLanguageModelClient = FoundationModelsEngine

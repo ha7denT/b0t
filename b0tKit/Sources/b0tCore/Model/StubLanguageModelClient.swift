@@ -19,7 +19,7 @@ import b0tBrain
 /// T9 (Phase 3): handlers may return a bare `Generable` value (existing
 /// behaviour, zero records emitted) *or* a `HandlerResult` wrapping a value
 /// plus scripted `[ToolCallRecord]`. Existing tests require no changes.
-public struct StubLanguageModelClient: LanguageModelClient {
+public struct StubInferenceEngine: InferenceEngine {
     public typealias Handler = @Sendable (AssembledContext, any Generable.Type) throws -> Any
 
     /// Optional wrapper that lets a test script both the output value and the
@@ -47,7 +47,7 @@ public struct StubLanguageModelClient: LanguageModelClient {
         self.handler = handler
     }
 
-    public func generate<Output: Generable>(
+    public func generate<Output: StructuredOutput>(
         context: AssembledContext,
         generating outputType: Output.Type
     ) async throws -> (Output, [ToolCallRecord]) {
@@ -69,3 +69,6 @@ public struct StubLanguageModelClient: LanguageModelClient {
         return (typed, records)
     }
 }
+
+/// Transition alias — existing tests construct `StubLanguageModelClient(handler:)`.
+public typealias StubLanguageModelClient = StubInferenceEngine

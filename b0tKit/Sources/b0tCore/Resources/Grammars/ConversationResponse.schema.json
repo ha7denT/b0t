@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "text": { "type": "string" },
+    "mood": {
+      "type": ["string", "null"],
+      "enum": ["idle", "speaking", "thinking", "surprised", "sleepy", "attentive", "worried", "delighted", null]
+    },
+    "memoryObservations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "about": { "type": "string" },
+          "what": { "type": "string" },
+          "importance": { "type": "string", "enum": ["low", "medium", "high"] }
+        },
+        "required": ["about", "what", "importance"]
+      }
+    }
+  },
+  "required": ["text", "memoryObservations"]
+}

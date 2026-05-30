@@ -11,7 +11,7 @@ import FoundationModels
 /// b0t organ engaged this beat, or nil if no module was involved. Phase 2 ships
 /// only the time-awareness tool (Slice 9), so most ticks will have nil here.
 @Generable
-public struct TickDecision: Sendable, Equatable {
+public struct TickDecision: Sendable, Equatable, Codable {
     @Guide(description: "What you noticed at this beat — one sentence.")
     public let observed: String
 

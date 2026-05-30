@@ -1,0 +1,9 @@
+char ::= [^"\\\x7F\x00-\x1F] | [\\] (["\\bfnrt] | "u" [0-9a-fA-F]{4})
+from ::= ("\"idle\"" | "\"speaking\"" | "\"thinking\"" | "\"surprised\"" | "\"sleepy\"" | "\"attentive\"" | "\"worried\"" | "\"delighted\"") space
+from-kv ::= "\"from\"" space ":" space from
+root ::= "{" space from-kv "," space to-kv "," space why-kv "}" space
+space ::= | " " | "\n"{1,2} [ \t]{0,20}
+string ::= "\"" char* "\"" space
+to ::= ("\"idle\"" | "\"speaking\"" | "\"thinking\"" | "\"surprised\"" | "\"sleepy\"" | "\"attentive\"" | "\"worried\"" | "\"delighted\"") space
+to-kv ::= "\"to\"" space ":" space to
+why-kv ::= "\"why\"" space ":" space string
