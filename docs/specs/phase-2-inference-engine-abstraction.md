@@ -1,6 +1,6 @@
 # Phase 2 re-open — inference engine abstraction (spec)
 
-**Status:** Draft for Jamee's review — design of record for the Phase 2 re-open
+**Status:** Approved 2026-05-30 — design of record for the Phase 2 re-open
 **Date:** 2026-05-30
 **Source:** amendment 2026-05-29 §2/§3/§7/§8; [ADR-0012](../decisions/0012-inference-engine-agnostic.md), [ADR-0015](../decisions/0015-content-format-boundary-slot-assembly.md)
 **Forks resolved 2026-05-30:** llama.cpp via official XCFramework + thin wrapper; tool-calling via tool-capable catalogue + lighter harness with graceful degradation; structured output via dual-conformance + schema→GBNF.
@@ -133,7 +133,7 @@ Per the resolved fork: **curate for competence + lighter harness + graceful degr
 
 ## 9. Open questions (do not silently resolve)
 
-1. **Processor config file location** — `identity/processor.md` frontmatter vs a dedicated `processor/config.md` organ dir vs `UserDefaults`. Proposed: markdown frontmatter (thesis-consistent, editable, surfaced by the Processor organ). Confirm with Jamee.
+1. **Processor config file location** — **Resolved 2026-05-30:** `identity/processor.md` frontmatter (`engine`, `model_id`, inference params), thesis-consistent and surfaced by the Processor organ. Model binaries live in Application Support, not markdown.
 2. **§14 Q6 model lineup + quant** — now coupled to tool-calling competence (§6). The exact trio, quant levels, context windows, and pinned source URLs need on-device validation (RAM fit on the 6GB floor, tool-call reliability).
 3. **`jsonSchema` derivation mechanism** — macro/codegen vs hand-written per type. Plan picks the lightest single-source-of-truth approach during Stage A.
 4. **Bundled test GGUF** — ship a tiny model in the test bundle for deterministic live tests, or download-on-first-test? Affects CI.
