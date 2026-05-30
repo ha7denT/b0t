@@ -2,38 +2,40 @@ import Foundation
 import FoundationModels
 import b0tBrain
 
-/// The seam through which `b0tCore` talks to a language model.
+/// The seam through which `b0tCore` talks to a language model engine.
 ///
-/// Two implementations exist: `LiveLanguageModelClient` (wraps Apple's
-/// `LanguageModelSession`) and `StubLanguageModelClient` (test-target visible).
-/// Production code is identical against either; tests shape the stub's
-/// outputs per case. See `docs/specs/phase-2-foundation-models-loop.md` §5.3.
+/// Engine-agnostic as of the 2026-05-29 amendment (ADR-0012). Conformers:
+/// `FoundationModelsEngine` (Apple `LanguageModelSession`) and, from Stage B,
+/// a llama.cpp-backed engine. Production code is identical against either;
+/// tests use `StubInferenceEngine`.
 ///
-/// T9 (Phase 3): `generate` returns `(Output, [ToolCallRecord])`. The records
-/// array captures tool invocations that occurred during the generation,
-/// extracted from `LanguageModelSession.Transcript` via
-/// `LiveLanguageModelClient.extractToolCallRecords`. Production callers may
-/// drop the records with `_` until T10/T12 wire them into `ConversationTurn`
-/// and `TickResult` respectively.
-public protocol LanguageModelClient: Sendable {
-    func generate<Output: Generable>(
+/// `generate` returns `(Output, [ToolCallRecord])`. The records capture tool
+/// invocations during generation. `Output` is `StructuredOutput` (refines
+/// `Generable`, adds `Codable`) so both engines can populate the same type.
+public protocol InferenceEngine: Sendable {
+    func generate<Output: StructuredOutput>(
         context: AssembledContext,
         generating outputType: Output.Type
     ) async throws -> (Output, [ToolCallRecord])
 }
 
-/// Errors surfaced by any `LanguageModelClient` implementation.
+/// Transition alias — existing call sites in `b0tApp` and tests refer to
+/// `LanguageModelClient`. Remove in a later cleanup once references migrate.
+public typealias LanguageModelClient = InferenceEngine
+
+/// Errors surfaced by any `InferenceEngine` implementation.
 ///
-/// `modelUnavailable` is raised by `LiveLanguageModelClient` at init time when
-/// `SystemLanguageModel.default.isAvailable == false` (Apple Intelligence
-/// disabled, device ineligible, model not yet downloaded, etc.).
+/// `modelUnavailable` is raised by `FoundationModelsEngine` at init time when
+/// `SystemLanguageModel.default.isAvailable == false`.
 ///
-/// `exceededContextWindowSize` carries the assembler's pre-call estimate so
-/// the graduated fallback in `ContextAssembler` (spec §7.4) can log which
-/// budget level triggered the fallback.
-public enum LanguageModelClientError: Error, Sendable, Equatable {
+/// `exceededContextWindowSize` carries the assembler's pre-call estimate so the
+/// graduated fallback in `ContextAssembler` can log which budget level fired.
+public enum InferenceEngineError: Error, Sendable, Equatable {
     case modelUnavailable
     case exceededContextWindowSize(estimatedTokens: Int)
     case sessionFailed(underlyingDescription: String)
     case malformedGenerableOutput(underlyingDescription: String)
 }
+
+/// Transition alias for the renamed error enum.
+public typealias LanguageModelClientError = InferenceEngineError
