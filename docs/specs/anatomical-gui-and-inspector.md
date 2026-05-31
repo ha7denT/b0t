@@ -35,6 +35,7 @@ This captures decisions reached in discussion. Fidelity is ASCII/structural by i
 - A **Gamelabs-generated painterly animation sprite-sheet** (mood states; head rotates ≤ a few degrees).
 - **Eye-screen:** baked into the sprite art, aqua-toned — looks lit, **no runtime emissive** in v1 (animated eye-screen → v2).
 - **Speech grille:** the sole v1 emissive element — a **transparent cut-out** in the face sprite, lit by a **token-yellow emissive shape one z-layer behind it**, brightness driven by the speech signal (TTS amplitude, else token-rate). Per ADR-0014/0016.
+- **Placeholder asset (v01):** the static head **with the grille area as transparency** is at `assets/face-parts/placeholder/WunderB0t-01/Head 04 transparent.png` (siblings: `Head 04 reduced.png`; `spritesheets/` holds the mood-state animation frames). This WunderB0t-01 placeholder demonstrates the grille mechanism above — the transparent cut-out is exactly where the behind-shape glow shows through.
 
 ## 3. Organ inspector
 

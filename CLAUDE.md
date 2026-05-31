@@ -14,10 +14,10 @@ Before any task that touches design, architecture, or copy:
 
 1. `docs/design_document.md` — the why. Philosophy, aesthetic, the four pillars.
 2. `docs/prd.md` — the what and how. Implementation spec, phased rollout, component-level requirements.
-3. `docs/decisions/` — settled architectural decisions (ADRs). Each one is short. ADRs 0012–0015 (2026-05-29 amendment) are the current source of truth where they conflict with older docs; ADR-0016 (aesthetic) is pending Jamee's UI designs.
+3. `docs/decisions/` — settled architectural decisions (ADRs). Each one is short. ADRs 0012–0017 (the 2026-05-29 amendment + the 2026-05-30/31 design sessions) are the current source of truth where they conflict with older docs.
 4. `default-bot/` — the canonical b0t that ships with the app. Markdown content read into the bundle at build time.
 
-The most recent design amendment is `docs/b0t-amendment-2026-05-29.md`, with its impact map in `docs/plans/amendment-2026-05-29-interpretation.md`. It reframes b0t as tool-first, makes inference engine-agnostic (FM default-when-available / downloadable open-weight otherwise), and contracts v1 to a single non-modular b0t.
+The most recent design amendment is `docs/b0t-amendment-2026-05-29.md`, with its impact map in `docs/plans/amendment-2026-05-29-interpretation.md`. It reframes b0t as tool-first, makes inference engine-agnostic (FM default-when-available / downloadable open-weight otherwise), and contracts v1 to a single non-modular b0t. GUI/layout decisions (home screen, painterly face + grille, the 3-tab inspector, the organ ring + icon mapping) are captured in `docs/specs/anatomical-gui-and-inspector.md`. **For where active implementation actually stands — what's merged, what's local, what's next — read `docs/IMPLEMENTATION.md` first; it's the resume point.**
 
 Before any task touching user-facing copy:
 

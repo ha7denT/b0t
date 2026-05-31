@@ -2,17 +2,21 @@
 
 A living document. Updated at the end of each phase, or when a blocker appears.
 
-## Current state
+## Current state — RESUME POINT (2026-05-31)
 
-- **Phase:** 5 deferred 2026-05-06; **Phase 2 re-opened 2026-05-29** (engine
-  abstraction). Next phase to be selected after the Phase 2 re-open is planned.
-- **Status:** Phase 5 paused mid-brainstorm, deferred until the features it
-  showcases are built. Roughly a third of the 24 onboarding beats reference
-  modules that don't yet exist (mail, location, notes, weather) or features
-  in later phases (face creator → Phase 6, multi-b0t → now v2). Shipping
-  onboarding now would have the b0t introduce features it can't actually
-  perform — a credibility problem on day one. The brainstorm settled
-  enough to make resumption cheap (see "Specs in flight" below).
+Two threads in flight (Phase 5 onboarding stays separately deferred):
+
+**1. Phase 2 — inference engine re-open** (engine-agnostic; [ADR-0012](decisions/0012-inference-engine-agnostic.md)). Staged A→D in `docs/specs/phase-2-inference-engine-abstraction.md`.
+- **Stage A** — InferenceEngine/StructuredOutput abstraction. **Done; merged + pushed** to origin/main.
+- **Stage B** — `b0tLlama` (llama.cpp xcframework build `b9415`, `LlamaRuntime`, GBNF-constrained `LlamaEngine`). **Done; merged + pushed.** Live tests gated by `LIVE_LLAMA=1` (cached SmolLM2-360M). Plan: `docs/plans/phase-2b-llama-engine.md`.
+- **Stage C** (`docs/plans/phase-2c-engine-selection-and-models.md`) — **C1** (variable-window budgeting) + **C2** (`identity/processor.md` + `CapabilityDetector`) **done; merged to local main.** **C3** (download manager + lifecycle + catalogue) and **C4** (`b0tApp` engine-selection wiring) **NOT started — gated on §14 Q6** (validate the downloadable model lineup on-device: trio + quant + context windows + chat-template family, on a 6GB device).
+- **Stage D** = the GUI revision (thread 2) — not started; gated on Stage C.
+
+**2. GUI revision — designed, NOT implemented.** Home layout, painterly Gamelabs face + transparent-cutout grille, the 3-tab inspector, the 10-organ ring ([ADR-0017](decisions/0017-organ-ring-arrangement.md)), and the v01 organ→icon mapping + the placeholder head asset — all in `docs/specs/anatomical-gui-and-inspector.md`. Aesthetic: [ADR-0016](decisions/0016-aesthetic-reconciliation.md).
+
+**Test/build:** 302 SPM tests (3 `LIVE_LLAMA`-gated), 0 failures; iOS app builds. **To resume Phase 2:** validate §14 Q6, fill the catalogue placeholders, then execute Stage C3→C4 (subagent-driven, as A/B/C1/C2 were).
+
+**Phase 5 (onboarding)** stays deferred (2026-05-06): ~1/3 of the 24 beats reference features that don't exist yet (mail/location/notes/weather modules; face creator → v2; multi-b0t → v2). The brainstorm settled enough to make resumption cheap (see "Specs in flight").
 
 ### Amendment 2026-05-29 (recorded 2026-05-30)
 
@@ -27,7 +31,7 @@ Speech is signalled by an illuminated grille, no moving jaw
 content/format boundary + slot-based assembly
 ([ADR-0015](decisions/0015-content-format-boundary-slot-assembly.md)); the
 aesthetic goes LCD-forward with a yellow/aqua/pink semantic palette
-("never blue" overridden — ADR-0016, **pending** Jamee's UI designs).
+("never blue" overridden — [ADR-0016](decisions/0016-aesthetic-reconciliation.md), accepted).
 Impact map: `docs/plans/amendment-2026-05-29-interpretation.md`.
 
 - **§14 resolved 2026-05-30:** Q3 (palette override), Q4 (single b0t), Q5
@@ -35,11 +39,14 @@ Impact map: `docs/plans/amendment-2026-05-29-interpretation.md`.
   (FM + 3 downloadable models; disclosures in the Processor inspector — exact
   trio + quant levels pending on-device validation), Q7 (minimal TTS), Q9
   (iOS 26 + 6GB-RAM floor).
-- **§14 Q1/Q2 resolved 2026-05-30** against Jamee's home-screen mockup
-  (`assets/ref/`): painterly face (Q1), emissive aqua eye-screen kept (Q2).
-  [ADR-0016](decisions/0016-aesthetic-reconciliation.md) authored; design doc
-  §3.3/§3.5/§3.6 finalized. All §14 aesthetic items now closed. (Q8 trial
-  length remains a pre-launch call.)
+- **§14 Q1/Q2 resolved 2026-05-30/31** against Jamee's home-screen mockup
+  (`assets/ref/`): **painterly face** (Q1); the v1 **eye-screen is baked art
+  with no runtime emissive** — the grille is the *sole* emissive element,
+  refined to a **transparent cut-out + behind emissive shape** (Q2; the head
+  rotates ≤ a few degrees, so no shader/colour-key needed). Fancy eye-screen →
+  v2. ADR-0016 (+ 0014/0017) authored; design doc §3.3/§3.5/§3.6 finalized; full
+  layout in `docs/specs/anatomical-gui-and-inspector.md`. All §14 aesthetic
+  items closed. (Q8 trial length: pre-launch.)
 - **Layout (captured 2026-05-31):** organ ring reorganized — left/right
   world-vs-mind columns; processor crown (Reasoning renamed); journal a new
   10th organ — recorded in [ADR-0017](decisions/0017-organ-ring-arrangement.md).
