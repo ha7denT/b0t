@@ -44,8 +44,9 @@ Impact map: `docs/plans/amendment-2026-05-29-interpretation.md`.
   world-vs-mind columns; processor at the crown replacing the Reasoning organ;
   journal as a new organ) — an ADR-0010 arrangement change to record once the
   layout is finalized. **Face animation resolved 2026-05-30:** Gamelabs-generated
-  animation sprite-sheet; the grille is the sole v1 emissive element (colour-key
-  glow on reserved yellow within the sprite); eye-screen baked, no v1 emissive
+  animation sprite-sheet; the grille is the sole v1 emissive element (a transparent
+  cut-out in the face sprite lit by an emissive shape behind it in z-space;
+  head rotation ≤ a few degrees keeps it leak-free); eye-screen baked, no v1 emissive
   (fancy eye-screen → v2). See ADR-0014/0016. Memory-icon swap pending Jamee's
   asset filenames.
 - **Code untouched.** This was a docs + ADRs pass only. The Phase 2 re-open

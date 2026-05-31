@@ -214,7 +214,7 @@ The Face Creator is a feature-grade sub-product. Designing the face is part of h
 
 ### 3.3 Visual language layers
 
-> **Reconciled 2026-05-30 ([ADR-0016](decisions/0016-aesthetic-reconciliation.md); §14 Q1/Q2 resolved).** A deliberate **two-register** system: a **painterly face** (Q1) — a Gamelabs animation sprite-sheet — inside **1-bit LCD chrome** (backlit monochrome, **no bloom/glow**). In **v1 the face's one emissive element is the token-yellow speech grille** (ADR-0014), glowing via a colour-key shader within the sprite-sheet; the **eye-screen is baked painterly art** (Q2: no runtime emissive in v1 — animated eye-screen → v2). Everything else (panels, organs, wiring, inspection surface) is matte LCD. The layer list below is read through that lens.
+> **Reconciled 2026-05-30 ([ADR-0016](decisions/0016-aesthetic-reconciliation.md); §14 Q1/Q2 resolved).** A deliberate **two-register** system: a **painterly face** (Q1) — a Gamelabs animation sprite-sheet — inside **1-bit LCD chrome** (backlit monochrome, **no bloom/glow**). In **v1 the face's one emissive element is the token-yellow speech grille** (ADR-0014), rendered as a transparent cut-out in the sprite lit by an emissive shape behind it in z-space; the **eye-screen is baked painterly art** (Q2: no runtime emissive in v1 — animated eye-screen → v2). Everything else (panels, organs, wiring, inspection surface) is matte LCD. The layer list below is read through that lens.
 
 The app uses register shifts between layers, each matching its content:
 
