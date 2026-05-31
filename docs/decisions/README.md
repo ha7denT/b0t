@@ -23,10 +23,11 @@ Standard sections: Context, Decision, Rationale, Consequences, When to revisit.
 | 0007 | [Anatomical GUI as the primary interface](0007-anatomical-gui-not-chat.md) | Accepted |
 | 0008 | [Implementation amendment — 2026-05-04 vocabulary and architectural locks](0008-implementation-amendment-2026-05-04.md) | Partially superseded by 0012/0013 |
 | 0009 | [`Module` protocol uses `[any Tool]` directly (no `ToolHandle` wrapper)](0009-module-protocol-simplification.md) | Accepted |
-| 0010 | [Organs are anatomical subsystems](0010-organs-are-anatomical-subsystems.md) | Accepted |
+| 0010 | [Organs are anatomical subsystems](0010-organs-are-anatomical-subsystems.md) | Superseded in part by 0017 |
 | 0011 | [Defer face rig to Phase 6](0011-defer-face-rig-to-phase-6.md) | Superseded by 0013 |
 | 0012 | [Inference is engine-agnostic; FM default-when-available](0012-inference-engine-agnostic.md) | Accepted |
 | 0013 | [v1 ships a single non-modular b0t](0013-v1-single-non-modular-bot.md) | Accepted |
 | 0014 | [Speech via illuminated grille; no moving jaw in v1](0014-speech-via-illuminated-grille.md) | Accepted |
 | 0015 | [Content/format boundary; slot-based prompt assembly](0015-content-format-boundary-slot-assembly.md) | Accepted |
 | 0016 | [Aesthetic reconciliation: LCD-forward, painterly face, semantic palette](0016-aesthetic-reconciliation.md) | Accepted |
+| 0017 | [Organ-ring arrangement: left/right columns, processor crown, journal organ](0017-organ-ring-arrangement.md) | Accepted |
