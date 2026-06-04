@@ -118,6 +118,14 @@ public actor LlamaRuntime {
         return output
     }
 
+    /// Renders `messages` through the model's embedded chat template without
+    /// generating — used by the Q6 validation harness's template-gate check to
+    /// confirm `llama_chat_apply_template` recognises the embedded template
+    /// (throws `.templateApplyFailed` if not) and to inspect the delimiters.
+    public func renderChatTemplate(_ messages: [LlamaChatMessage]) throws -> String {
+        try applyChatTemplate(messages)
+    }
+
     // MARK: - C bridging helpers
 
     private func applyChatTemplate(_ messages: [LlamaChatMessage]) throws -> String {

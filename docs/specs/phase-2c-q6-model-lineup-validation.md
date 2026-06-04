@@ -72,7 +72,9 @@ All three weight files (~0.8–1.3 GB at Q4_K_M) sit comfortably under the resid
 
 ## 5. Turnkey on-device validation protocol (iPhone 13 Pro, iOS 26)
 
-Run per candidate (all three). The harness is a thin throwaway test view or a `LIVE_LLAMA`-style gated case that loads a local GGUF via `LlamaRuntime` and exercises the steps below. **Capture the numbers into the table in §6.**
+Run per candidate (all three). **The harness is built** (2026-06-05): a DEBUG-only SwiftUI view, `Q6ValidationView` (`b0tApp/Sources/Debug/`), reached via the existing debug sheet (long-press the home screen → **Q6** in the toolbar). It `.fileImporter`-picks a GGUF, runs all six checks via `Q6Runner`, and renders the row on-screen. **Capture the numbers into the table in §6.**
+
+**How to run:** AirDrop / save each Q4_K_M GGUF to the device's Files, open the DEBUG build, long-press home → debug brain → **Q6**, pick a model, tap *run 6 checks*, read the row. Repeat per model. The pure logic (tool-call grammar/parse/score) is host-tested in `b0tLlamaTests`; the GBNF + template-render paths have a gated `LIVE_LLAMA` e2e test (`Q6ToolCallLiveTests`).
 
 **Setup**
 1. Side-load each Q4_K_M GGUF to the device (Files / debug bundle). Note exact file + size.

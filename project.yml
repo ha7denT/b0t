@@ -36,6 +36,8 @@ targets:
       - package: b0tKit
         product: b0tCore
       - package: b0tKit
+        product: b0tLlama
+      - package: b0tKit
         product: b0tBrain
       - package: b0tKit
         product: b0tModules

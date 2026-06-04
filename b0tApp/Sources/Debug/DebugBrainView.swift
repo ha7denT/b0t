@@ -55,6 +55,11 @@
                 .padding()
             }
             .navigationTitle("debug brain")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationLink("Q6") { Q6ValidationView() }
+                }
+            }
             .task { await initializeManager() }
             .task { await pollJournalTail() }
         }

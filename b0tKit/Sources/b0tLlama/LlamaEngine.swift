@@ -15,6 +15,14 @@ public struct LlamaEngine: InferenceEngine {
         self.runtime = try LlamaRuntime(modelPath: modelPath, contextLength: contextLength)
     }
 
+    /// Wraps an already-loaded `LlamaRuntime` instead of loading the model
+    /// again. Lets callers share one resident model across the structured-output
+    /// path and other runtime uses (e.g. the Q6 harness reusing its loaded
+    /// model for both the GBNF and tool-call checks).
+    public init(runtimeReusing runtime: LlamaRuntime) {
+        self.runtime = runtime
+    }
+
     public func generate<Output: StructuredOutput>(
         context: AssembledContext,
         generating outputType: Output.Type

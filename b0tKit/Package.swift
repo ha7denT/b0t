@@ -51,6 +51,10 @@ let package = Package(
             name: "b0tLlamaLiveTests",
             dependencies: ["b0tLlama", "b0tCore"]
         ),
+        .testTarget(
+            name: "b0tLlamaTests",
+            dependencies: ["b0tLlama", "b0tCore"]
+        ),
 
         .testTarget(
             name: "b0tCoreTests",
