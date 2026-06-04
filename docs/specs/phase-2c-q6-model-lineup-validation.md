@@ -66,7 +66,17 @@ All three weight files (~0.8–1.3 GB at Q4_K_M) sit comfortably under the resid
 ## 4. Pinning + integrity (ADR-0012 "pinned, declared source")
 
 - Pin to the **full 40-char commit SHA** via `resolve/<sha>/<file>` (HF rejects 7-char short hashes).
-- **Per-file SHA-256:** from HF LFS metadata (Hub API `GET /api/models/{repo}/tree/{revision}`, or the file's LFS pointer / `X-Linked-ETag`), or compute once after a trusted download and bake the expected hash into the catalogue row. **Capture checksums at lock time** — HF files can be re-uploaded; the pinned SHA + checksum are taken together when we commit the catalogue entry, not from this research pass.
+- **Per-file SHA-256:** from HF LFS metadata (Hub API `GET /api/models/{repo}/tree/{revision}`, or the file's LFS pointer / `X-Linked-ETag`), or compute once after a trusted download and bake the expected hash into the catalogue row.
+
+### Captured + verified (2026-06-05)
+
+All three resolved from **bartowski** GGUF repos (open, not gated), pinned to the commit below, **downloaded and SHA-256-verified** against the pinned `resolve/<sha>/` URL. These are the catalogue rows for Stage C3.
+
+| Model | Repo | Pinned commit | File | Size (bytes) | SHA-256 |
+|---|---|---|---|---|---|
+| Qwen3-1.7B | `bartowski/Qwen_Qwen3-1.7B-GGUF` | `dcb19155b962dbb6389f4691a982043a8e651022` | `Qwen_Qwen3-1.7B-Q4_K_M.gguf` | 1282439584 | `72c5c3cb38fa32d5256e2fe30d03e7a64c6c79e668ad84057e3bd66e250b24fb` |
+| Llama-3.2-1B | `bartowski/Llama-3.2-1B-Instruct-GGUF` | `067b946cf014b7c697f3654f621d577a3e3afd1c` | `Llama-3.2-1B-Instruct-Q4_K_M.gguf` | 807694464 | `6f85a640a97cf2bf5b8e764087b1e83da0fdb51d7c9fab7d0fece9385611df83` |
+| Qwen2.5-1.5B | `bartowski/Qwen2.5-1.5B-Instruct-GGUF` | `9eadc66189c7641e1ddd226b8267a9119b2ce2d4` | `Qwen2.5-1.5B-Instruct-Q4_K_M.gguf` | 986048768 | `1adf0b11065d8ad2e8123ea110d1ec956dab4ab038eab665614adba04b6c3370` |
 
 ---
 
@@ -95,13 +105,29 @@ Run per candidate (all three). **The harness is built** (2026-06-05): a DEBUG-on
 
 ---
 
-## 6. Results table (fill on-device)
+## 6. Results
 
-| Model | Template applies? | Max safe ctx | Peak RAM @ctx (entitled / not) | First-token median | tok/s | GBNF JSON ok? | Tool-call hit-rate | Verdict |
-|---|---|---|---|---|---|---|---|---|
-| Qwen3-1.7B (Q4_K_M) | | | | | | | | |
-| Llama 3.2 1B (Q4_K_M) | | | | | | | | |
-| Qwen2.5-1.5B (Q4_K_M) | | | | | | | | |
+### 6a. Functional half — host (macOS), 2026-06-05
+
+ Run via the gated `Q6HostFunctionalTests` (`Q6_HOST=1`) against the verified GGUFs on the xcframework's macOS slice. **All three pass the template gate (go/no-go) and GBNF — no disqualifications.**
+
+| Model | #1 template gate | #5 GBNF JSON (n/5) | #6 tool-call (hit / parsed) |
+|---|---|---|---|
+| Qwen3-1.7B | ✅ PASS — ChatML (`<\|im_start\|>`) | 5/5 | 8/8 (100%) / 8/8 |
+| Llama-3.2-1B | ✅ PASS — llama3 (`<\|start_header_id\|>`) | 5/5 | 7/8 (88%) / 8/8 |
+| Qwen2.5-1.5B | ✅ PASS — ChatML (`<\|im_start\|>`) | 5/5 | 8/8 (100%) / 8/8 |
+
+**Interpretation.** Template recognition by `llama_chat_apply_template` is confirmed for the whole trio on the pure-C path — the load-bearing gate ([ADR-0018](../decisions/0018-llama-tool-calling-via-gbnf-pure-c.md)) is satisfied. GBNF structured output is reliable (also retires the llama.cpp #21571 sampler-init risk for these models). Tool-call **parse rate is 100% by grammar construction**; selection hit-rate is strong. **Caveat:** the 8 probes are simple/unambiguous, so #6 here is a *floor* check (obvious request → obvious tool), not hard agentic competence — real multi-turn/ambiguous selection will be lower (cf. the desk BFCL multi-turn figures). This validates the mechanism + basic viability of all three, not full tool-calling competence.
+
+### 6b. Resource half — physical iPhone 13 Pro (PENDING)
+
+Host RAM/latency are meaningless for the 6GB floor; these stay for the device pass via `Q6ValidationView`.
+
+| Model | Max safe ctx | Peak RAM @ctx (entitled / not) | First-token median | tok/s | Verdict |
+|---|---|---|---|---|---|
+| Qwen3-1.7B (Q4_K_M) | pending | pending | pending | pending | functional ✅ · resource pending |
+| Llama 3.2 1B (Q4_K_M) | pending | pending | pending | pending | functional ✅ · resource pending |
+| Qwen2.5-1.5B (Q4_K_M) | pending | pending | pending | pending | functional ✅ · resource pending |
 
 ---
 
