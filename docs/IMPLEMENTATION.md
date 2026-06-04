@@ -15,7 +15,7 @@ Two threads in flight (Phase 5 onboarding stays separately deferred):
 
 **2. GUI revision — designed, NOT implemented.** Home layout, painterly Gamelabs face + transparent-cutout grille, the 3-tab inspector, the 10-organ ring ([ADR-0017](decisions/0017-organ-ring-arrangement.md)), and the v01 organ→icon mapping + the placeholder head asset — all in `docs/specs/anatomical-gui-and-inspector.md`. Aesthetic: [ADR-0016](decisions/0016-aesthetic-reconciliation.md).
 
-**Test/build:** 302 SPM tests (3 `LIVE_LLAMA`-gated), 0 failures; iOS app builds. **To resume Phase 2:** §14 Q6 desk-half is done (trio locked, ADR-0018, protocol authored — see the Q6 bullet above); the next action is Jamee's on-device validation pass, then fill the catalogue rows and execute Stage C3→C4 (subagent-driven, as A/B/C1/C2 were).
+**Test/build:** 331 SPM tests (7 `LIVE_LLAMA`/`Q6_HOST`-gated), 0 failures; iOS app builds. **To resume Phase 2:** Stage C (C1–C4) is **complete** and the §14 Q6 trio is functionally validated on host. The next pulls are **remote-friendly**: **Stage D** (Processor inspector UI + token gauge + download-progress UI), the tool-call **execute/iterate loop** (single-shot built), the model **disclosure-copy voice pass**, and `DebugBrainView` resolver parity. The **only device-gated item** is the iPhone 13 Pro RAM/latency confirmation (spec §6b) — low-risk, non-blocking.
 
 **Phase 5 (onboarding)** stays deferred (2026-05-06): ~1/3 of the 24 beats reference features that don't exist yet (mail/location/notes/weather modules; face creator → v2; multi-b0t → v2). The brainstorm settled enough to make resumption cheap (see "Specs in flight").
 
