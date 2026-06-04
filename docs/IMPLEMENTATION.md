@@ -2,19 +2,20 @@
 
 A living document. Updated at the end of each phase, or when a blocker appears.
 
-## Current state — RESUME POINT (2026-05-31)
+## Current state — RESUME POINT (2026-06-05)
 
 Two threads in flight (Phase 5 onboarding stays separately deferred):
 
 **1. Phase 2 — inference engine re-open** (engine-agnostic; [ADR-0012](decisions/0012-inference-engine-agnostic.md)). Staged A→D in `docs/specs/phase-2-inference-engine-abstraction.md`.
 - **Stage A** — InferenceEngine/StructuredOutput abstraction. **Done; merged + pushed** to origin/main.
 - **Stage B** — `b0tLlama` (llama.cpp xcframework build `b9415`, `LlamaRuntime`, GBNF-constrained `LlamaEngine`). **Done; merged + pushed.** Live tests gated by `LIVE_LLAMA=1` (cached SmolLM2-360M). Plan: `docs/plans/phase-2b-llama-engine.md`.
-- **Stage C** (`docs/plans/phase-2c-engine-selection-and-models.md`) — **C1** (variable-window budgeting) + **C2** (`identity/processor.md` + `CapabilityDetector`) **done; merged to local main.** **C3** (download manager + lifecycle + catalogue) and **C4** (`b0tApp` engine-selection wiring) **NOT started — gated on §14 Q6** (validate the downloadable model lineup on-device: trio + quant + context windows + chat-template family, on a 6GB device).
+- **Stage C** (`docs/plans/phase-2c-engine-selection-and-models.md`) — **C1** (variable-window budgeting) + **C2** (`identity/processor.md` + `CapabilityDetector`) **done; merged to local main.** **C3** (download manager + lifecycle + catalogue) and **C4** (`b0tApp` engine-selection wiring) **NOT started — gated on §14 Q6.**
+- **§14 Q6 — desk half DONE (2026-06-02), device half pending Jamee.** Research + candidate matrix complete; trio **locked**: default **Qwen3-1.7B** (Apache-2.0), opt-in **Llama 3.2 1B** ("Built with Llama"), third **Qwen2.5-1.5B-Instruct** (Apache-2.0); all Q4_K_M. SmolLM2 disqualified (27% BFCL) → stays test-fixture only. Tool-calling settled by [ADR-0018](decisions/0018-llama-tool-calling-via-gbnf-pure-c.md): **GBNF harness on the pure-C boundary** (minja/`common` confirmed NOT in the b9415 xcframework; pure-C principle kept). Matrix + RAM math + **turnkey on-device validation protocol** in `docs/specs/phase-2c-q6-model-lineup-validation.md`. **Next:** Jamee runs the protocol on the iPhone 13 Pro → fill that doc's results table → capture pinned SHA+checksum per row → fill Stage C3 catalogue rows → execute C3→C4.
 - **Stage D** = the GUI revision (thread 2) — not started; gated on Stage C.
 
 **2. GUI revision — designed, NOT implemented.** Home layout, painterly Gamelabs face + transparent-cutout grille, the 3-tab inspector, the 10-organ ring ([ADR-0017](decisions/0017-organ-ring-arrangement.md)), and the v01 organ→icon mapping + the placeholder head asset — all in `docs/specs/anatomical-gui-and-inspector.md`. Aesthetic: [ADR-0016](decisions/0016-aesthetic-reconciliation.md).
 
-**Test/build:** 302 SPM tests (3 `LIVE_LLAMA`-gated), 0 failures; iOS app builds. **To resume Phase 2:** validate §14 Q6, fill the catalogue placeholders, then execute Stage C3→C4 (subagent-driven, as A/B/C1/C2 were).
+**Test/build:** 302 SPM tests (3 `LIVE_LLAMA`-gated), 0 failures; iOS app builds. **To resume Phase 2:** §14 Q6 desk-half is done (trio locked, ADR-0018, protocol authored — see the Q6 bullet above); the next action is Jamee's on-device validation pass, then fill the catalogue rows and execute Stage C3→C4 (subagent-driven, as A/B/C1/C2 were).
 
 **Phase 5 (onboarding)** stays deferred (2026-05-06): ~1/3 of the 24 beats reference features that don't exist yet (mail/location/notes/weather modules; face creator → v2; multi-b0t → v2). The brainstorm settled enough to make resumption cheap (see "Specs in flight").
 
