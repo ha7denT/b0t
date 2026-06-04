@@ -1,6 +1,7 @@
 import SwiftUI
 import b0tBrain
 import b0tCore
+import b0tLlama
 import b0tModules
 
 #if canImport(BackgroundTasks) && os(iOS)
@@ -53,11 +54,7 @@ struct b0tApp: App {
         if forceStub {
             client = makeProductionStub()
         } else {
-            do {
-                client = try LiveLanguageModelClient()
-            } catch {
-                client = makeProductionStub()
-            }
+            client = await resolveClient(bot: bot)
         }
 
         let modules: [any Module]
@@ -90,6 +87,61 @@ struct b0tApp: App {
                 await manager.startDebugTimer()
             }
         #endif
+    }
+
+    /// Stage C4: resolve the inference engine from `identity/processor.md` +
+    /// FM availability + which models are downloaded, then construct it. Falls
+    /// back to FM (or the stub) when the selected llama model isn't present
+    /// (the download UI is Stage D).
+    private func resolveClient(bot: Bot) async -> any LanguageModelClient {
+        let processorEngine: String?
+        let processorModelId: String?
+        if let processor = try? await bot.identity.processor {
+            processorEngine = processor.processorEngine
+            processorModelId = processor.processorModelId
+        } else {
+            processorEngine = nil
+            processorModelId = nil
+        }
+
+        let downloads = ModelDownloadManager()
+        var downloaded: Set<String> = []
+        for entry in InferenceModelCatalogue.downloadable {
+            if let file = entry.file,
+                await downloads.isDownloaded(filename: file, expectedSize: entry.sizeBytes)
+            {
+                downloaded.insert(entry.id)
+            }
+        }
+
+        let decision = EngineSelector.resolve(
+            processorEngine: processorEngine, modelId: processorModelId,
+            downloadedModelIds: downloaded)
+
+        func fmOrStub() -> any LanguageModelClient {
+            (try? LiveLanguageModelClient()) ?? makeProductionStub()
+        }
+
+        switch decision {
+        case .foundationModels:
+            print("[b0t] inference engine: foundation models")
+            return fmOrStub()
+        case .llama(let modelId, let contextLength):
+            if let entry = InferenceModelCatalogue.entry(id: modelId), let file = entry.file,
+                let engine = try? LlamaEngine(
+                    modelPath: downloads.localURL(filename: file), contextLength: contextLength)
+            {
+                print("[b0t] inference engine: llama (\(modelId))")
+                return engine
+            }
+            print("[b0t] llama load failed for \(modelId); falling back")
+            return fmOrStub()
+        case .llamaModelMissing(let modelId):
+            print(
+                "[b0t] selected llama model '\(modelId)' not downloaded; using fallback "
+                    + "(download UI is Stage D)")
+            return fmOrStub()
+        }
     }
 
     private func makeProductionStub() -> StubLanguageModelClient {
