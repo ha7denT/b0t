@@ -133,10 +133,15 @@ Host RAM/latency are meaningless for the 6GB floor; these stay for the device pa
 
 ## 7. After validation → unblocks
 
-Once the table is filled and the trio confirmed:
-1. Capture pinned SHA + per-file SHA-256 per row (§4); draft each model's disclosure string for the Processor inspector and run it through the voice-and-copy guide.
-2. Fill the **Stage C3** catalogue rows (`b0tBrain` inference-model catalogue), replacing the `// TODO(Q6)` placeholders.
-3. Execute **Stage C3 → C4** (download manager + lifecycle + `b0tApp` engine-selection wiring), subagent-driven, as A/B/C1/C2 were.
+**Status (2026-06-05): the functional half + Stage C3/C4 are DONE.**
+1. ✅ Pinned SHA + per-file SHA-256 + size captured & verified per row (§4) — baked into `InferenceModelCatalogue` (b0tBrain).
+2. ✅ Stage C3 catalogue rows filled (real trio, no placeholders); download manager + lifecycle built (`ModelDownloadManager`, `ModelStore`).
+3. ✅ Stage C4 engine-selection wiring built (`EngineSelector` + `b0tApp.resolveClient`).
+
+**Still outstanding:**
+- **Disclosure strings are provisional** — draft each model's Processor-inspector disclosure properly and run it through the voice-and-copy guide before the Stage D UI ships (the catalogue's `disclosure` fields are placeholders).
+- **Device RAM/latency pass** (§6b) on the iPhone 13 Pro — the only device-gated item.
+- **Stage D** (Processor inspector UI + token gauge + download-progress UI) and the tool-call *execute/iterate* loop (single-shot built).
 
 ## Open items carried forward
 - Exact usable context window + quant (Q4_K_M vs Q5_K_M) — set by check #2.

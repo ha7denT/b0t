@@ -1,5 +1,14 @@
 # Stage C — Engine selection, model download & lifecycle, variable budgeting (plan)
 
+> **STATUS — COMPLETE (C1–C4, 2026-06-05).** This plan is now historical. As-built:
+> C1 variable budgeting + C2 `processor.md`/`CapabilityDetector` (merged earlier);
+> C3 `InferenceModelCatalogue` (b0tBrain, real verified trio rows — the Q6-gated
+> placeholders below were resolved, see `docs/specs/phase-2c-q6-model-lineup-validation.md`)
+> + `ModelDownloadManager` + `ModelStore` (b0tLlama); C4 `EngineSelector` (b0tCore)
+> + `b0tApp.resolveClient`. The llama **tool-call harness** shipped as a single-shot
+> GBNF loop (`LlamaToolCallLoop`, ADR-0018); execute/iterate + Stage D UI remain.
+> The resume point is `docs/IMPLEMENTATION.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
 **Goal:** Make the engine **user-selectable and capability-defaulted** end to end: a markdown `identity/processor.md` config drives which engine/model runs; budgeting re-bases on the active model's real context window; a download manager + lifecycle bring downloadable models onto the device; and `b0tApp` constructs the right engine at launch.
