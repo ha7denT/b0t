@@ -31,3 +31,4 @@ Standard sections: Context, Decision, Rationale, Consequences, When to revisit.
 | 0015 | [Content/format boundary; slot-based prompt assembly](0015-content-format-boundary-slot-assembly.md) | Accepted |
 | 0016 | [Aesthetic reconciliation: LCD-forward, painterly face, semantic palette](0016-aesthetic-reconciliation.md) | Accepted |
 | 0017 | [Organ-ring arrangement: left/right columns, processor crown, journal organ](0017-organ-ring-arrangement.md) | Accepted |
+| 0018 | [Llama-path tool-calling via GBNF on the pure-C boundary; minja/common not adopted](0018-llama-tool-calling-via-gbnf-pure-c.md) | Accepted |
