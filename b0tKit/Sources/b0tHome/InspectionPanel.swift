@@ -53,9 +53,7 @@ public struct InspectionPanel: View {
         case .tools:
             ToolsDirectoryView(state: state)
         case .reasoning:
-            OrganInspectionView(
-                state: state, organ: .reasoning,
-                file: ReasoningStateFile.make(state: state))
+            ProcessorInspectionView(state: state)
         case .sensors:
             OrganInspectionView(
                 state: state, organ: .sensors,
