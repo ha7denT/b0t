@@ -6,10 +6,16 @@ import b0tBrain
 
 final class ConversationUsageTests: XCTestCase {
     func test_respond_emitsUsage_withInputFromBudgetAndOutputFromResponse() async throws {
-        // Load the canonical-bot fixture (respond() assembles → needs real files).
-        let fixturesURL = Bundle.module.resourceURL!.appendingPathComponent("Fixtures/canonical-bot")
+        // Copy the fixture to a temp dir so respond()'s journal write doesn't
+        // pollute the shared bundle copy and break other tests.
+        let source = Bundle.module.resourceURL!
+            .appendingPathComponent("Fixtures/canonical-bot")
+        let temp = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.copyItem(at: source, to: temp)
+        addTeardownBlock { try? FileManager.default.removeItem(at: temp) }
         let store = BotStore()
-        let bot = try await store.load(at: fixturesURL)
+        let bot = try await store.load(at: temp)
         let stub = StubLanguageModelClient { _, outputType in
             ConversationResponse(text: "hello there friend")
         }
