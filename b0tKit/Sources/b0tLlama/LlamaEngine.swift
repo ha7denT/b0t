@@ -4,29 +4,45 @@ import b0tCore
 
 /// `InferenceEngine` backed by a local GGUF model via `LlamaRuntime`.
 ///
-/// Stage B: no tools (`records` always empty). Structured output is enforced by
-/// the type's pre-generated GBNF grammar and decoded from JSON via `Codable`.
+/// Stage B/C: structured output is enforced by the type's pre-generated GBNF
+/// grammar and decoded from JSON via `Codable`. The tool loop is gated behind
+/// `supportsToolLoop` (defaults `false`); it arrives in the next task.
 public struct LlamaEngine: InferenceEngine {
-    private let runtime: LlamaRuntime
+    private let runtime: any LlamaGenerating
+    private let supportsToolLoop: Bool
 
     public var contextWindow: Int { runtime.contextWindow }
 
-    public init(modelPath: URL, contextLength: Int) throws {
+    public init(modelPath: URL, contextLength: Int, supportsToolLoop: Bool = false) throws {
         self.runtime = try LlamaRuntime(modelPath: modelPath, contextLength: contextLength)
+        self.supportsToolLoop = supportsToolLoop
     }
 
-    /// Wraps an already-loaded `LlamaRuntime` instead of loading the model
+    /// Wraps an already-loaded `LlamaGenerating` instead of loading the model
     /// again. Lets callers share one resident model across the structured-output
     /// path and other runtime uses (e.g. the Q6 harness reusing its loaded
     /// model for both the GBNF and tool-call checks).
-    public init(runtimeReusing runtime: LlamaRuntime) {
+    public init(runtimeReusing runtime: any LlamaGenerating, supportsToolLoop: Bool = false) {
         self.runtime = runtime
+        self.supportsToolLoop = supportsToolLoop
     }
 
     public func generate<Output: StructuredOutput>(
         context: AssembledContext,
         generating outputType: Output.Type
     ) async throws -> (Output, [ToolCallRecord]) {
+        // Tool loop arrives in the next task; for now, structured single-pass.
+        let output = try await singlePassStructured(context: context, generating: outputType)
+        return (output, [])
+    }
+
+    /// The final-answer / no-tools path: describe the shape in-prompt, generate
+    /// under the type's GBNF grammar, decode JSON. (Factored out of the original
+    /// `generate` body, unchanged.)
+    private func singlePassStructured<Output: StructuredOutput>(
+        context: AssembledContext,
+        generating outputType: Output.Type
+    ) async throws -> Output {
         // llama.cpp does not inject the schema, so describe the shape in-prompt.
         let userContent = """
             \(context.userPrompt)
@@ -48,7 +64,7 @@ public struct LlamaEngine: InferenceEngine {
         }
         do {
             let value = try JSONDecoder().decode(Output.self, from: data)
-            return (value, [])
+            return value
         } catch {
             throw InferenceEngineError.malformedGenerableOutput(
                 underlyingDescription: String(describing: error))
