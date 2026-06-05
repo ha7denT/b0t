@@ -1,3 +1,4 @@
+@preconcurrency import Combine
 import Foundation
 import FoundationModels
 import OSLog
@@ -27,6 +28,14 @@ public actor HeartbeatManager {
     private var nextBeatNumber: Int = 1
     private var didLoadBeatNumber: Bool = false
 
+    /// Per-beat token-usage snapshot for the anatomy GUI (crown + Processor gauge).
+    /// `nonisolated(unsafe)` because PassthroughSubject is a class with internal
+    /// locking — safe to send from any context, but Swift 6 can't prove it without
+    /// the explicit annotation.
+    nonisolated(unsafe) public let usageEvents = PassthroughSubject<GenerationUsage, Never>()
+
+    private let modelIdProvider: @Sendable () -> String
+
     private static let logger = Logger(
         subsystem: "com.toppeross.b0t.b0tCore", category: "HeartbeatManager")
 
@@ -37,7 +46,8 @@ public actor HeartbeatManager {
         clock: any Clock = SystemClock(),
         scheduler: any HeartbeatScheduler = LiveBGTaskScheduler(),
         tools: [any Tool] = [],
-        toolsRequirePermission: Bool = false
+        toolsRequirePermission: Bool = false,
+        modelIdProvider: @escaping @Sendable () -> String = { "" }
     ) {
         self.bot = bot
         self.store = store
@@ -49,11 +59,12 @@ public actor HeartbeatManager {
             store: store,
             tools: tools,
             toolsRequirePermission: toolsRequirePermission,
-            contextWindow: client.contextWindow
+            contextWindowProvider: { [client] in client.contextWindow }
         )
         self.executor = Executor(bot: bot, store: store)
         self.journalWriter = JournalWriter(bot: bot, store: store, clock: clock)
         self.missedBeatDetector = MissedBeatDetector(bot: bot, store: store)
+        self.modelIdProvider = modelIdProvider
     }
 
     public func tick(trigger: TickTrigger) async throws -> TickResult {
@@ -94,6 +105,13 @@ public actor HeartbeatManager {
                 context: context,
                 generating: TickDecision.self
             )
+            usageEvents.send(
+                GenerationUsage(
+                    tokensIn: context.budget.estimated,
+                    tokensOut: TokenEstimator.estimate(decision.acted),
+                    limit: context.budget.limit,
+                    modelId: modelIdProvider(),
+                    breakdown: context.budget.breakdown))
             let delta = try await executor.apply(decision)
             try await journalWriter.appendTick(
                 decision: decision,
