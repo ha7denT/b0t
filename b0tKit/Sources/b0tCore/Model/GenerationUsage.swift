@@ -1,5 +1,3 @@
-import Foundation
-
 /// A per-turn token-usage snapshot, emitted by `ConversationManager`/`HeartbeatManager`
 /// after a turn or beat completes. Drives the crown meters and the Processor
 /// Controls token gauge. Snapshot-per-turn (no live streaming) — see
@@ -35,11 +33,4 @@ public struct GenerationUsage: Sendable, Equatable {
         guard limit > 0 else { return 0 }
         return min(1.0, Double(totalTokens) / Double(limit))
     }
-}
-
-/// Outcome of a model-selection request. `.missing` tells the UI to bounce to
-/// the Directory tab and offer the download (spec §2 — "immediate re-resolve + load").
-public enum ModelSelectionOutcome: Sendable, Equatable {
-    case active(modelId: String)
-    case missing(modelId: String)
 }
