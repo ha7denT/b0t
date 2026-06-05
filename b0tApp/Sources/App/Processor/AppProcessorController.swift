@@ -36,14 +36,17 @@ final class AppProcessorController: ProcessorControlling, @unchecked Sendable {
     }
 
     func selectModel(id: String) async -> ModelSelectionOutcome {
-        if let entry = InferenceModelCatalogue.entry(id: id),
-            let file = try? await store.read(bot.identity.processorURL)
-        {
-            let updated =
-                file
-                .settingFrontmatter("engine", to: .string(entry.engine.rawValue))
-                .settingFrontmatter("model_id", to: .string(id))
-            try? await store.write(updated)
+        if let entry = InferenceModelCatalogue.entry(id: id) {
+            do {
+                let file = try await store.read(bot.identity.processorURL)
+                let updated =
+                    file
+                    .settingFrontmatter("engine", to: .string(entry.engine.rawValue))
+                    .settingFrontmatter("model_id", to: .string(id))
+                try await store.write(updated)
+            } catch {
+                print("[b0t] AppProcessorController: failed to persist selection for '\(id)': \(error)")
+            }
         }
         return await host.selectModel(id: id)
     }
