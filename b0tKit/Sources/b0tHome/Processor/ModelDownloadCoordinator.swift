@@ -57,7 +57,7 @@ public final class ModelDownloadCoordinator {
         } catch let ModelDownloadServiceError.failed(message) {
             states[modelId] = .failed(message: message)
         } catch {
-            states[modelId] = .failed(message: "Download didn\u{2019}t finish. Try again.")
+            states[modelId] = .failed(message: "the download didn\u{2019}t finish. try again.")
         }
         activeDownloadId = nil
         let s = await service.storage()
