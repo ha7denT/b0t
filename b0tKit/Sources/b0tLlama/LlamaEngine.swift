@@ -4,9 +4,12 @@ import b0tCore
 
 /// `InferenceEngine` backed by a local GGUF model via `LlamaRuntime`.
 ///
-/// Stage B/C: structured output is enforced by the type's pre-generated GBNF
-/// grammar and decoded from JSON via `Codable`. The tool loop is gated behind
-/// `supportsToolLoop` (defaults `false`); it arrives in the next task.
+/// When `supportsToolLoop` is `true` and the context carries tools, `generate`
+/// runs a two-pass loop: (1) gate pass — pick a tool or "none" under the GBNF
+/// gate grammar via `ToolGate`; (2) execute the chosen tool via `b0tCore`
+/// `ToolExecutor` and inject the result; (3) answer pass — structured output
+/// under the type's GBNF grammar. Without tools or with `supportsToolLoop`
+/// `false`, a single structured-output pass is used.
 public struct LlamaEngine: InferenceEngine {
     private let runtime: any LlamaGenerating
     private let supportsToolLoop: Bool

@@ -30,4 +30,10 @@ final class LlamaToolGateTests: XCTestCase {
         XCTAssertTrue(ToolGate.isNone(ToolCallEnvelope(tool: "none", arguments: .object([:]))))
         XCTAssertFalse(ToolGate.isNone(ToolCallEnvelope(tool: "time.now", arguments: .object([:]))))
     }
+
+    func test_argumentsJSON_integerStaysIntegral() {
+        let env = ToolCallEnvelope(tool: "x", arguments: .object(["n": .number(24)]))
+        // must be "{\"n\":24}", not "{\"n\":24.0}", so Int-typed @Generable args build cleanly
+        XCTAssertEqual(ToolGate.argumentsJSON(env), #"{"n":24}"#)
+    }
 }
