@@ -32,6 +32,7 @@ public final class ModelDownloadCoordinator {
     /// Populate state from disk for every downloadable catalogue model + storage.
     public func refresh() async {
         for entry in InferenceModelCatalogue.downloadable {
+            guard activeDownloadId != entry.id else { continue }
             let present = await service.isDownloaded(modelId: entry.id)
             states[entry.id] = present ? .downloaded : .notDownloaded
         }
@@ -47,7 +48,10 @@ public final class ModelDownloadCoordinator {
         states[modelId] = .downloading(progress: 0)
         do {
             try await service.start(modelId: modelId) { [weak self] p in
-                Task { @MainActor in self?.states[modelId] = .downloading(progress: p) }
+                Task { @MainActor in
+                    guard self?.activeDownloadId == modelId else { return }
+                    self?.states[modelId] = .downloading(progress: p)
+                }
             }
             states[modelId] = .downloaded
         } catch let ModelDownloadServiceError.failed(message) {
