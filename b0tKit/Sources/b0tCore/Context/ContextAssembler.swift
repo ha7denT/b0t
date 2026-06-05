@@ -33,7 +33,7 @@ public struct ContextAssembler: Sendable {
 
     /// Effective budget limit = current window minus the response reserve.
     /// Read per-assembly so a live engine swap (Stage D EngineHost) takes effect.
-    var limit: Int { max(0, windowProvider() - Self.responseReserve) }
+    private var limit: Int { max(0, windowProvider() - Self.responseReserve) }
 
     private static let logger = Logger(
         subsystem: "com.toppeross.b0t.b0tCore", category: "ContextAssembler"
