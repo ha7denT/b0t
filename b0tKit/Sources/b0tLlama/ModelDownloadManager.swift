@@ -165,7 +165,9 @@ public actor ModelDownloadManager {
         #endif
     }
 
-    static func availableCapacityBytes(near directory: URL) -> Int? {
+    /// Free storage capacity near `directory` (probes the nearest existing ancestor).
+    /// Consumed by the Stage-D storage line in `AppModelDownloadService.storage()`.
+    public static func availableCapacityBytes(near directory: URL) -> Int? {
         // Probe an existing ancestor (the directory may not exist yet).
         var probe = directory
         while !FileManager.default.fileExists(atPath: probe.path),

@@ -29,7 +29,11 @@ public struct ContextAssembler: Sendable {
     private let store: BotStore
     private let tools: [any Tool]
     private let toolsRequirePermission: Bool
-    private let limit: Int
+    private let windowProvider: @Sendable () -> Int
+
+    /// Effective budget limit = current window minus the response reserve.
+    /// Read per-assembly so a live engine swap (Stage D EngineHost) takes effect.
+    private var limit: Int { max(0, windowProvider() - Self.responseReserve) }
 
     private static let logger = Logger(
         subsystem: "com.toppeross.b0t.b0tCore", category: "ContextAssembler"
@@ -58,11 +62,24 @@ public struct ContextAssembler: Sendable {
         toolsRequirePermission: Bool = false,
         contextWindow: Int = 4096
     ) {
+        self.init(
+            bot: bot, store: store, tools: tools,
+            toolsRequirePermission: toolsRequirePermission,
+            contextWindowProvider: { contextWindow })
+    }
+
+    public init(
+        bot: Bot,
+        store: BotStore,
+        tools: [any Tool],
+        toolsRequirePermission: Bool,
+        contextWindowProvider: @escaping @Sendable () -> Int
+    ) {
         self.bot = bot
         self.store = store
         self.tools = tools
         self.toolsRequirePermission = toolsRequirePermission
-        self.limit = max(0, contextWindow - Self.responseReserve)
+        self.windowProvider = contextWindowProvider
     }
 
     public func assemble(mode: AssemblyMode) async throws -> AssembledContext {

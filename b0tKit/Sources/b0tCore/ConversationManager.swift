@@ -32,13 +32,20 @@ public actor ConversationManager {
     /// can't prove it without the explicit annotation.
     nonisolated(unsafe) public let toolCallEvents = PassthroughSubject<String, Never>()
 
+    /// Per-turn token-usage snapshot for the anatomy GUI (crown + Processor gauge).
+    /// `nonisolated(unsafe)` for the same reason as `toolCallEvents`.
+    nonisolated(unsafe) public let usageEvents = PassthroughSubject<GenerationUsage, Never>()
+
+    private let modelIdProvider: @Sendable () -> String
+
     public init(
         bot: Bot,
         store: BotStore,
         client: any LanguageModelClient,
         clock: any Clock = SystemClock(),
         tools: [any Tool] = [],
-        toolsRequirePermission: Bool = false
+        toolsRequirePermission: Bool = false,
+        modelIdProvider: @escaping @Sendable () -> String = { "" }
     ) {
         self.bot = bot
         self.store = store
@@ -49,10 +56,11 @@ public actor ConversationManager {
             store: store,
             tools: tools,
             toolsRequirePermission: toolsRequirePermission,
-            contextWindow: client.contextWindow
+            contextWindowProvider: { [client] in client.contextWindow }
         )
         self.executor = Executor(bot: bot, store: store)
         self.journalWriter = JournalWriter(bot: bot, store: store, clock: clock)
+        self.modelIdProvider = modelIdProvider
     }
 
     public func respond(to userPrompt: String) async throws -> ConversationTurn {
@@ -64,9 +72,17 @@ public actor ConversationManager {
         nextTurnNumber += 1
 
         do {
-            let (response, toolCalls) = try await respondWithFallback(userPrompt: userPrompt, level: 0)
-            for record in toolCalls {
-                toolCallEvents.send(record.toolName)
+            let (response, toolCalls, budget) = try await respondWithFallback(
+                userPrompt: userPrompt, level: 0)
+            for record in toolCalls { toolCallEvents.send(record.toolName) }
+            if let budget {
+                usageEvents.send(
+                    GenerationUsage(
+                        tokensIn: budget.estimated,
+                        tokensOut: TokenEstimator.estimate(response.text),
+                        limit: budget.limit,
+                        modelId: modelIdProvider(),
+                        breakdown: budget.breakdown))
             }
             let delta = try await executor.apply(response)
             try await journalWriter.appendConversationTurn(
@@ -85,14 +101,15 @@ public actor ConversationManager {
 
     private func respondWithFallback(
         userPrompt: String, level: Int
-    ) async throws -> (ConversationResponse, [ToolCallRecord]) {
+    ) async throws -> (ConversationResponse, [ToolCallRecord], TokenBudget?) {
         let context = try await assembler.assemble(
             mode: .conversation(userPrompt: userPrompt),
             fallbackLevel: level
         )
         do {
-            return try await client.generate(
+            let (response, calls) = try await client.generate(
                 context: context, generating: ConversationResponse.self)
+            return (response, calls, context.budget)
         } catch LanguageModelClientError.exceededContextWindowSize {
             if level >= 3 {
                 return (
@@ -101,7 +118,7 @@ public actor ConversationManager {
                         mood: .thinking,
                         memoryObservations: []
                     ),
-                    []
+                    [], nil
                 )
             }
             return try await respondWithFallback(userPrompt: userPrompt, level: level + 1)
