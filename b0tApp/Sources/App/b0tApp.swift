@@ -51,10 +51,21 @@ struct b0tApp: App {
         let useDebugTimer = ProcessInfo.processInfo.arguments.contains("--debug-heartbeat-timer")
 
         let client: any LanguageModelClient
+        let modelIdProvider: @Sendable () -> String
         if forceStub {
             client = makeProductionStub()
+            // Stub branch leaves processorRuntime nil (acceptable for v1 debug);
+            // no live model id to report.
+            modelIdProvider = { "" }
         } else {
-            client = await resolveClient(bot: bot)
+            // Build the single shared inference runtime once and hand its
+            // EngineHost to the heartbeat. The same host is reused by the chat
+            // manager + Processor inspector (Stage D, approach A), so switching
+            // the model in the inspector takes effect everywhere.
+            let runtime = await ProcessorRuntime.make(bot: bot, store: store)
+            b0tApp.shared.processorRuntime = runtime
+            client = runtime.engineHost
+            modelIdProvider = { [host = runtime.engineHost] in host.activeModelId }
         }
 
         let modules: [any Module]
@@ -75,7 +86,8 @@ struct b0tApp: App {
             store: store,
             client: client,
             tools: tools,
-            toolsRequirePermission: toolsRequirePermission
+            toolsRequirePermission: toolsRequirePermission,
+            modelIdProvider: modelIdProvider
         )
         heartbeat = manager
         b0tApp.shared.heartbeat = manager
@@ -87,61 +99,6 @@ struct b0tApp: App {
                 await manager.startDebugTimer()
             }
         #endif
-    }
-
-    /// Stage C4: resolve the inference engine from `identity/processor.md` +
-    /// FM availability + which models are downloaded, then construct it. Falls
-    /// back to FM (or the stub) when the selected llama model isn't present
-    /// (the download UI is Stage D).
-    private func resolveClient(bot: Bot) async -> any LanguageModelClient {
-        let processorEngine: String?
-        let processorModelId: String?
-        if let processor = try? await bot.identity.processor {
-            processorEngine = processor.processorEngine
-            processorModelId = processor.processorModelId
-        } else {
-            processorEngine = nil
-            processorModelId = nil
-        }
-
-        let downloads = ModelDownloadManager()
-        var downloaded: Set<String> = []
-        for entry in InferenceModelCatalogue.downloadable {
-            if let file = entry.file,
-                await downloads.isDownloaded(filename: file, expectedSize: entry.sizeBytes)
-            {
-                downloaded.insert(entry.id)
-            }
-        }
-
-        let decision = EngineSelector.resolve(
-            processorEngine: processorEngine, modelId: processorModelId,
-            downloadedModelIds: downloaded)
-
-        func fmOrStub() -> any LanguageModelClient {
-            (try? LiveLanguageModelClient()) ?? makeProductionStub()
-        }
-
-        switch decision {
-        case .foundationModels:
-            print("[b0t] inference engine: foundation models")
-            return fmOrStub()
-        case .llama(let modelId, let contextLength):
-            if let entry = InferenceModelCatalogue.entry(id: modelId), let file = entry.file,
-                let engine = try? LlamaEngine(
-                    modelPath: downloads.localURL(filename: file), contextLength: contextLength)
-            {
-                print("[b0t] inference engine: llama (\(modelId))")
-                return engine
-            }
-            print("[b0t] llama load failed for \(modelId); falling back")
-            return fmOrStub()
-        case .llamaModelMissing(let modelId):
-            print(
-                "[b0t] selected llama model '\(modelId)' not downloaded; using fallback "
-                    + "(download UI is Stage D)")
-            return fmOrStub()
-        }
     }
 
     private func makeProductionStub() -> StubLanguageModelClient {
@@ -169,6 +126,12 @@ struct b0tApp: App {
 /// outside the SwiftUI lifecycle) can find the active HeartbeatManager.
 final class B0tAppShared: @unchecked Sendable {
     var heartbeat: HeartbeatManager?
+    /// The shared inference runtime (Stage D). `ProcessorRuntime` is
+    /// main-actor-isolated and is built and read only from MainActor contexts
+    /// (`initializeHeartbeat`, the inspector wiring in 15b). The property holds a
+    /// reference only; the class stays `@unchecked Sendable` so the BG-task
+    /// closure can keep touching `heartbeat` off the main actor.
+    var processorRuntime: ProcessorRuntime?
 }
 
 enum Bootstrap: Sendable {
