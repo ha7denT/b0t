@@ -31,9 +31,65 @@ public struct LlamaEngine: InferenceEngine {
         context: AssembledContext,
         generating outputType: Output.Type
     ) async throws -> (Output, [ToolCallRecord]) {
-        // Tool loop arrives in the next task; for now, structured single-pass.
-        let output = try await singlePassStructured(context: context, generating: outputType)
-        return (output, [])
+        guard supportsToolLoop, !context.tools.isEmpty else {
+            let output = try await singlePassStructured(context: context, generating: outputType)
+            return (output, [])
+        }
+
+        // Pass 1 — tool gate: pick a tool (or "none") under the gate grammar.
+        let descriptors = context.tools.map {
+            ToolDescriptor(name: $0.name, description: $0.description)
+        }
+        let gateMessages = [
+            LlamaChatMessage(role: "system", content: ToolGate.systemPrompt(for: descriptors)),
+            LlamaChatMessage(role: "user", content: context.userPrompt),
+        ]
+        let gateRaw = try await runtime.generate(
+            messages: gateMessages, grammar: ToolGate.grammar(for: descriptors), maxTokens: 256)
+
+        var records: [ToolCallRecord] = []
+        var answerContext = context
+
+        if let env = LlamaToolCallLoop.parse(gateRaw), !ToolGate.isNone(env),
+            let tool = ToolExecutor.tool(named: env.tool, in: context.tools)
+        {
+            let argsJSON = ToolGate.argumentsJSON(env)
+            do {
+                let result = try await ToolExecutor.execute(tool: tool, argumentsJSON: argsJSON)
+                records.append(
+                    ToolCallRecord(
+                        toolName: env.tool, argumentsSummary: result.argumentsSummary,
+                        outputSummary: result.outputSummary, timestamp: Date()))
+                answerContext = Self.injectingToolResult(
+                    context, tool: env.tool, summary: result.outputSummary)
+            } catch {
+                records.append(
+                    ToolCallRecord(
+                        toolName: env.tool, argumentsSummary: argsJSON,
+                        outputSummary: "errored", timestamp: Date()))
+                answerContext = Self.injectingToolResult(
+                    context, tool: env.tool, summary: "(tool error: \(error))")
+            }
+        }
+        // unparseable / unknown tool / "none" → answerContext unchanged, records empty
+
+        // Pass 2 — final structured answer.
+        let output = try await singlePassStructured(context: answerContext, generating: outputType)
+        return (output, records)
+    }
+
+    /// Returns a copy of `context` with the tool result appended to the user
+    /// prompt, so the answer pass can ground its reply on it.
+    private static func injectingToolResult(
+        _ context: AssembledContext, tool: String, summary: String
+    ) -> AssembledContext {
+        AssembledContext(
+            systemInstructions: context.systemInstructions,
+            userPrompt: context.userPrompt + "\n\ntool \(tool) result: \(summary)",
+            tools: context.tools,
+            toolsRequirePermission: context.toolsRequirePermission,
+            budget: context.budget,
+            loadedFiles: context.loadedFiles)
     }
 
     /// The final-answer / no-tools path: describe the shape in-prompt, generate
