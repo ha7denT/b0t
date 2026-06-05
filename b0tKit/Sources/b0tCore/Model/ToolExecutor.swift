@@ -1,8 +1,8 @@
 import Foundation
 import FoundationModels
 
-/// Result of running a tool: model/human-readable summaries for the answer pass
-/// and the `ToolCallRecord`.
+/// Result of running a tool: human/model-readable summaries fed to the answer
+/// pass and recorded in the `ToolCallRecord`.
 public struct ToolRunResult: Sendable, Equatable {
     public let outputSummary: String
     public let argumentsSummary: String
