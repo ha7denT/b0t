@@ -167,6 +167,7 @@ struct DownloadRowView: View {
             switch st {
             case .downloaded: Text("✓")
             case .downloading: Text("↓")
+            case .failed: Text("✗").foregroundStyle(.secondary)
             default: Text("·").foregroundStyle(.secondary)
             }
             Text(entry.displayName).frame(maxWidth: .infinity, alignment: .leading)
@@ -178,6 +179,13 @@ struct DownloadRowView: View {
                 if let s = entry.sizeBytes {
                     Text(String(format: "%.1f GB", Double(s) / 1_000_000_000))
                         .font(.system(.caption2, design: .monospaced)).foregroundStyle(.secondary)
+                }
+            case .failed(let message):
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(message)
+                        .font(.system(.caption2, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                    Button("retry") { Task { await coordinator?.start(modelId: entry.id) } }
                 }
             default:
                 if entry.engine == .foundationModels {
