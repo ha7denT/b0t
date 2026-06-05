@@ -17,6 +17,7 @@ public final class EngineHost: InferenceEngine, @unchecked Sendable {
     /// loader (see `makeProductionLoader`).
     public typealias Loader = @Sendable (_ modelId: String) async -> (any InferenceEngine, Int)?
 
+    private static let logger = Logger(subsystem: "com.toppeross.b0t.b0tLlama", category: "EngineHost")
     private let lock = OSAllocatedUnfairLock<State>(
         initialState: State(engine: nil, modelId: "", window: 4096))
     private struct State {
@@ -82,11 +83,16 @@ extension EngineHost {
                     filename: file, expectedSize: entry.sizeBytes)
                 guard present else { return nil }
                 let path = downloads.localURL(filename: file)
-                guard
-                    let runtime = try? await store.load(
+                do {
+                    let runtime = try await store.load(
                         modelId: entry.id, path: path, contextLength: entry.contextWindow)
-                else { return nil }
-                return (LlamaEngine(runtimeReusing: runtime), entry.contextWindow)
+                    return (LlamaEngine(runtimeReusing: runtime), entry.contextWindow)
+                } catch {
+                    EngineHost.logger.error(
+                        "model '\(entry.id, privacy: .public)' is present but failed to load: \(error, privacy: .public)"
+                    )
+                    return nil
+                }
             }
         }
     }
