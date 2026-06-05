@@ -64,12 +64,16 @@ public final class EngineHost: InferenceEngine, @unchecked Sendable {
     }
 }
 
-/// Inert engine used only if the host is somehow queried before init populates it.
+/// Guards the `EngineHost` init invariant: `lock.engine` is always non-nil after
+/// `init` completes, so this `generate` path should never execute. If it ever
+/// fires, it means the invariant was violated — fail loudly rather than masking
+/// the bug with a soft throw.
 private struct FallbackEngine: InferenceEngine {
     var contextWindow: Int { 4096 }
     func generate<Output: StructuredOutput>(
         context: AssembledContext, generating outputType: Output.Type
     ) async throws -> (Output, [ToolCallRecord]) {
-        throw InferenceEngineError.modelUnavailable
+        preconditionFailure(
+            "EngineHost queried before its initial engine was set — init invariant violated")
     }
 }

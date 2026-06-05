@@ -43,4 +43,21 @@ final class EngineHostTests: XCTestCase {
         XCTAssertEqual(host.contextWindow, 4096)
         XCTAssertEqual(host.activeModelId, "foundation_models_default")
     }
+
+    func test_generate_forwardsToCurrentEngine() async {
+        let host = EngineHost(
+            initialEngine: StubEngine(window: 4096), initialModelId: "x", loader: { _ in nil })
+        let context = AssembledContext(
+            systemInstructions: "s", userPrompt: "u", tools: [], toolsRequirePermission: false,
+            budget: TokenBudget(estimated: 0, limit: 4096, breakdown: [:], didFallBackToDigest: false),
+            loadedFiles: [])
+        do {
+            _ = try await host.generate(context: context, generating: ConversationResponse.self)
+            XCTFail("expected the stub engine's error to propagate")
+        } catch let InferenceEngineError.sessionFailed(desc) {
+            XCTAssertEqual(desc, "stub")
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+    }
 }
