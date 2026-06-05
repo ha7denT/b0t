@@ -47,6 +47,7 @@ final class LlamaEngineToolLoopTests: XCTestCase {
         XCTAssertEqual(records.first?.toolName, "time.now")
         XCTAssertTrue(records.first?.outputSummary.contains("2026-06-05") ?? false)
         XCTAssertTrue(gen.seenUserContents.last?.contains("2026-06-05") ?? false)
+        XCTAssertTrue(gen.seenUserContents.last?.contains("tool time.now result:") ?? false)
         XCTAssertEqual(resp.text, "it is noon")
     }
 
@@ -62,6 +63,7 @@ final class LlamaEngineToolLoopTests: XCTestCase {
                 generating: ConversationResponse.self)
         XCTAssertEqual(records.count, 0)
         XCTAssertEqual(resp.text, "hello")
+        XCTAssertEqual(gen.seenUserContents.count, 2)  // gate (none) + answer
     }
 
     func test_supportsToolLoopFalse_skipsGate() async throws {
