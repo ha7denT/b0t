@@ -253,3 +253,11 @@ public actor LlamaRuntime {
         return chain
     }
 }
+
+// MARK: - LlamaGenerating
+
+/// `LlamaRuntime` satisfies `LlamaGenerating` with its existing members:
+/// `contextWindow` is `nonisolated let` (off-actor read is safe), and
+/// `generate(messages:grammar:maxTokens:)` is already `async throws`.
+/// Actors are implicitly `Sendable`, so no additional annotation is needed.
+extension LlamaRuntime: LlamaGenerating {}
