@@ -64,6 +64,34 @@ public final class EngineHost: InferenceEngine, @unchecked Sendable {
     }
 }
 
+extension EngineHost {
+    /// Production loader: FM entry → `FoundationModelsEngine`; downloaded llama
+    /// entry → `ModelStore`-loaded `LlamaEngine`; otherwise `nil`.
+    public static func makeProductionLoader(
+        store: ModelStore, downloads: ModelDownloadManager
+    ) -> Loader {
+        { modelId in
+            guard let entry = InferenceModelCatalogue.entry(id: modelId) else { return nil }
+            switch entry.engine {
+            case .foundationModels:
+                guard let fm = try? FoundationModelsEngine() else { return nil }
+                return (fm, entry.contextWindow)
+            case .llama:
+                guard let file = entry.file else { return nil }
+                let present = await downloads.isDownloaded(
+                    filename: file, expectedSize: entry.sizeBytes)
+                guard present else { return nil }
+                let path = downloads.localURL(filename: file)
+                guard
+                    let runtime = try? await store.load(
+                        modelId: entry.id, path: path, contextLength: entry.contextWindow)
+                else { return nil }
+                return (LlamaEngine(runtimeReusing: runtime), entry.contextWindow)
+            }
+        }
+    }
+}
+
 /// Guards the `EngineHost` init invariant: `lock.engine` is always non-nil after
 /// `init` completes, so this `generate` path should never execute. If it ever
 /// fires, it means the invariant was violated — fail loudly rather than masking
