@@ -4,6 +4,7 @@ import b0tHome
 
 struct ContentView: View {
     let bootstrap: Bootstrap
+    let processorRuntime: ProcessorRuntime?
 
     #if DEBUG
         @State private var showDebugBrain = false
@@ -15,12 +16,25 @@ struct ContentView: View {
             case .pending:
                 pendingView
             case .ready(let bot, let store):
-                HomeView(bot: bot, store: store, initialHeartBPM: 4)
+                if let rt = processorRuntime {
+                    HomeView(
+                        bot: bot, store: store, initialHeartBPM: 4,
+                        client: rt.engineHost,
+                        modelIdProvider: { [host = rt.engineHost] in host.activeModelId },
+                        processorController: rt.processorController,
+                        downloadCoordinator: rt.downloadCoordinator
+                    )
                     #if DEBUG
                         .onLongPressGesture(minimumDuration: 1.5) {
                             showDebugBrain = true
                         }
                     #endif
+                } else {
+                    // Runtime not yet built (brief startup window before
+                    // ProcessorRuntime.make completes). Never render HomeView
+                    // without the shared host in production.
+                    pendingView
+                }
             case .failed(let reason):
                 failedView(reason)
             }
@@ -62,5 +76,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(bootstrap: .pending)
+    ContentView(bootstrap: .pending, processorRuntime: nil)
 }

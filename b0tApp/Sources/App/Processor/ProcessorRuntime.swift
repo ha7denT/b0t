@@ -27,13 +27,23 @@ final class ProcessorRuntime {
     /// Build the shared runtime: resolve the initial engine (same logic as the
     /// old resolveClient), wrap it in an EngineHost with a ModelStore-backed
     /// loader, and construct the inspector seams over the SAME ModelDownloadManager.
-    static func make(bot: Bot, store: BotStore) async -> ProcessorRuntime {
+    static func make(bot: Bot, store: BotStore, forceStub: Bool = false) async -> ProcessorRuntime {
         // One ModelDownloadManager shared by the host loader, the processor
         // controller, and the download service — so every downloaded-state check
         // looks at the same files directory.
         let downloads = ModelDownloadManager()
         let modelStore = ModelStore(downloadManager: downloads)
-        let (initialEngine, initialId) = await resolveInitialEngine(bot: bot, downloads: downloads)
+        let initialEngine: any LanguageModelClient
+        let initialId: String
+        if forceStub {
+            // Debug `--use-stub-client`: start on the stub engine, but STILL build
+            // the EngineHost + inspector seams over a real ModelDownloadManager /
+            // ModelStore so the Processor inspector + downloads remain testable.
+            initialEngine = Self.makeStub()
+            initialId = InferenceModelCatalogue.foundationModelsDefault.id
+        } else {
+            (initialEngine, initialId) = await resolveInitialEngine(bot: bot, downloads: downloads)
+        }
         let host = EngineHost(
             initialEngine: initialEngine, initialModelId: initialId,
             loader: EngineHost.makeProductionLoader(store: modelStore, downloads: downloads))

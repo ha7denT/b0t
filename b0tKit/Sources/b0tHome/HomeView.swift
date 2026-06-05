@@ -18,12 +18,27 @@ public struct HomeView: View {
     @State private var state: AnatomyState
     @State private var scene: AnatomyScene
     @State private var listener: ToolInvocationListener?
+    @State private var usageListener: UsageListener?
     private let bot: Bot
     private let store: BotStore
+    private let injectedClient: (any LanguageModelClient)?
+    private let modelIdProvider: (@Sendable () -> String)?
+    private let injectedProcessorController: (any ProcessorControlling)?
+    private let injectedDownloadCoordinator: ModelDownloadCoordinator?
 
-    public init(bot: Bot, store: BotStore, initialHeartBPM: Int = 4) {
+    public init(
+        bot: Bot, store: BotStore, initialHeartBPM: Int = 4,
+        client: (any LanguageModelClient)? = nil,
+        modelIdProvider: (@Sendable () -> String)? = nil,
+        processorController: (any ProcessorControlling)? = nil,
+        downloadCoordinator: ModelDownloadCoordinator? = nil
+    ) {
         self.bot = bot
         self.store = store
+        self.injectedClient = client
+        self.modelIdProvider = modelIdProvider
+        self.injectedProcessorController = processorController
+        self.injectedDownloadCoordinator = downloadCoordinator
         let state = AnatomyState(bot: bot, store: store, initialHeartBPM: initialHeartBPM)
         let scene = AnatomyScene(size: CGSize(width: 390, height: 540))
         scene.installFullAnatomy(initialBPM: initialHeartBPM)
@@ -42,7 +57,10 @@ public struct HomeView: View {
         }
         .ignoresSafeArea(.container, edges: .horizontal)
         .task { await initializeManager() }
-        .onDisappear { listener?.stop() }
+        .onDisappear {
+            listener?.stop()
+            usageListener?.stop()
+        }
         .onChange(of: state.heartBPM) { _, newBPM in
             scene.heart?.startPulsing(bpm: newBPM)
         }
@@ -65,15 +83,23 @@ public struct HomeView: View {
     private func initializeManager() async {
         guard state.manager == nil else { return }
 
-        let forceStub = ProcessInfo.processInfo.arguments.contains("--use-stub-client")
         let client: any LanguageModelClient
-        if forceStub {
-            client = makeStubClient()
+        if let injectedClient {
+            // Production: the shared EngineHost passed down from b0tApp, so chat,
+            // heartbeat, and the Processor inspector all drive the SAME engine.
+            client = injectedClient
         } else {
-            do {
-                client = try LiveLanguageModelClient()
-            } catch {
+            // No injection (#Preview / standalone): keep the original
+            // forceStub / live / stub fallback path.
+            let forceStub = ProcessInfo.processInfo.arguments.contains("--use-stub-client")
+            if forceStub {
                 client = makeStubClient()
+            } else {
+                do {
+                    client = try LiveLanguageModelClient()
+                } catch {
+                    client = makeStubClient()
+                }
             }
         }
 
@@ -95,9 +121,12 @@ public struct HomeView: View {
             store: store,
             client: client,
             tools: tools,
-            toolsRequirePermission: toolsRequirePermission
+            toolsRequirePermission: toolsRequirePermission,
+            modelIdProvider: modelIdProvider ?? { "" }
         )
         state.manager = manager
+        state.processorController = injectedProcessorController
+        state.downloadCoordinator = injectedDownloadCoordinator
 
         let listener = ToolInvocationListener(
             state: state,
@@ -105,6 +134,13 @@ public struct HomeView: View {
         )
         listener.start()
         self.listener = listener
+
+        let usage = UsageListener(
+            state: state,
+            source: manager.usageEvents.eraseToAnyPublisher()
+        )
+        usage.start()
+        self.usageListener = usage
     }
 
     private func makeStubClient() -> StubLanguageModelClient {

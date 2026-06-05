@@ -12,6 +12,7 @@ import b0tModules
 struct b0tApp: App {
     @State private var bootstrap: Bootstrap = .pending
     @State private var heartbeat: HeartbeatManager?
+    @State private var processorRuntime: ProcessorRuntime?
 
     init() {
         registerBGTaskHandler()
@@ -19,10 +20,23 @@ struct b0tApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(bootstrap: bootstrap)
+            ContentView(bootstrap: bootstrap, processorRuntime: processorRuntime)
                 .task {
                     bootstrap = await Bootstrap.run()
-                    await initializeHeartbeat()
+                    if case .ready(let bot, let store) = bootstrap {
+                        // Build the single shared inference runtime once at startup.
+                        // Its EngineHost is reused by the heartbeat, the chat
+                        // manager, and the Processor inspector (Stage D, approach A),
+                        // so switching the model in the inspector takes effect
+                        // everywhere.
+                        let forceStub = ProcessInfo.processInfo.arguments
+                            .contains("--use-stub-client")
+                        let rt = await ProcessorRuntime.make(
+                            bot: bot, store: store, forceStub: forceStub)
+                        processorRuntime = rt
+                        b0tApp.shared.processorRuntime = rt
+                        await initializeHeartbeat(runtime: rt)
+                    }
                 }
         }
     }
@@ -44,28 +58,16 @@ struct b0tApp: App {
         #endif
     }
 
-    private func initializeHeartbeat() async {
+    private func initializeHeartbeat(runtime: ProcessorRuntime) async {
         guard case .ready(let bot, let store) = bootstrap else { return }
 
-        let forceStub = ProcessInfo.processInfo.arguments.contains("--use-stub-client")
         let useDebugTimer = ProcessInfo.processInfo.arguments.contains("--debug-heartbeat-timer")
 
-        let client: any LanguageModelClient
-        let modelIdProvider: @Sendable () -> String
-        if forceStub {
-            client = makeProductionStub()
-            // Stub branch leaves processorRuntime nil (acceptable for v1 debug);
-            // no live model id to report.
-            modelIdProvider = { "" }
-        } else {
-            // Build the single shared inference runtime once and hand its
-            // EngineHost to the heartbeat. The same host is reused by the chat
-            // manager + Processor inspector (Stage D, approach A), so switching
-            // the model in the inspector takes effect everywhere.
-            let runtime = await ProcessorRuntime.make(bot: bot, store: store)
-            b0tApp.shared.processorRuntime = runtime
-            client = runtime.engineHost
-            modelIdProvider = { [host = runtime.engineHost] in host.activeModelId }
+        // The heartbeat always drives the shared EngineHost. In forceStub mode the
+        // host wraps the stub engine, which is the correct behaviour.
+        let client: any LanguageModelClient = runtime.engineHost
+        let modelIdProvider: @Sendable () -> String = {
+            [host = runtime.engineHost] in host.activeModelId
         }
 
         let modules: [any Module]
@@ -99,24 +101,6 @@ struct b0tApp: App {
                 await manager.startDebugTimer()
             }
         #endif
-    }
-
-    private func makeProductionStub() -> StubLanguageModelClient {
-        StubLanguageModelClient { context, outputType in
-            if outputType == ConversationResponse.self {
-                return ConversationResponse(text: "(stub) heard you")
-            } else if outputType == TickDecision.self {
-                return TickDecision(
-                    observed: "stub tick",
-                    considered: ["pass"],
-                    decided: "pass",
-                    why: "stub mode",
-                    acted: "noted silently"
-                )
-            } else {
-                preconditionFailure("stub does not handle \(outputType)")
-            }
-        }
     }
 
     static let shared = B0tAppShared()
