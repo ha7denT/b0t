@@ -98,3 +98,37 @@ public enum Q6ToolCallFixtures {
         return ToolCallScore(total: results.count, parsed: parsed, correctTool: correct)
     }
 }
+
+/// Builds the one-shot "tool gate": the grammar + prompt that let a model pick
+/// exactly one tool OR decline with the reserved name `"none"` (spec §5). Pure.
+public enum ToolGate {
+    public static let noneName = "none"
+
+    public static func grammar(for tools: [ToolDescriptor]) -> String {
+        ToolCallGrammarBuilder.grammar(toolNames: tools.map(\.name) + [noneName])
+    }
+
+    public static func systemPrompt(for tools: [ToolDescriptor]) -> String {
+        let list = tools.map { "- \($0.name): \($0.description)" }.joined(separator: "\n")
+        return """
+            Decide whether a tool is needed to answer the user. Available tools:
+            \(list)
+
+            Respond with ONLY a JSON object: {"tool": "<a tool name above>", "arguments": { ... }} \
+            to call a tool, or {"tool": "none", "arguments": {}} if no tool is needed. \
+            Choose at most one tool.
+            """
+    }
+
+    public static func isNone(_ envelope: ToolCallEnvelope) -> Bool {
+        envelope.tool == noneName
+    }
+
+    /// Serialises the envelope's arguments back to a JSON string for `ToolExecutor`.
+    public static func argumentsJSON(_ envelope: ToolCallEnvelope) -> String {
+        guard let data = try? JSONEncoder().encode(envelope.arguments),
+            let s = String(data: data, encoding: .utf8)
+        else { return "{}" }
+        return s
+    }
+}

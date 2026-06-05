@@ -25,6 +25,11 @@ public struct InferenceModelEntry: Sendable, Equatable, Identifiable {
     public let quant: String?
     /// llama.cpp chat-template family (host-confirmed for the trio). Nil for FM.
     public let templateFamily: String?
+    /// Curated per spec §6 — whether the model reliably drives the GBNF tool-call
+    /// gate. false → b0t reasons without live tools (degrades gracefully).
+    /// The validated trio (Qwen3, Llama 3.2, Qwen2.5) score ≥ 88 % BFCL;
+    /// SmolLM2 scores 27 % — not tool-capable.
+    public let supportsToolLoop: Bool
     public let license: String
     /// User-facing disclosure for the Processor inspector. **Provisional** —
     /// pending a voice-and-copy pass before the Stage D UI ships (spec §7).
@@ -41,7 +46,7 @@ public struct InferenceModelEntry: Sendable, Equatable, Identifiable {
         id: String, displayName: String, engine: InferenceEngineFamily, contextWindow: Int,
         quant: String? = nil, templateFamily: String? = nil, license: String, disclosure: String,
         repo: String? = nil, pinnedSHA: String? = nil, file: String? = nil, sha256: String? = nil,
-        sizeBytes: Int? = nil
+        sizeBytes: Int? = nil, supportsToolLoop: Bool = true
     ) {
         self.id = id
         self.displayName = displayName
@@ -49,6 +54,7 @@ public struct InferenceModelEntry: Sendable, Equatable, Identifiable {
         self.contextWindow = contextWindow
         self.quant = quant
         self.templateFamily = templateFamily
+        self.supportsToolLoop = supportsToolLoop
         self.license = license
         self.disclosure = disclosure
         self.repo = repo
@@ -78,7 +84,8 @@ public enum InferenceModelCatalogue {
         contextWindow: 4096,
         license: "Apple system model",
         disclosure:
-            "Apple's on-device model. Nothing downloads and nothing leaves your device.")
+            "Apple's on-device model. Nothing downloads and nothing leaves your device.",
+        supportsToolLoop: true)
 
     public static let qwen3 = InferenceModelEntry(
         id: "qwen3-1.7b",
@@ -93,7 +100,8 @@ public enum InferenceModelCatalogue {
         pinnedSHA: "dcb19155b962dbb6389f4691a982043a8e651022",
         file: "Qwen_Qwen3-1.7B-Q4_K_M.gguf",
         sha256: "72c5c3cb38fa32d5256e2fe30d03e7a64c6c79e668ad84057e3bd66e250b24fb",
-        sizeBytes: 1_282_439_584)
+        sizeBytes: 1_282_439_584,
+        supportsToolLoop: true)
 
     public static let llama32 = InferenceModelEntry(
         id: "llama-3.2-1b",
@@ -110,7 +118,8 @@ public enum InferenceModelCatalogue {
         pinnedSHA: "067b946cf014b7c697f3654f621d577a3e3afd1c",
         file: "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
         sha256: "6f85a640a97cf2bf5b8e764087b1e83da0fdb51d7c9fab7d0fece9385611df83",
-        sizeBytes: 807_694_464)
+        sizeBytes: 807_694_464,
+        supportsToolLoop: true)
 
     public static let qwen25 = InferenceModelEntry(
         id: "qwen2.5-1.5b",
@@ -125,10 +134,12 @@ public enum InferenceModelCatalogue {
         pinnedSHA: "9eadc66189c7641e1ddd226b8267a9119b2ce2d4",
         file: "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
         sha256: "1adf0b11065d8ad2e8123ea110d1ec956dab4ab038eab665614adba04b6c3370",
-        sizeBytes: 986_048_768)
+        sizeBytes: 986_048_768,
+        supportsToolLoop: true)
 
     /// Tiny test model (Stage B). Not part of the user-facing production lineup,
     /// but a real downloadable entry the download/lifecycle code exercises.
+    /// 27 % BFCL — not tool-capable; tool loop disabled (spec §6).
     public static let smolLM2Test = InferenceModelEntry(
         id: "smollm2-360m-test",
         displayName: "SmolLM2 360M (test)",
@@ -142,7 +153,8 @@ public enum InferenceModelCatalogue {
         pinnedSHA: "main",
         file: "SmolLM2-360M-Instruct-Q4_K_M.gguf",
         sha256: "2fa3f013dcdd7b99f9b237717fa0b12d75bbb89984cc1274be1471a465bac9c2",
-        sizeBytes: 270_590_880)
+        sizeBytes: 270_590_880,
+        supportsToolLoop: false)
 
     /// Production user-facing lineup: Foundation Models + the validated trio.
     public static let production: [InferenceModelEntry] = [

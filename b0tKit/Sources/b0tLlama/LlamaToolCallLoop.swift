@@ -5,11 +5,11 @@ import Foundation
 /// tool list into the prompt, generates under a tool-call grammar, and parses
 /// the resulting envelope.
 ///
-/// "Single-shot" = it picks a tool + arguments; it does NOT execute the tool or
-/// feed results back. Execution + iteration need live `b0tModules` + permissions
-/// and land with the real C3/C4 loop. The prompt-rendering and parsing here are
-/// pure and unit-tested; the one `runtime.generate` call is exercised on-device
-/// / in the gated live test.
+/// `pickTool` is the single-shot primitive (still used by the Q6 validation
+/// harness). The production execute/iterate loop now lives in
+/// `LlamaEngine.generate`, which reuses this type's static `parse` method.
+/// The prompt-rendering and parsing are pure and unit-tested; the
+/// `runtime.generate` call is exercised in the gated live tests.
 public struct LlamaToolCallLoop {
     private let runtime: LlamaRuntime
 

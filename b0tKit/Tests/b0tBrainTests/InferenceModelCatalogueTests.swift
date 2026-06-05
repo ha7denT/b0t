@@ -57,4 +57,11 @@ final class InferenceModelCatalogueTests: XCTestCase {
         XCTAssertTrue(
             InferenceModelCatalogue.llama32.disclosure.contains("Built with Llama"))
     }
+
+    func test_supportsToolLoop_curatedPerEntry() {
+        XCTAssertTrue(InferenceModelCatalogue.qwen3.supportsToolLoop)
+        XCTAssertTrue(InferenceModelCatalogue.llama32.supportsToolLoop)
+        XCTAssertTrue(InferenceModelCatalogue.qwen25.supportsToolLoop)
+        XCTAssertFalse(InferenceModelCatalogue.smolLM2Test.supportsToolLoop)
+    }
 }

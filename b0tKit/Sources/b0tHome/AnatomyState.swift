@@ -24,6 +24,14 @@ public final class AnatomyState {
     /// (currently `ChatView`) check for nil and disable input until ready.
     public var manager: ConversationManager?
 
+    /// The most recent per-turn token usage (chat or heartbeat). Drives the crown
+    /// meters + Processor Controls gauge. Set by `UsageListener`.
+    public var latestUsage: GenerationUsage?
+
+    /// Injected Stage-D seams (nil in previews/tests that don't exercise them).
+    public var processorController: (any ProcessorControlling)?
+    public var downloadCoordinator: ModelDownloadCoordinator?
+
     public init(bot: Bot, store: BotStore, initialHeartBPM: Int) {
         self.bot = bot
         self.store = store
@@ -31,5 +39,8 @@ public final class AnatomyState {
         self.activeWiring = []
         self.heartBPM = initialHeartBPM
         self.manager = nil
+        self.latestUsage = nil
+        self.processorController = nil
+        self.downloadCoordinator = nil
     }
 }
