@@ -2,6 +2,7 @@
     import SwiftUI
     import b0tCore
     import b0tBrain
+    import b0tLlama
     import b0tModules
 
     struct DebugBrainView: View {
@@ -121,22 +122,13 @@
 
         private func initializeManager() async {
             let forceStub = ProcessInfo.processInfo.arguments.contains("--use-stub-client")
+            let runtime = await ProcessorRuntime.make(bot: bot, store: store, forceStub: forceStub)
+            let host = runtime.engineHost
 
-            let client: any LanguageModelClient
             if forceStub {
-                client = makeStub()
                 modelStatus = .stub(reason: "--use-stub-client launch arg.")
             } else {
-                do {
-                    client = try LiveLanguageModelClient()
-                    modelStatus = .live
-                } catch LanguageModelClientError.modelUnavailable {
-                    client = makeStub()
-                    modelStatus = .stub(reason: "model unavailable on this device.")
-                } catch {
-                    client = makeStub()
-                    modelStatus = .stub(reason: "init failed: \(error).")
-                }
+                modelStatus = .live
             }
 
             let modules: [any Module]
@@ -155,35 +147,19 @@
             manager = ConversationManager(
                 bot: bot,
                 store: store,
-                client: client,
+                client: host,
                 tools: tools,
-                toolsRequirePermission: toolsRequirePermission
+                toolsRequirePermission: toolsRequirePermission,
+                modelIdProvider: { host.activeModelId }
             )
             heartbeat = HeartbeatManager(
                 bot: bot,
                 store: store,
-                client: client,
+                client: host,
                 tools: tools,
-                toolsRequirePermission: toolsRequirePermission
+                toolsRequirePermission: toolsRequirePermission,
+                modelIdProvider: { host.activeModelId }
             )
-        }
-
-        private func makeStub() -> StubLanguageModelClient {
-            StubLanguageModelClient { context, outputType in
-                if outputType == ConversationResponse.self {
-                    return ConversationResponse(text: "echo: \(context.userPrompt)")
-                } else if outputType == TickDecision.self {
-                    return TickDecision(
-                        observed: "manual tick",
-                        considered: ["pass"],
-                        decided: "pass",
-                        why: "stub mode",
-                        acted: "noted silently"
-                    )
-                } else {
-                    preconditionFailure("stub does not handle \(outputType)")
-                }
-            }
         }
 
         private func pollJournalTail() async {
