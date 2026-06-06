@@ -78,7 +78,7 @@ public enum InferenceModelCatalogue {
         contextWindow: 4096,
         license: "Apple system model",
         disclosure:
-            "Apple's on-device model. Nothing downloads and nothing leaves your device.")
+            "Apple's on-device model. nothing downloads, nothing leaves your device.")
 
     public static let qwen3 = InferenceModelEntry(
         id: "qwen3-1.7b",
@@ -88,7 +88,7 @@ public enum InferenceModelCatalogue {
         quant: "Q4_K_M",
         templateFamily: "ChatML",
         license: "Apache-2.0",
-        disclosure: "Qwen3 1.7B — Apache 2.0, from Alibaba's Qwen team. Runs on your device.",
+        disclosure: "Qwen3 1.7B — Apache-2.0, from Alibaba's Qwen team. runs on your device.",
         repo: "bartowski/Qwen_Qwen3-1.7B-GGUF",
         pinnedSHA: "dcb19155b962dbb6389f4691a982043a8e651022",
         file: "Qwen_Qwen3-1.7B-Q4_K_M.gguf",
@@ -105,7 +105,7 @@ public enum InferenceModelCatalogue {
         license: "Llama 3.2 Community License",
         disclosure:
             "Built with Llama. Llama 3.2 1B, from Meta, under the Llama 3.2 Community License. "
-            + "Runs on your device.",
+            + "runs on your device.",
         repo: "bartowski/Llama-3.2-1B-Instruct-GGUF",
         pinnedSHA: "067b946cf014b7c697f3654f621d577a3e3afd1c",
         file: "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
@@ -120,7 +120,7 @@ public enum InferenceModelCatalogue {
         quant: "Q4_K_M",
         templateFamily: "ChatML",
         license: "Apache-2.0",
-        disclosure: "Qwen2.5 1.5B — Apache 2.0, from Alibaba's Qwen team. Runs on your device.",
+        disclosure: "Qwen2.5 1.5B — Apache-2.0, from Alibaba's Qwen team. runs on your device.",
         repo: "bartowski/Qwen2.5-1.5B-Instruct-GGUF",
         pinnedSHA: "9eadc66189c7641e1ddd226b8267a9119b2ce2d4",
         file: "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
@@ -137,7 +137,7 @@ public enum InferenceModelCatalogue {
         quant: "Q4_K_M",
         templateFamily: "ChatML",
         license: "Apache-2.0",
-        disclosure: "SmolLM2 360M — Apache 2.0, from Hugging Face. Test model.",
+        disclosure: "SmolLM2 360M — Apache-2.0, from Hugging Face. test model.",
         repo: "bartowski/SmolLM2-360M-Instruct-GGUF",
         pinnedSHA: "main",
         file: "SmolLM2-360M-Instruct-Q4_K_M.gguf",
