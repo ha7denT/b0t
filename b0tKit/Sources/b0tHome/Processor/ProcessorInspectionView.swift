@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import b0tBrain
 import b0tCore
+import b0tDesign
 
 /// Builds the read-only `.md` tab content for a catalogue model (notes + source).
 enum ProcessorModelNotes {
@@ -56,11 +57,11 @@ public struct ProcessorInspectionView: View {
 
     private var header: some View {
         HStack {
-            Text("▦ processor").font(.system(.headline, design: .monospaced))
+            Text("▦ processor").font(Typography.systemMono(size: 16))
             Spacer()
             ForEach(Tab.allCases, id: \.self) { t in
                 Button(t.rawValue) { tab = t }
-                    .font(.system(.caption, design: .monospaced))
+                    .font(Typography.systemMono(size: 12))
                     .foregroundStyle(t == tab ? ProcessorPalette.yellow : .secondary)
             }
         }
@@ -75,9 +76,9 @@ public struct ProcessorInspectionView: View {
                 Button("▶") { cycle(1) }
             }
             Text("engine  \(selection.engineLabel)")
-                .font(.system(.caption, design: .monospaced)).foregroundStyle(.secondary)
+                .font(Typography.systemMono(size: 12)).foregroundStyle(.secondary)
             TokenGaugeView(usage: state.latestUsage)
-        }.font(.system(.body, design: .monospaced))
+        }.font(Typography.systemMono(size: 14))
     }
 
     private var directory: some View {
@@ -86,7 +87,7 @@ public struct ProcessorInspectionView: View {
                 DownloadRowView(entry: entry, coordinator: state.downloadCoordinator)
             }
             if let c = state.downloadCoordinator {
-                Text(storageLine(c)).font(.system(.caption2, design: .monospaced))
+                Text(storageLine(c)).font(Typography.systemMono(size: 11))
                     .foregroundStyle(.secondary)
             }
         }
@@ -95,7 +96,7 @@ public struct ProcessorInspectionView: View {
     private var notes: some View {
         ScrollView {
             Text(ProcessorModelNotes.markdown(for: models[selectedIndex]))
-                .font(.system(.caption, design: .monospaced))
+                .font(Typography.systemMono(size: 12))
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -134,14 +135,14 @@ struct TokenGaugeView: View {
             bar(label: "in ", value: u?.tokensIn ?? 0, limit: u?.limit ?? 0)
             bar(label: "out", value: u?.tokensOut ?? 0, limit: u?.limit ?? 0)
             Text("\((u?.tokensIn ?? 0) + (u?.tokensOut ?? 0)) / \(u?.limit ?? 0) ctx")
-                .font(.system(.caption2, design: .monospaced)).foregroundStyle(.secondary)
+                .font(Typography.systemMono(size: 11)).foregroundStyle(.secondary)
         }
     }
 
     private func bar(label: String, value: Int, limit: Int) -> some View {
         let frac = limit > 0 ? min(1.0, Double(value) / Double(limit)) : 0
         return HStack(spacing: 6) {
-            Text(label).font(.system(.caption2, design: .monospaced))
+            Text(label).font(Typography.systemMono(size: 11))
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Rectangle().fill(.secondary.opacity(0.2))
@@ -149,7 +150,7 @@ struct TokenGaugeView: View {
                         .frame(width: geo.size.width * frac)
                 }
             }.frame(height: 8)
-            Text("\(value)").font(.system(.caption2, design: .monospaced)).frame(
+            Text("\(value)").font(Typography.systemMono(size: 11)).frame(
                 width: 48, alignment: .trailing)
         }
     }
@@ -178,12 +179,12 @@ struct DownloadRowView: View {
             case .downloaded:
                 if let s = entry.sizeBytes {
                     Text(String(format: "%.1f GB", Double(s) / 1_000_000_000))
-                        .font(.system(.caption2, design: .monospaced)).foregroundStyle(.secondary)
+                        .font(Typography.systemMono(size: 11)).foregroundStyle(.secondary)
                 }
             case .failed(let message):
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(message)
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(Typography.systemMono(size: 11))
                         .foregroundStyle(.secondary)
                     Button("retry") { Task { await coordinator?.start(modelId: entry.id) } }
                 }
@@ -194,7 +195,7 @@ struct DownloadRowView: View {
                     Button("download") { Task { await coordinator?.start(modelId: entry.id) } }
                 }
             }
-        }.font(.system(.caption, design: .monospaced))
+        }.font(Typography.systemMono(size: 12))
     }
 }
 

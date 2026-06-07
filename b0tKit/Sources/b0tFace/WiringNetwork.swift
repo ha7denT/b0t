@@ -46,10 +46,16 @@ public final class WiringNetwork {
         path.move(to: a)
         path.addLine(to: b)
         let line = SKShapeNode(path: path)
-        line.strokeColor = .systemGreen  // phosphor placeholder; tune with aesthetic refs
-        line.lineWidth = 1.5
+        // Dimmed aqua (#3DEAFF × 0.8) — function/IO semantic colour, pipe-style.
+        line.strokeColor = SKColor(
+            red: 0x3D / 255.0 * 0.8,
+            green: 0xEA / 255.0 * 0.8,
+            blue: 0xFF / 255.0 * 0.8,
+            alpha: 1
+        )
+        line.lineWidth = 5
         line.alpha = 0.35  // dim at rest
-        line.glowWidth = 1.0
+        line.glowWidth = 2.5
         return line
     }
 }

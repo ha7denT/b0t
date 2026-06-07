@@ -26,7 +26,8 @@ public final class AnatomyScene: SKScene {
     public override init(size: CGSize) {
         super.init(size: size)
         scaleMode = .aspectFit
-        backgroundColor = SKColor(red: 0.09, green: 0.08, blue: 0.06, alpha: 1.0)  // warm dark
+        // Cool dark teal base (ADR-0016 — warm amber replaced by aqua-derived dark).
+        backgroundColor = SKColor(red: 0.045, green: 0.075, blue: 0.075, alpha: 1.0)
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
     }
 
@@ -111,6 +112,7 @@ public final class AnatomyScene: SKScene {
     private func installWiring() {
         let wiring = WiringNetwork()
         wiring.installLines(faceCentre: .zero, organSize: size)
+        wiring.node.zPosition = -3  // pipes behind everything: grille z=-1, face z=0, organs z=0
         addChild(wiring.node)
         self.wiring = wiring
     }

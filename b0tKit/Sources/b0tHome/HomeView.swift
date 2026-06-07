@@ -51,7 +51,7 @@ public struct HomeView: View {
         VStack(spacing: 0) {
             SpriteView(scene: scene, options: [.allowsTransparency])
                 .frame(maxHeight: 540)
-                .background(Color(red: 0.09, green: 0.08, blue: 0.06))
+                .background(Color(red: 0.045, green: 0.075, blue: 0.075))  // cool dark teal (ADR-0016)
                 .overlay(alignment: .top) {
                     // Crown token meters — the glance view of input/output usage.
                     // Final placement on the painterly crown awaits Jamee's visual pass.
