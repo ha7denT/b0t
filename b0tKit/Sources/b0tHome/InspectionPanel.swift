@@ -50,6 +50,9 @@ public struct InspectionPanel: View {
         case .identity:
             DirectoryNavigatorView(
                 state: state, organ: .identity, directoryRelativePath: "identity")
+        case .journal:
+            DirectoryNavigatorView(
+                state: state, organ: .journal, directoryRelativePath: "journal")
         case .tools:
             ToolsDirectoryView(state: state)
         case .reasoning:

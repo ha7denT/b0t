@@ -10,6 +10,9 @@ public final class HeartNode {
         texture.filteringMode = .nearest
         let sprite = SKSpriteNode(texture: texture, size: AnatomyLayout.heartSize)
         sprite.name = OrganID.heart.rawValue
+        // Semantic tint (ADR-0016 / spec §4): heart = pink #FF3DEA.
+        sprite.color = SKColor(red: 0xFF / 255.0, green: 0x3D / 255.0, blue: 0xEA / 255.0, alpha: 1.0)
+        sprite.colorBlendFactor = 1.0
         self.node = sprite
     }
 

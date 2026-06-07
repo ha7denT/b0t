@@ -8,9 +8,9 @@ final class WiringNetworkTests: XCTestCase {
     func test_wiring_hasOneLinePerOrgan() {
         let wiring = WiringNetwork()
         wiring.installLines(faceCentre: .zero, organSize: CGSize(width: 390, height: 480))
-        // 8 ring organs (heart is distinguished — its line is implicit / different style)
+        // 9 organs wired (all ten organs minus the heart, which is distinguished — no wire).
         let lines = wiring.node.children.compactMap { $0 as? SKShapeNode }
-        XCTAssertEqual(lines.count, 8)
+        XCTAssertEqual(lines.count, 9)
     }
 
     func test_wiring_pulseInbound_runsActionOnLine() {

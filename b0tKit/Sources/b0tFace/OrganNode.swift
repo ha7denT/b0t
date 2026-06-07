@@ -16,7 +16,23 @@ public final class OrganNode {
         let size = (organ == .heart) ? AnatomyLayout.heartSize : AnatomyLayout.organSize
         let sprite = SKSpriteNode(texture: texture, size: size)
         sprite.name = organ.rawValue
+        // Semantic tint (ADR-0016 / spec §4): mask-tint the transparent silhouette.
+        // Processor (reasoning) = yellow; all other organs = aqua.
+        sprite.color = OrganNode.tint(for: organ)
+        sprite.colorBlendFactor = 1.0
         self.node = sprite
+    }
+
+    /// Semantic backlight colour for an organ silhouette (ADR-0016, spec §4).
+    private static func tint(for organ: OrganID) -> SKColor {
+        switch organ {
+        case .reasoning:
+            // processor — yellow #EAFF3D
+            return SKColor(red: 0xEA / 255.0, green: 0xFF / 255.0, blue: 0x3D / 255.0, alpha: 1.0)
+        default:
+            // organs — aqua #3DEAFF
+            return SKColor(red: 0x3D / 255.0, green: 0xFF / 255.0, blue: 0xEA / 255.0, alpha: 1.0)
+        }
     }
 
     /// One-shot activity pulse — the organ "lights up" for ~600ms.

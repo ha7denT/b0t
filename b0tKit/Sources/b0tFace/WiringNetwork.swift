@@ -20,7 +20,8 @@ public final class WiringNetwork {
         self.node = root
     }
 
-    /// Installs one wiring line per ring organ (8 organs — heart is distinguished, no wire).
+    /// Installs one wiring line per organ (9 organs — heart is distinguished, no wire).
+    /// Endpoints derive from `AnatomyLayout.position(for:)`, so they follow the column layout.
     public func installLines(faceCentre: CGPoint, organSize: CGSize) {
         for organ in OrganID.allCases where organ != .heart {
             let target = AnatomyLayout.position(for: organ, in: organSize)

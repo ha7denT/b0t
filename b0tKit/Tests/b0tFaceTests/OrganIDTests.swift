@@ -3,13 +3,13 @@ import XCTest
 @testable import b0tFace
 
 final class OrganIDTests: XCTestCase {
-    func test_organID_hasNineCases() {
-        XCTAssertEqual(OrganID.allCases.count, 9)
+    func test_organID_hasTenCases() {
+        XCTAssertEqual(OrganID.allCases.count, 10)
     }
 
-    func test_organID_includesAllNineSubsystems() {
+    func test_organID_includesAllTenSubsystems() {
         let expected: Set<OrganID> = [
-            .reasoning, .memory, .identity, .modules,
+            .reasoning, .memory, .identity, .modules, .journal,
             .sensors, .tools, .network, .location,
             .heart,
         ]
@@ -20,5 +20,6 @@ final class OrganIDTests: XCTestCase {
         XCTAssertEqual(OrganID.heart.rawValue, "heart")
         XCTAssertEqual(OrganID.reasoning.rawValue, "reasoning")
         XCTAssertEqual(OrganID.modules.rawValue, "modules")
+        XCTAssertEqual(OrganID.journal.rawValue, "journal")
     }
 }

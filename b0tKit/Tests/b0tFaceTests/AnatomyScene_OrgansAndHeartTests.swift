@@ -5,7 +5,7 @@ import XCTest
 
 @MainActor
 final class AnatomyScene_OrgansAndHeartTests: XCTestCase {
-    func test_installFullAnatomy_addsAll9Organs() {
+    func test_installFullAnatomy_addsAll10Organs() {
         let scene = AnatomyScene(size: CGSize(width: 390, height: 480))
         scene.installFullAnatomy(initialBPM: 4)
         for organ in OrganID.allCases {

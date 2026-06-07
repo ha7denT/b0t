@@ -3,7 +3,7 @@ import SwiftUI
 
 /// The root SKScene for the anatomy area (top half of HomeView).
 ///
-/// Slice 3 ships face + 9-organ ring + heart + wiring. Slice 4 adds touch-handling
+/// Slice 3 ships face + 10-organ columns + heart + wiring. Slice 4 adds touch-handling
 /// for organ taps; Slice 8 wires tool-event pulses through the wiring network.
 public final class AnatomyScene: SKScene {
     public private(set) var face: FaceComposite?
@@ -27,7 +27,7 @@ public final class AnatomyScene: SKScene {
         fatalError("init(coder:) is not supported")
     }
 
-    /// Installs Hilfer's face plus the 9-organ ring, heart, and wiring network.
+    /// Installs Hilfer's face plus the 10-organ columns, heart, and wiring network.
     public func installFullAnatomy(initialBPM: Int) {
         installHilferFace()
         installOrgansAndHeart(initialBPM: initialBPM)
@@ -92,6 +92,7 @@ public final class AnatomyScene: SKScene {
         case .tools: return "OrganTools"
         case .network: return "OrganNetwork"
         case .location: return "OrganLocation"
+        case .journal: return "OrganJournal"
         case .heart: return "OrganHeart"
         }
     }

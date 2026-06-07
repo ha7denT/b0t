@@ -10,24 +10,23 @@ public enum AnatomyLayout {
     public static let heartSize = CGSize(width: 96, height: 96)  // distinguished — slightly larger
 
     /// Returns the centre position of the given organ in scene-space (origin = centre of anatomy).
-    /// Asymmetric upper ring per spec §3 decision 4.
+    /// Two vertical columns per ADR-0017: processor crown on top, heart at bottom centre,
+    /// left column = world-facing I/O (top→bottom), right column = inward / mind (top→bottom).
+    /// Scene is 390×540, origin centre, y-up.
     public static func position(for organ: OrganID, in size: CGSize) -> CGPoint {
-        let r: CGFloat = 180  // ring radius
         switch organ {
-        // ABOVE EYE-LINE (4 organs, asymmetric)
-        case .reasoning: return CGPoint(x: 0, y: r)  // 12 o'clock — crown
-        case .modules: return CGPoint(x: -r * 0.78, y: r * 0.55)  // 10–11 o'clock
-        case .memory: return CGPoint(x: r * 0.78, y: r * 0.55)  // 1–2 o'clock
-        case .identity: return CGPoint(x: -r, y: 0)  // 9 o'clock (left ear)
-
-        // BELOW EYE-LINE (4 organs)
-        case .tools: return CGPoint(x: -r * 0.78, y: -r * 0.55)  // 7–8 o'clock
-        case .sensors: return CGPoint(x: r * 0.78, y: -r * 0.55)  // 4–5 o'clock
-        case .location: return CGPoint(x: -r * 0.42, y: -r * 0.92)  // 7 o'clock-ish, deeper
-        case .network: return CGPoint(x: r * 0.42, y: -r * 0.92)  // 5 o'clock-ish, deeper
-
-        // BOTTOM-CENTRE (distinguished)
-        case .heart: return CGPoint(x: 0, y: -r * 1.18)  // below the lower ring
+        case .reasoning: return CGPoint(x: 0, y: 215)  // processor crown
+        // left column — world-facing I/O (top→bottom)
+        case .network: return CGPoint(x: -150, y: 130)
+        case .location: return CGPoint(x: -150, y: 44)
+        case .sensors: return CGPoint(x: -150, y: -44)
+        case .tools: return CGPoint(x: -150, y: -130)
+        // right column — inward / mind (top→bottom)
+        case .memory: return CGPoint(x: 150, y: 130)
+        case .identity: return CGPoint(x: 150, y: 44)
+        case .modules: return CGPoint(x: 150, y: -44)
+        case .journal: return CGPoint(x: 150, y: -130)
+        case .heart: return CGPoint(x: 0, y: -205)
         }
     }
 }

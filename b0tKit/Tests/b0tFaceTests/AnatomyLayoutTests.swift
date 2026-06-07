@@ -22,18 +22,29 @@ final class AnatomyLayoutTests: XCTestCase {
         XCTAssertLessThan(pos.y, 0, "heart should be below face centre")
     }
 
-    func test_aboveEyeLineOrgans_haveYPositiveOrAtCrown() {
-        for organ in [OrganID.reasoning, .memory, .identity, .modules] {
+    func test_leftColumnOrgans_haveXNegative() {
+        // Left column — world-facing I/O, per ADR-0017.
+        for organ in [OrganID.network, .location, .sensors, .tools] {
             let pos = AnatomyLayout.position(for: organ, in: CGSize(width: 390, height: 480))
-            XCTAssertGreaterThanOrEqual(pos.y, 0, "\(organ) should be at or above eye-line")
+            XCTAssertLessThan(pos.x, 0, "\(organ) should be in the left column")
         }
     }
 
-    func test_belowEyeLineOrgans_haveYNegative() {
-        for organ in [OrganID.tools, .sensors, .location, .network] {
+    func test_rightColumnOrgans_haveXPositive() {
+        // Right column — inward / mind, per ADR-0017.
+        for organ in [OrganID.memory, .identity, .modules, .journal] {
             let pos = AnatomyLayout.position(for: organ, in: CGSize(width: 390, height: 480))
-            XCTAssertLessThan(pos.y, 0, "\(organ) should be below eye-line")
+            XCTAssertGreaterThan(pos.x, 0, "\(organ) should be in the right column")
         }
+    }
+
+    func test_processorAndHeart_areCentred() {
+        let processor = AnatomyLayout.position(for: .reasoning, in: CGSize(width: 390, height: 480))
+        let heart = AnatomyLayout.position(for: .heart, in: CGSize(width: 390, height: 480))
+        XCTAssertEqual(processor.x, 0, accuracy: 1.0)
+        XCTAssertEqual(heart.x, 0, accuracy: 1.0)
+        XCTAssertGreaterThan(processor.y, 0, "processor crown above centre")
+        XCTAssertLessThan(heart.y, 0, "heart below centre")
     }
 
     func test_organBaseSize_is64() {
