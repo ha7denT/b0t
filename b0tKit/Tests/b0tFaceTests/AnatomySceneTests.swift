@@ -19,4 +19,44 @@ final class AnatomySceneTests: XCTestCase {
         let scene = AnatomyScene(size: CGSize(width: 390, height: 480))
         XCTAssertNotEqual(scene.backgroundColor, .black)
     }
+
+    // MARK: — WunderHead / ADR-0014 tests
+
+    func test_installFullAnatomy_hasFaceUnit() {
+        let scene = AnatomyScene(size: CGSize(width: 390, height: 480))
+        scene.installFullAnatomy(initialBPM: 4)
+        XCTAssertNotNil(
+            scene.childNode(withName: "face_unit"), "face_unit node must exist after installFullAnatomy")
+    }
+
+    func test_installFullAnatomy_hasGrilleEmissive() {
+        let scene = AnatomyScene(size: CGSize(width: 390, height: 480))
+        scene.installFullAnatomy(initialBPM: 4)
+        XCTAssertNotNil(
+            scene.childNode(withName: "grille_emissive"),
+            "grille_emissive node must exist after installFullAnatomy")
+    }
+
+    func test_installWunderFace_isIdempotent() {
+        let scene = AnatomyScene(size: CGSize(width: 390, height: 480))
+        scene.installWunderFace()
+        scene.installWunderFace()
+        let faceUnitNodes = scene.children.filter { $0.name == "face_unit" }
+        XCTAssertEqual(
+            faceUnitNodes.count, 1, "installWunderFace must be idempotent — exactly one face_unit node")
+    }
+
+    func test_installWunderFace_headNodeAndGrilleRefsSet() {
+        let scene = AnatomyScene(size: CGSize(width: 390, height: 480))
+        scene.installWunderFace()
+        XCTAssertNotNil(scene.headNode)
+        XCTAssertNotNil(scene.grille)
+    }
+
+    func test_installWunderFace_grilleIsBehindHead() {
+        let scene = AnatomyScene(size: CGSize(width: 390, height: 480))
+        scene.installWunderFace()
+        XCTAssertEqual(scene.grille?.zPosition ?? 0, -1)
+        XCTAssertEqual(scene.headNode?.zPosition ?? -999, 0)
+    }
 }

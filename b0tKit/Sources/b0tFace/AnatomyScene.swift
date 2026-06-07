@@ -6,7 +6,15 @@ import SwiftUI
 /// Slice 3 ships face + 10-organ columns + heart + wiring. Slice 4 adds touch-handling
 /// for organ taps; Slice 8 wires tool-event pulses through the wiring network.
 public final class AnatomyScene: SKScene {
+    // MARK: — Hilfer path (tests + previews; kept intact)
     public private(set) var face: FaceComposite?
+
+    // MARK: — WunderHead path (production)
+    /// The single-unit head sprite (WunderHead). Non-nil after `installWunderFace()`.
+    public private(set) var headNode: SKSpriteNode?
+    /// Token-yellow emissive grille shape behind the head. Non-nil after `installWunderFace()`.
+    public private(set) var grille: SKShapeNode?
+
     public private(set) var heart: HeartNode?
     public private(set) var wiring: WiringNetwork?
     public private(set) var organs: [OrganID: OrganNode] = [:]
@@ -27,11 +35,50 @@ public final class AnatomyScene: SKScene {
         fatalError("init(coder:) is not supported")
     }
 
-    /// Installs Hilfer's face plus the 10-organ columns, heart, and wiring network.
+    /// Installs WunderHead (single-unit) face plus the 10-organ columns, heart, and wiring network.
+    /// Production entry point.
     public func installFullAnatomy(initialBPM: Int) {
-        installHilferFace()
+        installWunderFace()
         installOrgansAndHeart(initialBPM: initialBPM)
         installWiring()
+    }
+
+    /// Installs the single-unit WunderHead face with ADR-0014 emissive grille.
+    ///
+    /// Structure (flat, both as direct scene children):
+    /// - `"grille_emissive"` — token-yellow `SKShapeNode`, `zPosition = -1` (behind head)
+    /// - `"face_unit"` — `SKSpriteNode(imageNamed: "WunderHead")`, `zPosition = 0`
+    public func installWunderFace() {
+        guard headNode == nil else { return }
+
+        // Token yellow: #EAFF3D
+        let grilleNode = SKShapeNode(
+            rectOf: CGSize(width: 38, height: 18),
+            cornerRadius: 4
+        )
+        grilleNode.fillColor = SKColor(
+            red: 0xEA / 255.0,
+            green: 0xFF / 255.0,
+            blue: 0x3D / 255.0,
+            alpha: 1.0
+        )
+        grilleNode.strokeColor = .clear
+        grilleNode.glowWidth = 6.0
+        grilleNode.alpha = 0.9
+        grilleNode.position = CGPoint(x: 0, y: -64)
+        grilleNode.zPosition = -1
+        grilleNode.name = "grille_emissive"
+        addChild(grilleNode)
+        self.grille = grilleNode
+
+        let texture = SKTexture(imageNamed: "WunderHead")
+        texture.filteringMode = .nearest
+        let head = SKSpriteNode(texture: texture, size: CGSize(width: 256, height: 256))
+        head.position = .zero
+        head.zPosition = 0
+        head.name = "face_unit"
+        addChild(head)
+        self.headNode = head
     }
 
     /// Installs Hilfer face only (used by AnatomyView previews and slice 2 tests).
