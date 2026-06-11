@@ -2,6 +2,39 @@
 
 A living document. Updated at the end of each phase, or when a blocker appears.
 
+## ⏯ SESSION HANDOFF — RESUME POINT (2026-06-11)
+
+> This block is the current resume point and supersedes the dated section below where they conflict. Work is spread across **four feature branches off `main`** (none merged into each other yet — a batched merge/PR reconciliation is owed when Jamee is back from travel). The tracker is consequently **fragmented**: each branch updated its own copy of this file, so a `main` merge will conflict trivially in `IMPLEMENTATION.md` — reconcile by hand.
+
+### Branch map
+- **`main`** (`29c9ba8`) — Phase 2 **Stages A–D merged**. Processor inspector + token metering + engine selection/downloads all live here.
+- **`llama-tool-call-loop`** (`d2f1d35`, **pushed to origin/llama-tool-call-loop; PR NOT yet created**) — the llama **tool-call execute/iterate loop** (one-tool-then-answer; gate→execute→answer in `LlamaEngine.generate` via b0tCore `ToolExecutor` existential-opening; curated `supportsToolLoop`). Spec `docs/specs/phase-2-llama-tool-call-loop.md`, plan `docs/plans/phase-2-llama-tool-call-loop.md`. **To open the PR:** `gh` is installed but not authed — run `gh auth login` (GitHub.com → SSH), then `gh pr create`, or use the one-click URL `https://github.com/ha7denT/b0t/pull/new/llama-tool-call-loop`. 365 SPM tests, 0 failures.
+- **`phase-2-closeouts`** (`101a6d8`, local) — model **disclosure-copy voice pass** (system-voice lowercase; "Built with Llama" verbatim preserved) + **`DebugBrainView` resolver parity** (debug path now uses the shared `ProcessorRuntime`/`EngineHost`).
+- **`import-anatomy-assets`** (`a6b6b08`, local, **CURRENT / active GUI-revision branch**) — the GUI revision (see below). This is where to resume the design work.
+
+### Active branch: `import-anatomy-assets` — the GUI revision (in progress)
+Commits: `96fe566` import v01 assets → `f3ad5af` normalize organ icons to transparent + Journal icon → `346401f` ADR-0017 layout (left/right organ columns, **Journal = 10th organ**, semantic tint aqua/pink/yellow) → `9132964` single-unit **WunderB0t "Head 04" face** + ADR-0014 **emissive grille** (token-yellow shape behind the transparent grille cut-out; static) → `a6b6b08` polish (organ columns widened to x±170, **wiring = thicker aqua pipes behind the face in Z** `zPosition -3`, **cool LCD palette** replacing warm-amber per ADR-0016, **IoskeleyMono** `Typography.systemMono` in the Stage D processor views — they had slipped to system-mono).
+- **As-built layout** (`b0tFace/AnatomyLayout.swift`): processor crown (0,215); left col x=-170 Network/Location/Sensors/Tools (y 130/44/-44/-130); right col x=+170 Memory/Identity/Modules/Journal; heart (0,-205). `OrganID` now has 10 cases incl. `journal` (routed in `InspectionPanel` to the `journal/` dir). Face = single `SKSpriteNode` "WunderHead" (`installWunderFace()`; the old 3-part `installHilferFace()`/`FaceComposite` kept for tests/previews). Grille node "grille_emissive" at (0,-64), 38×18, `#EAFF3D`, z-1.
+- **Tests:** b0tFaceTests 49, b0tHomeTests 38 — green. App builds (`xcodebuild -scheme b0t`).
+- Assets live in `b0tApp/Resources/Assets.xcassets/` (Hilfer*, Wunder Head, Organ* incl. OrganJournal). Raw source packs under `assets/icons/` + `assets/face-parts/` remain **untracked** (licensed working material; whether to commit them is Jamee's call).
+
+### ⛔ OPEN — needed to continue the GUI work
+- **Lower-section "tabs" — UNRESOLVED design question.** Jamee's feedback: the lower section "should have tabs and not be brown." Colour is done (cool dark). The **tabs structure is undecided** — I asked (persistent top-level tab bar vs restyle the inspector's 3 tabs vs chat↔inspector toggle vs other) and Jamee chose to **clarify first**. Open questions to settle: which views the tabs switch between (chat/journal/settings/inspector?), always-present vs contextual, the gear icon's role, and the visual style (backlit chip vs segmented). **Resume by settling this, then implementing.**
+
+### Pending tuning / follow-ups on the GUI branch (Jamee's visual call)
+- Grille is **static**; ADR-0014's design is brightness driven by the speech signal (token-emission rate, later TTS amplitude) — **dynamic grille drive is the follow-up**. Resting brightness/placement may want a nudge.
+- Organ **column/grille positions** are screenshot-tuned approximations; organ **glyph picks** are the v01 §4 choices — both want Jamee's exact eyeball.
+- Verify the cool lower-section colour reads right on device (tuned from a compressed sim screenshot).
+
+### Cross-cutting known issues (any branch)
+- `b0tFace` SpriteKit nodes carry **pre-existing actor-isolation warnings** (now also on the new tint/grille lines) — package-level, non-blocking; a b0tFace Swift-6-concurrency cleanup is worth doing someday.
+- `b0tHomeTests`/`OrganInspectionViewTests` **intermittently segfaults (signal 11) under parallel runs** — pre-existing, clean in isolation / with `--no-parallel`; worth a dedicated fix.
+
+### Phase 2 still-deferred (by design)
+Live per-token metering (reopens the Stage A protocol), the **temperature slider** (temp hardcoded), and the **iPhone 13 Pro RAM/latency** device pass (spec §6b of `phase-2c-q6-model-lineup-validation.md`) — the only device-gated item.
+
+---
+
 ## Current state — RESUME POINT (2026-06-05)
 
 Two threads in flight (Phase 5 onboarding stays separately deferred):
