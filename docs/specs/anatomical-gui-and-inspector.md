@@ -2,11 +2,11 @@
 
 **Status:** Design of record (ASCII-fidelity) for the GUI revision; feeds the eventual layout/inspector implementation (the amendment's "Stage D" surface).
 **Date:** 2026-05-31
-**Deciders:** Jamee
-**Source:** Jamee's home-screen mockup (`assets/ref/iPhone 14 Pro - Phone Template (Community).png`), design session 2026-05-30/31.
+**Deciders:** Hayden
+**Source:** Hayden's home-screen mockup (`assets/ref/iPhone 14 Pro - Phone Template (Community).png`), design session 2026-05-30/31.
 **Related:** [ADR-0017](../decisions/0017-organ-ring-arrangement.md) (organ ring), [ADR-0016](../decisions/0016-aesthetic-reconciliation.md) (aesthetic), [ADR-0014](../decisions/0014-speech-via-illuminated-grille.md) (grille), [ADR-0013](../decisions/0013-v1-single-non-modular-bot.md) (single face), [ADR-0012](../decisions/0012-inference-engine-agnostic.md) (engines), [ADR-0015](../decisions/0015-content-format-boundary-slot-assembly.md) (slots/token metering).
 
-This captures decisions reached in discussion. Fidelity is ASCII/structural by intent (Jamee: "ASCII is fine for our discussion"); a pixel-true render is deferred to implementation.
+This captures decisions reached in discussion. Fidelity is ASCII/structural by intent (Hayden: "ASCII is fine for our discussion"); a pixel-true render is deferred to implementation.
 
 ---
 
@@ -103,7 +103,7 @@ Input (assembled prompt) and output (response) **share one ceiling** — the act
 | Token meters + download progress | `UI Sprite sheet/UI_chains/Stat Bar` |
 | Directory scroll | `UI Sprite sheet/UI_white01/Scrollbar Thumb` |
 
-## 4. Organ → icon mapping (v01, from Jamee 2026-05-31)
+## 4. Organ → icon mapping (v01, from Hayden 2026-05-31)
 
 Paths relative to repo root (`assets/icons/`). `2000 Pixel Icons Pack` = the 16px organ glyphs; `1bit_UI_Pixel_Pack` = processor/heart.
 

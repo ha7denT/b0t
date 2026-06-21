@@ -2,13 +2,13 @@
 
 **Status:** Accepted
 **Date:** 2026-05-30
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Supersedes:** the Foundation-Models-*exclusivity* clause of ADR-0001 (the on-device / no-cloud principle stands). Amends PRD §2 non-negotiable #1.
 **Source:** amendment 2026-05-29 §2; §14 Q5 resolved 2026-05-30.
 
 ## Context
 
-ADR-0001 locked "v1 uses Apple Foundation Models exclusively." The Foundation Models framework requires A17 Pro hardware (iPhone 15 Pro or newer), excluding a large installed base — including Jamee's own iPhone 13 Pro (A15). Tying the product to FM hardware contradicts the reach the tool-first positioning (amendment §1) now demands, and weakens the ownership thesis for everyone who can't run FM.
+ADR-0001 locked "v1 uses Apple Foundation Models exclusively." The Foundation Models framework requires A17 Pro hardware (iPhone 15 Pro or newer), excluding a large installed base — including Hayden's own iPhone 13 Pro (A15). Tying the product to FM hardware contradicts the reach the tool-first positioning (amendment §1) now demands, and weakens the ownership thesis for everyone who can't run FM.
 
 The amendment as written proposed *replacing* FM with downloadable open-weight models. The design session refined this: rather than drop FM, make inference **engine-agnostic** and let device capability pick the default.
 

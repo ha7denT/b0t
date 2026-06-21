@@ -32,7 +32,7 @@
 - `CLAUDE.md` (root) — project conventions
 
 **Conventions used in this plan:**
-- `**[USER]**` marks a step Jamee performs at the keyboard (Xcode IDE actions, App Store Connect, etc.). Claude Code cannot perform these.
+- `**[USER]**` marks a step Hayden performs at the keyboard (Xcode IDE actions, App Store Connect, etc.). Claude Code cannot perform these.
 - `**[CC]**` marks a step Claude Code (or whoever is executing the plan) performs.
 - `**[VERIFY]**` marks a verification step — run a command, check output, do not move on if it fails.
 
@@ -114,7 +114,7 @@ b0t/
 - Modify: `docs/prd.md` (lines around §3.1, the project structure tree)
 - Modify: `CLAUDE.md` (root) — verify section labelled "Project structure" matches PRD post-edit
 
-**Why first:** Jamee's instruction was "update docs for consistency" (Q3). Locking the on-disk vs PRD layout *before* the Xcode project exists means we don't introduce drift.
+**Why first:** Hayden's instruction was "update docs for consistency" (Q3). Locking the on-disk vs PRD layout *before* the Xcode project exists means we don't introduce drift.
 
 - [ ] **Step 1.1: Read PRD §3.1 to find every `Resources/DefaultBot/` and `Resources/Skills/` reference**
 
@@ -248,7 +248,7 @@ Expected: push succeeds. If SSH key isn't configured, the push will fail with a 
 
 ## Task 3: Create the Xcode project
 
-**[USER]** This task is performed by Jamee in Xcode. The project file format is best created by Xcode itself rather than hand-written. Once created, all subsequent edits go through Claude Code editing the Swift Package or folder references.
+**[USER]** This task is performed by Hayden in Xcode. The project file format is best created by Xcode itself rather than hand-written. Once created, all subsequent edits go through Claude Code editing the Swift Package or folder references.
 
 **Files:**
 - Create: `b0t.xcodeproj/` (created by Xcode)
@@ -757,7 +757,7 @@ Config: 110-col line length, 4-space indent, ordered imports."
 **Files:**
 - Create: `.claude/settings.json` (project-scoped, committed)
 
-The two MCP servers (`xcode`, `XcodeBuildMCP`) are already registered in Jamee's local `~/.claude.json`. The committed project-scoped `settings.json` documents the project's expected harness state and adds repo-level hooks.
+The two MCP servers (`xcode`, `XcodeBuildMCP`) are already registered in Hayden's local `~/.claude.json`. The committed project-scoped `settings.json` documents the project's expected harness state and adds repo-level hooks.
 
 - [ ] **Step 8.1: Write `.claude/settings.json`**
 
@@ -1080,7 +1080,7 @@ The face rig — SpriteKit + SwiftUI rendering of the b0t's animated face.
 - **Nearest-neighbour scaling always.** `SKTexture.filteringMode = .nearest`. Never bilinear. Pixel grid must survive retina scaling.
 - Every shipped face part has all 8 mood states baked in. New parts must conform.
 - Animations are `SKAction` sequences in Swift — diffable in git.
-- Pixel art assets are provided by Jamee; we integrate, we do not generate.
+- Pixel art assets are provided by Hayden; we integrate, we do not generate.
 
 ## Depends on
 

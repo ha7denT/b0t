@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-05-30
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Source:** amendment 2026-05-29 §5; relates to ADR-0013 (single face) and §14 Q7 (minimal TTS).
 
 ## Context

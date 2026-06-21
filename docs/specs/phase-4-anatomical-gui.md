@@ -321,7 +321,7 @@ Land in this order, typically across two PRs (the housekeeping PR first, then th
 | Heart BPM round-trip — slider → file → scene tween restart | Integration test: build the scene, mutate state, assert the `repeatForever` action's interval | medium |
 | Wiring pulse on tool invocation | Integration test: publish `ToolInvocation`, assert scene's wiring node received the pulse action | medium |
 | `HomeView` snapshots — idle (chat default), each organ inspection mode, edit mode | Snapshot tests via `swift-snapshot-testing` (chosen at slice 4) or Apple's built-in snapshots | medium |
-| Visual fidelity | `RenderPreview` (Apple Xcode MCP) for each view at design time | medium — visual judgement remains Jamee's |
+| Visual fidelity | `RenderPreview` (Apple Xcode MCP) for each view at design time | medium — visual judgement remains Hayden's |
 | End-to-end smoke (live anatomy on simulator, organ taps swap LCD content, heart beats at BPM, calendar tool pulses wiring) | Manual on-simulator smoke per Phase 3 pattern, documented in `IMPLEMENTATION.md` notes | acceptance gate |
 
 Phase 3 lessons applied:
@@ -337,20 +337,20 @@ Phase 3 lessons applied:
 - Scene is mostly idle (one heartbeat tween + occasional wiring pulse). 60fps target on iPhone 14 Pro per ADR-0007 is comfortably met.
 - Foundation Models session is short-lived per ADR-0008; no concurrent FM session during scene rendering except during a chat reply, where it's already known to coexist with UI per Phase 2.
 
-## 13. Dependencies on Jamee
+## 13. Dependencies on Hayden
 
 Called out so they don't surface mid-build:
 
-1. **Hilfer's three Part PNGs** at 256px (Skull, Eye-screen, Jaw) — Jamee delivers from Gamelabs. *Jamee committed in brainstorming: "I will provide the 3× PNGs."*
-2. **9 organ icons** at 64px — Jamee delivers.
-3. **4 module sub-icons** at 16px (calendar, reminders, time-awareness, health) plus the universal 8px file icon — Jamee delivers.
+1. **Hilfer's three Part PNGs** at 256px (Skull, Eye-screen, Jaw) — Hayden delivers from Gamelabs. *Hayden committed in brainstorming: "I will provide the 3× PNGs."*
+2. **9 organ icons** at 64px — Hayden delivers.
+3. **4 module sub-icons** at 16px (calendar, reminders, time-awareness, health) plus the universal 8px file icon — Hayden delivers.
 4. **Verdana for chat** — system-provided on iOS; no asset to deliver, no licensing concern.
 
 Implementation can scaffold against placeholder squares for assets 1–3, but the visual-design probe doesn't validate until the real PNGs are in place.
 
 ## 14. Acceptance criteria
 
-Phase 4 closes when, on a real-device or simulator-with-Apple-Intelligence smoke pass driven by Jamee:
+Phase 4 closes when, on a real-device or simulator-with-Apple-Intelligence smoke pass driven by Hayden:
 
 1. App opens to the home screen showing Hilfer composed of three Parts (Skull / Eye-screen / Jaw), with the Eye-screen carrying the CRT scanline overlay.
 2. The 9-organ ring is laid out per the locked layout, each organ icon visible.
@@ -363,7 +363,7 @@ Phase 4 closes when, on a real-device or simulator-with-Apple-Intelligence smoke
 9. With no organ selected, the LCD shows the chat scrollback and composer; sending a message routes through the existing `ConversationManager` and the b0t replies in voice.
 10. The visual languages stay distinct: only the Eye-screen has CRT scanlines; the LCD has no bloom, no scanlines.
 
-Each criterion is verified live by Jamee per the Phase 3 smoke pattern. The agent harness can't drive simulator UI deterministically.
+Each criterion is verified live by Hayden per the Phase 3 smoke pattern. The agent harness can't drive simulator UI deterministically.
 
 ## 15. Forward-looking, *not* this spec's output
 

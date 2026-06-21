@@ -2,7 +2,7 @@
 
 **Status:** Superseded in part by [0017](0017-organ-ring-arrangement.md) — the *organs-as-fixed-subsystems* principle stands, but the organ **list** (Reasoning → Processor; Journal added → ten organs) and **arrangement** (left/right world-vs-mind columns, not above/below eye-line) are replaced by ADR-0017.
 **Date:** 2026-05-05
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Supersedes (in part):** ADR-0007's organ-as-module framing
 
 ## Context

@@ -13,7 +13,7 @@ final class ExecutorTests: XCTestCase {
         let response = ConversationResponse(
             text: "noted",
             memoryObservations: [
-                MemoryObservation(about: "Jamee", what: "vendor call at 4pm", importance: .high),
+                MemoryObservation(about: "Hayden", what: "vendor call at 4pm", importance: .high),
                 MemoryObservation(about: "weather", what: "looks like rain", importance: .low),
                 MemoryObservation(
                     about: "work_tracker", what: "deadline tomorrow", importance: .medium),
@@ -28,7 +28,7 @@ final class ExecutorTests: XCTestCase {
 
         // Re-read memory/recent.md and confirm the medium and high observations are present.
         let recent = try await bot.memory.recent
-        XCTAssertTrue(recent.prose.contains("Jamee"))
+        XCTAssertTrue(recent.prose.contains("Hayden"))
         XCTAssertTrue(recent.prose.contains("vendor call at 4pm"))
         XCTAssertTrue(recent.prose.contains("work_tracker"))
         XCTAssertTrue(recent.prose.contains("deadline tomorrow"))

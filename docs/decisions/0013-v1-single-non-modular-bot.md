@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-05-30
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Supersedes:** ADR-0011 (defer face rig to Phase 6). **Partially supersedes** ADR-0008 (gallery cap-6, heartbeat-unlock currency, Gamelabs baked-palette pipeline, Manufacturers-as-content → v2; retained as the v2 design).
 **Source:** amendment 2026-05-29 §4, §5; §14 Q4 resolved 2026-05-30.
 

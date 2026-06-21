@@ -1,11 +1,11 @@
 # Interpretation plan — amendment 2026-05-29
 
-**Status:** Awaiting Jamee's approval before execution
+**Status:** Awaiting Hayden's approval before execution
 **Author:** Claude Code (interpretation pass per amendment §0.5)
 **Source:** `docs/b0t-amendment-2026-05-29.md`
 **Decisions folded in:** §14 Q3/Q4/Q5/Q6/Q7/Q9 resolved in the 2026-05-30 session (below). Q1/Q2/Q8 deferred.
 
-This is the "produce a plan, not code" deliverable the amendment's §0.5 requires. It lists what changes, which ADRs supersede which, which shipped code is affected, the phase re-sequence, and the execution order. Nothing below is executed until Jamee approves this document.
+This is the "produce a plan, not code" deliverable the amendment's §0.5 requires. It lists what changes, which ADRs supersede which, which shipped code is affected, the phase re-sequence, and the execution order. Nothing below is executed until Hayden approves this document.
 
 ---
 
@@ -21,14 +21,14 @@ This is the "produce a plan, not code" deliverable the amendment's §0.5 require
 | **Q4** | **Single b0t in v1.** Multi-b0t roster + Gallery → v2. | Heartbeat *scheduler* stays; unlock-currency role defers. |
 
 **Deferred (not resolved):**
-- **Q1** (face: 1-bit monochrome vs. painterly) and **Q2** (CRT eye-screen vs. all-LCD) — await Jamee's incoming UI layout designs. They gate the *face-register* clauses of the aesthetic ADR (ADR-0016), which is authored only after Q1/Q2/Q3 are all confirmed (amendment §13).
+- **Q1** (face: 1-bit monochrome vs. painterly) and **Q2** (CRT eye-screen vs. all-LCD) — await Hayden's incoming UI layout designs. They gate the *face-register* clauses of the aesthetic ADR (ADR-0016), which is authored only after Q1/Q2/Q3 are all confirmed (amendment §13).
 - **Q8** (trial length 3 vs 7 days) — pre-launch pricing call, blocks nothing.
 
 ---
 
 ## 1. How the engine decision reshapes amendment §2
 
-The amendment as written reverses non-negotiable #1 and removes Foundation Models. Jamee's Q5 answer changes this to a **multi-engine, capability-detected architecture**:
+The amendment as written reverses non-negotiable #1 and removes Foundation Models. Hayden's Q5 answer changes this to a **multi-engine, capability-detected architecture**:
 
 - An **`InferenceEngine` protocol** (the amendment's *recommended* abstraction) becomes **mandatory and central**.
 - **FM is a first-class conformer**, pre-selected as the default *when `SystemLanguageModel.default.isAvailable`*.
@@ -39,7 +39,7 @@ The amendment as written reverses non-negotiable #1 and removes Foundation Model
 
 **The hard engineering problem (own ADR note):** `@Generable` is FM-only. The llama.cpp conformer must produce the *same* typed structs (`TickDecision`, `ConversationResponse`, etc.) via grammar-constrained decoding (GBNF) or JSON-schema decoding. The protocol contract is "decode to this `Codable` shape"; each engine satisfies it its own way. This is the meatiest part of the Phase 2 re-open.
 
-**Why llama.cpp:** GGUF metadata carries the model's own chat template (solves Jamee's "each model needs specific prompt syntax" — the §3 format layer follows the weights on model switch) *and* supports GBNF grammars (solves the `@Generable`-parity problem). One library, both problems.
+**Why llama.cpp:** GGUF metadata carries the model's own chat template (solves Hayden's "each model needs specific prompt syntax" — the §3 format layer follows the weights on model switch) *and* supports GBNF grammars (solves the `@Generable`-parity problem). One library, both problems.
 
 ---
 
@@ -143,7 +143,7 @@ Refines amendment §12 with the §14 decisions folded in. **"Edit now" = unblock
 2. **`b0t-amendment-2026-05-04.md`** v2-deferral header lines.
 3. **Core docs** (README, CLAUDE.md, design_document, prd) — "edit now" rows in §5.
 4. **`IMPLEMENTATION.md`** ledger + amendment record.
-5. **Re-pose Q1/Q2** when Jamee's UI designs arrive → author ADR-0016 + the "after designs" doc rows.
+5. **Re-pose Q1/Q2** when Hayden's UI designs arrive → author ADR-0016 + the "after designs" doc rows.
 6. **Code** (Phase 2 re-open) is a *separate* implementation effort with its own plan — not part of this doc pass.
 
 This pass produces **docs + ADRs only**. No code is touched until the Phase 2 re-open is planned and approved separately.

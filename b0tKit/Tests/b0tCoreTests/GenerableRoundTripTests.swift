@@ -12,7 +12,7 @@ final class GenerableRoundTripTests: XCTestCase {
             text: "hello",
             mood: .delighted,
             memoryObservations: [
-                MemoryObservation(about: "Jamee", what: "likes coffee", importance: .medium)
+                MemoryObservation(about: "Hayden", what: "likes coffee", importance: .medium)
             ]
         )
         let restored = try roundTrip(original)

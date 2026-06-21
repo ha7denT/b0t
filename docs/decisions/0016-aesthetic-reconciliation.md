@@ -2,13 +2,13 @@
 
 **Status:** Accepted
 **Date:** 2026-05-30
-**Deciders:** Jamee
-**Source:** amendment 2026-05-29 §9; §14 Q1/Q2/Q3 resolved 2026-05-30 against Jamee's home-screen mockup (`assets/ref/`).
+**Deciders:** Hayden
+**Source:** amendment 2026-05-29 §9; §14 Q1/Q2/Q3 resolved 2026-05-30 against Hayden's home-screen mockup (`assets/ref/`).
 **Supersedes:** design document §3.5's "warm phosphor — never blue" rule; reconciles §3.3 and §3.6.
 
 ## Context
 
-The 2026-05-29 amendment moved the display idiom toward LCD-forward (backlit monochrome, no bloom) with a three-colour semantic highlight palette, but left three aesthetic questions open because they cascade into every visual surface (§14): Q1 the b0t face's visual register, Q2 the CRT eye-screen, Q3 the formal "never blue" override. The amendment specified the aesthetic ADR be authored only once all three were confirmed. Jamee's home-screen mockup (2026-05-30) resolved them.
+The 2026-05-29 amendment moved the display idiom toward LCD-forward (backlit monochrome, no bloom) with a three-colour semantic highlight palette, but left three aesthetic questions open because they cascade into every visual surface (§14): Q1 the b0t face's visual register, Q2 the CRT eye-screen, Q3 the formal "never blue" override. The amendment specified the aesthetic ADR be authored only once all three were confirmed. Hayden's home-screen mockup (2026-05-30) resolved them.
 
 ## Decision
 
@@ -36,7 +36,7 @@ A deliberate **two-register** aesthetic: a painterly face inside 1-bit LCD chrom
 - **Design doc:** §3.5 colour rule rewritten (done); §3.3 layer prose and §3.6 transition prose finalized to LCD-forward + painterly-face + emissive eyes/grille (this ADR unblocks them).
 - **ADR-0003** (SpriteKit + SwiftUI) stands. The Phase 4 eye-screen `EyesNode` + CRT scanline shader is **superseded for v1** (the single Gamelabs sprite-sheet has no separate eye node); an emissive eye-screen returns in v2. The v1 emissive implementation is a transparent grille cut-out backed by a behind-sprite emissive shape (no shader needed).
 - **`b0tDesign`:** the semantic tokens (added per amendment §9) + 1-bit mask-tint utility are the implementation; the eye-screen shader stays.
-- **Layout note (separate concern):** Jamee's mockup also reorganizes the organ ring (left/right world-vs-mind columns; processor at the crown replacing the Reasoning organ; journal as a new organ). That is an *anatomical-arrangement* change to [ADR-0010](0010-organs-are-anatomical-subsystems.md), tracked separately once the layout is finalized — **not** part of this aesthetic ADR.
+- **Layout note (separate concern):** Hayden's mockup also reorganizes the organ ring (left/right world-vs-mind columns; processor at the crown replacing the Reasoning organ; journal as a new organ). That is an *anatomical-arrangement* change to [ADR-0010](0010-organs-are-anatomical-subsystems.md), tracked separately once the layout is finalized — **not** part of this aesthetic ADR.
 
 ## When to revisit
 

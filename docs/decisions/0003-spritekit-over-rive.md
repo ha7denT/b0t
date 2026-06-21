@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-04-30
-**Deciders:** Jamee
+**Deciders:** Hayden
 
 ## Context
 
@@ -25,15 +25,15 @@ Secondary factors:
 - **Native Apple frameworks** is a stated project goal (per project goals — keep the stack minimal and Apple-aligned).
 - **Pixel-perfect rendering out of the box** via `SKTexture.filteringMode = .nearest`. No fighting an external runtime to disable bilinear interpolation.
 - **Sprite atlas tooling** is mature in Xcode — drag a folder of frames in, get an atlas. Workflow matches the pixel-art-with-painterly-lighting source material.
-- **Diffability.** Animation changes show up in git diffs as readable Swift, reviewable by Jamee and editable by Claude Code.
+- **Diffability.** Animation changes show up in git diffs as readable Swift, reviewable by Hayden and editable by Claude Code.
 - **One fewer dependency** — Rive's runtime adds binary size and a third-party update treadmill.
 
-The trade-off accepted: more code than a `.riv` import would be for the same animation. This cost is borne by Claude Code, not Jamee, so it's an acceptable trade.
+The trade-off accepted: more code than a `.riv` import would be for the same animation. This cost is borne by Claude Code, not Hayden, so it's an acceptable trade.
 
 ## Consequences
 
-- Animation authoring is code-first. Jamee describes the desired motion in plain language; Claude Code writes the `SKAction` sequence.
-- Pixel art assets are provided by Jamee (purchased kit, custom art, or combination), bundled as `SKTextureAtlas`-compatible folders.
+- Animation authoring is code-first. Hayden describes the desired motion in plain language; Claude Code writes the `SKAction` sequence.
+- Pixel art assets are provided by Hayden (purchased kit, custom art, or combination), bundled as `SKTextureAtlas`-compatible folders.
 - Each face part must declare the same set of mood states (idle, speaking, thinking, surprised, sleepy, attentive, worried, delighted) — enforced by a Swift protocol contract.
 - A small motion vocabulary library is built once and reused — blink, breathe, glance, head-tilt, mood-transition. Individual parts compose these.
 - For complex non-character animations (the wiring/energy-flow visualisation between face and organs), SwiftUI's native animation system or `SKEffectNode` shaders are used as appropriate.

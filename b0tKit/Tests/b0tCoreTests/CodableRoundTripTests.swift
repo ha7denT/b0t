@@ -26,7 +26,7 @@ final class CodableRoundTripTests: XCTestCase {
     }
 
     func test_memoryObservation_codableRoundTrips() throws {
-        let original = MemoryObservation(about: "Jamee", what: "likes coffee", importance: .high)
+        let original = MemoryObservation(about: "Hayden", what: "likes coffee", importance: .high)
         XCTAssertEqual(try jsonRoundTrip(original), original)
     }
 
@@ -35,7 +35,7 @@ final class CodableRoundTripTests: XCTestCase {
             text: "hello",
             mood: .delighted,
             memoryObservations: [
-                MemoryObservation(about: "Jamee", what: "likes coffee", importance: .medium)
+                MemoryObservation(about: "Hayden", what: "likes coffee", importance: .medium)
             ]
         )
         XCTAssertEqual(try jsonRoundTrip(original), original)

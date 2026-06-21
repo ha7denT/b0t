@@ -1239,7 +1239,7 @@ git commit -m "feat(b0tHome): ProcessorModelNotes builder for the .md tab (Stage
 
 ### Task 12: `ProcessorInspectionView` — the 3-tab SwiftUI shell
 
-Add the view to the file from Task 11. This is UI; verification is `RenderPreview` (per the Phase 4 convention — snapshot/visual sign-off is Jamee's, deferred). The view binds to `AnatomyState` (seams + `latestUsage`) and the `ModelDownloadCoordinator`. Temp slider omitted (spec §2). Match the ASCII layout in `anatomical-gui-and-inspector.md` §3.
+Add the view to the file from Task 11. This is UI; verification is `RenderPreview` (per the Phase 4 convention — snapshot/visual sign-off is Hayden's, deferred). The view binds to `AnatomyState` (seams + `latestUsage`) and the `ModelDownloadCoordinator`. Temp slider omitted (spec §2). Match the ASCII layout in `anatomical-gui-and-inspector.md` §3.
 
 **Files:**
 - Modify: `b0tKit/Sources/b0tHome/Processor/ProcessorInspectionView.swift`
@@ -1424,7 +1424,7 @@ Expected: builds clean (no warnings).
 
 - [ ] **Step 4: RenderPreview the view**
 
-Use the `/preview ProcessorInspectionView` slash command (Apple MCP `RenderPreview`). Verify against `anatomical-gui-and-inspector.md` §3: yellow header, tab strip, model cycle, in/out gauge, directory rows + storage line. Visual sign-off is Jamee's; capture the render for review.
+Use the `/preview ProcessorInspectionView` slash command (Apple MCP `RenderPreview`). Verify against `anatomical-gui-and-inspector.md` §3: yellow header, tab strip, model cycle, in/out gauge, directory rows + storage line. Visual sign-off is Hayden's; capture the render for review.
 
 - [ ] **Step 5: Commit**
 

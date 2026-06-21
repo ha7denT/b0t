@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Hilfer's palette — the Wundercog tier-1 starter Model.
 ///
-/// Values are sRGB literals; tweak with Jamee's eye against the Hilfer PNGs.
+/// Values are sRGB literals; tweak with Hayden's eye against the Hilfer PNGs.
 public enum WundercogPalette {
     /// Off-white polymer shell — Hilfer's skull and jaw base.
     public static let shellOffwhite = Color(red: 0.93, green: 0.92, blue: 0.88)

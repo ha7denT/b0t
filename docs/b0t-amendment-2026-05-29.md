@@ -1,7 +1,7 @@
 # b0t implementation amendment — 2026-05-29
 
 **Status:** Active — awaiting Claude Code interpretation pass
-**Author:** Jamee
+**Author:** Hayden
 **Supersedes / amends:** prior decisions on the inference engine, v1 face scope, multi-b0t scope, and aesthetic display metaphor. Touches the 2026-05-04 amendment, the design document, the PRD, README, CLAUDE.md, and shipped code in Phases 2 and 4.
 **Scope of impact:** **This amendment is NOT largely additive.** Unlike 2026-05-04, it reverses at least one locked PRD non-negotiable, redirects shipped code in `b0tCore` (Phase 2) and `b0tFace`/`b0tHome` (Phase 4), and moves several features previously scoped for v1 into v2. Read §0 before acting.
 
@@ -9,13 +9,13 @@
 
 ## 0. How Claude Code should process this amendment
 
-This document records decisions made by Jamee in a design session. It is the new source of truth where it conflicts with earlier documents. However:
+This document records decisions made by Hayden in a design session. It is the new source of truth where it conflicts with earlier documents. However:
 
 1. **Apply the items marked DECIDED.** These are settled. Revise the relevant docs and code to match.
-2. **Do NOT resolve the items in §14 (Open questions).** They are genuinely undecided and require Jamee's input, per the project's standing rule ("surface ambiguity, do not silently resolve" — CLAUDE.md conventions, PRD §0). Where this amendment notes a *recommended* resolution, treat it as a suggestion to put to Jamee, not a decision.
+2. **Do NOT resolve the items in §14 (Open questions).** They are genuinely undecided and require Hayden's input, per the project's standing rule ("surface ambiguity, do not silently resolve" — CLAUDE.md conventions, PRD §0). Where this amendment notes a *recommended* resolution, treat it as a suggestion to put to Hayden, not a decision.
 3. **Supersede, do not delete.** ADRs are append-only. Where this amendment overturns a settled decision, author a new ADR that references and supersedes the old one (see §13). Do not edit historical ADRs except to add a "Superseded by ADR-NNNN" header line.
 4. **This reworks shipped phases.** Treat §2 (inference) and §5 (face) as re-opening Phase 2 and Phase 6 respectively, and as partially invalidating Phase 4 assumptions. Update `docs/IMPLEMENTATION.md` (the tracker) and re-sequence the phase ledger accordingly (§12).
-5. **Begin by producing an interpretation plan, not code.** Before touching anything, produce a short written plan that lists: which docs change, which ADRs supersede which, which shipped code is affected, and which §14 questions block which work. Surface that plan to Jamee for approval first.
+5. **Begin by producing an interpretation plan, not code.** Before touching anything, produce a short written plan that lists: which docs change, which ADRs supersede which, which shipped code is affected, and which §14 questions block which work. Surface that plan to Hayden for approval first.
 
 ---
 
@@ -37,7 +37,7 @@ What this does **not** change: the four pillars (markdown brain, configurable he
 
 b0t v1 will run on **downloadable open-weight models executed locally** (e.g. Llama 3.2 1B, Qwen3 1.7B), not Apple's Foundation Models framework.
 
-**Rationale:** Apple Intelligence / the Foundation Models framework requires A17 Pro hardware (iPhone 15 Pro or newer). That excludes a large installed base, including Jamee's own iPhone 13 Pro (A15). Bringing a downloadable model widens device support and strengthens the ownership thesis — the user chooses and owns the brain.
+**Rationale:** Apple Intelligence / the Foundation Models framework requires A17 Pro hardware (iPhone 15 Pro or newer). That excludes a large installed base, including Hayden's own iPhone 13 Pro (A15). Bringing a downloadable model widens device support and strengthens the ownership thesis — the user chooses and owns the brain.
 
 This **reverses PRD §2 non-negotiable #1** ("All AI inference is on-device via Apple Foundation Models"). It does **not** weaken the *on-device, no-cloud* principle — inference remains fully local. Non-negotiables #2, #3, #5 (markdown, no telemetry, no cloud fallback) all stand and are reinforced.
 
@@ -102,7 +102,7 @@ Affected:
 
 **What is deferred (to v2 with the modular system):** the `FacePart` protocol and its `SkullNode`/`EyesNode`/`JawNode` conformers as a *runtime-composited* rig; `DecalNode`; per-part palette variants.
 
-**Code impact on Phase 4 (shipped):** Phase 4 shipped a static 3-part face (Skull/Eyes/Jaw composited, painterly lighting, CRT eye-screen). Decide (Jamee, §14) whether the v1 single face replaces that composition with a single sprite or keeps the composed look but animates it as one unit. Either way, the moving Jaw is dropped and a grille element added.
+**Code impact on Phase 4 (shipped):** Phase 4 shipped a static 3-part face (Skull/Eyes/Jaw composited, painterly lighting, CRT eye-screen). Decide (Hayden, §14) whether the v1 single face replaces that composition with a single sprite or keeps the composed look but animates it as one unit. Either way, the moving Jaw is dropped and a grille element added.
 
 ---
 
@@ -153,7 +153,7 @@ Surface token usage as a **resource gauge with a denominator**, not a bare count
 Most of the surface stays muted/dark and unsaturated; these are emphasis-only (buttons, highlights, panel backlights per organ semantic).
 
 **CONFLICTS to surface (do NOT silently resolve — §14):**
-- Design doc §3.5 states "warm phosphor — amber, green, or cream. **Never blue**." Aqua `#3DEAFF` is a cyan/blue and pink is magenta. The new palette overrides the "never blue / warm phosphor" rule. This is Jamee's to confirm as an explicit override.
+- Design doc §3.5 states "warm phosphor — amber, green, or cream. **Never blue**." Aqua `#3DEAFF` is a cyan/blue and pink is magenta. The new palette overrides the "never blue / warm phosphor" rule. This is Hayden's to confirm as an explicit override.
 - Design doc §3.3/§3.6 specify CRT/phosphor with "slight bloom and scanline" and "CRT warming" transitions. The LCD-no-bloom direction contradicts this. Phase 4 shipped a CRT scanline shader **on the eye-screen only**. Whether the eye-screen keeps its CRT treatment or also goes LCD is undecided (§14).
 - Design doc §3.3 layers the b0t face as "pixel art with painterly lighting." The new UI/organ direction is 1-bit monochrome (§10). Whether the *face itself* goes 1-bit or stays painterly is undecided (§14).
 
@@ -207,11 +207,11 @@ This adds App Store metadata / about-screen obligations but does not affect the 
 - **v1 ships a single non-modular face; modular Parts/Manufacturers/Models deferred to v2.** Supersedes/extends ADR-0011 (defer face rig) and the 2026-05-04 parts decisions.
 - **Speech signalled by illuminated speaker grille; no moving jaw in v1.** References the mood-×-mouth combinatorial rationale.
 - **Content/format boundary for prompts; slot-based assembly.** Documents the §3/§7 architecture.
-- **(Pending §14) Aesthetic reconciliation: LCD-forward, semantic highlight palette, "never blue" overridden.** Author only after Jamee confirms §14 items.
+- **(Pending §14) Aesthetic reconciliation: LCD-forward, semantic highlight palette, "never blue" overridden.** Author only after Hayden confirms §14 items.
 
 ---
 
-## 14. Open questions for Jamee (DO NOT resolve)
+## 14. Open questions for Hayden (DO NOT resolve)
 
 1. **Face visual register.** Does the v1 single face stay "pixel art with painterly lighting," or go 1-bit monochrome to match the new UI/organs? (Affects whether Phase 4's composed painterly face is reworked.)
 2. **CRT eye-screen.** Keep the shipped CRT scanline treatment on the eye-screen as the one emissive element, or take the whole surface LCD/no-bloom? (§9)
@@ -220,7 +220,7 @@ This adds App Store metadata / about-screen obligations but does not affect the 
 5. **Inference runtime.** llama.cpp (Metal) vs MLX vs MLC-LLM — engineering call. (Recommended: llama.cpp for its embedded-chat-template handling and GGUF ecosystem, which makes safe model-switching almost free.)
 6. **Default model + v1 catalogue.** Which models ship/are offered, and which is the default? (Recommended: Qwen3 default for Apache-2.0 simplicity; Llama opt-in with the §11 attribution.)
 7. **TTS in v1?** The grille amplitude path needs an audio source. Keep the elaborate `b0tAudio` TTS/effects (design doc §3.7), or text-only for v1 with the grille tracking token rate instead? (Affects Phase 8 scope.)
-8. **Trial length.** Design doc/PRD say 7 days; the competitor reference used 3. Pricing stays one-time $19.99/$29.99 either way. Jamee's call pre-launch (PRD §12 Q1).
+8. **Trial length.** Design doc/PRD say 7 days; the competitor reference used 3. Pricing stays one-time $19.99/$29.99 either way. Hayden's call pre-launch (PRD §12 Q1).
 9. **Minimum-OS / device floor.** With Foundation Models gone, the A17-Pro gate is removed. Keep iOS 26 minimum (for Liquid Glass per non-negotiable #4) but confirm the intended device floor now that iPhone 13 Pro is an explicit target.
 
 ---

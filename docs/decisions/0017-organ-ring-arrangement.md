@@ -2,13 +2,13 @@
 
 **Status:** Accepted
 **Date:** 2026-05-31
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Supersedes (in part):** [ADR-0010](0010-organs-are-anatomical-subsystems.md)'s organ list and spatial arrangement; design doc §2.3's above/below-eye-line split.
-**Source:** Jamee's home-screen mockup (`assets/ref/`), 2026-05-30/31.
+**Source:** Hayden's home-screen mockup (`assets/ref/`), 2026-05-30/31.
 
 ## Context
 
-ADR-0010 fixed nine organs arranged by the **eye-line** (perception/knowledge above, world-I/O below). Jamee's home-screen mockup reorganizes the ring into **two vertical columns** and aligns it with the 2026-05-29 amendment's engine-as-processor framing. The *organs-as-fixed-subsystems* principle (ADR-0010) is unchanged; only the roster and arrangement change.
+ADR-0010 fixed nine organs arranged by the **eye-line** (perception/knowledge above, world-I/O below). Hayden's home-screen mockup reorganizes the ring into **two vertical columns** and aligns it with the 2026-05-29 amendment's engine-as-processor framing. The *organs-as-fixed-subsystems* principle (ADR-0010) is unchanged; only the roster and arrangement change.
 
 ## Decision
 

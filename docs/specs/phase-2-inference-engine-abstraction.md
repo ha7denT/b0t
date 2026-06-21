@@ -14,7 +14,7 @@ This spec covers the architecture only. It decomposes into a TDD task plan (`doc
 **Goal.** Make `b0tCore` inference engine-agnostic: Foundation Models stays as a first-class engine (the default where the device supports it), and a llama.cpp-backed engine runs downloadable open-weight GGUF models (the default otherwise, switchable everywhere). Behaviour of the existing conversation/heartbeat flows is preserved on the FM path.
 
 **Non-goals (this re-open).**
-- The Processor inspector *visual* design beyond functional wiring (waits on Jamee's UI materials / §14 Q1–Q2 aesthetic).
+- The Processor inspector *visual* design beyond functional wiring (waits on Hayden's UI materials / §14 Q1–Q2 aesthetic).
 - The robust open-weight tool-call loop for *weak* models — we target tool-capable models and degrade gracefully (see §6).
 - Multi-b0t, modular face, anything in ADR-0013's v2 set.
 

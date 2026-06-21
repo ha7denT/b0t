@@ -2,7 +2,7 @@
 
 **Status:** Partially superseded by [0012](0012-inference-engine-agnostic.md) — the "Apple Foundation Models exclusively" clause is superseded (inference is now engine-agnostic; FM default-when-available, downloadable open-weight otherwise). The on-device / no-cloud principle below **stands**.
 **Date:** 2026-04-30
-**Deciders:** Jamee
+**Deciders:** Hayden
 
 ## Context
 

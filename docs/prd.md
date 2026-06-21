@@ -10,7 +10,7 @@
 
 ## 0. How to use this document
 
-This PRD is the implementation contract. The design document is the philosophy. **Read both before starting any major task.** When the PRD and design document conflict, ask the developer (Jamee) — do not silently resolve.
+This PRD is the implementation contract. The design document is the philosophy. **Read both before starting any major task.** When the PRD and design document conflict, ask the developer (Hayden) — do not silently resolve.
 
 When this document says **REQUIRED**, that is a hard constraint. When it says **SHOULD**, that is a strong default that can be revisited with developer approval. When it says **CONSIDER**, that is guidance.
 
@@ -343,7 +343,7 @@ protocol Module {
 
 ### 5.4 b0tFace (rig + rendering)
 
-**Phase note (amended 2026-05-29 — [ADR-0013](decisions/0013-v1-single-non-modular-bot.md)/[ADR-0014](decisions/0014-speech-via-illuminated-grille.md)):** Phase 4 shipped a static three-part composite. v1's face is now a **single pre-composed unit** (not runtime-composited from Skull/Eyes/Jaw), with ~8 mood states authored as **sprite-sheet animations** that the rig *selects*. **No moving jaw** — speech is signalled by an **illuminated speaker grille** (pulsing in token-yellow, driven by TTS amplitude or token-emission rate). The modular Parts rig + Face Creator defer to v2. The runtime-composited rig, MoodController, and motion-vocabulary library are **net-new Phase 6 work** (they were never shipped), now targeting the single-unit sprite-sheet model. The face's *visual register* (1-bit vs painterly) and the CRT eye-screen treatment await Jamee's UI designs (§14 Q1/Q2).
+**Phase note (amended 2026-05-29 — [ADR-0013](decisions/0013-v1-single-non-modular-bot.md)/[ADR-0014](decisions/0014-speech-via-illuminated-grille.md)):** Phase 4 shipped a static three-part composite. v1's face is now a **single pre-composed unit** (not runtime-composited from Skull/Eyes/Jaw), with ~8 mood states authored as **sprite-sheet animations** that the rig *selects*. **No moving jaw** — speech is signalled by an **illuminated speaker grille** (pulsing in token-yellow, driven by TTS amplitude or token-emission rate). The modular Parts rig + Face Creator defer to v2. The runtime-composited rig, MoodController, and motion-vocabulary library are **net-new Phase 6 work** (they were never shipped), now targeting the single-unit sprite-sheet model. The face's *visual register* (1-bit vs painterly) and the CRT eye-screen treatment await Hayden's UI designs (§14 Q1/Q2).
 
 **REQUIRED:** the face is rendered using **SpriteKit embedded in SwiftUI via `SpriteView`**. Each face part is an `SKSpriteNode`. Animation is driven by `SKAction` sequences (idle blink, breathing, glance, mood transitions). Sprite frames are bundled in `SKTextureAtlas` per part. Mood states are state-machine-driven on the scene level.
 
@@ -353,9 +353,9 @@ protocol Module {
 
 **REQUIRED:** the face renders at native resolution scaled for retina displays without losing the pixel-art grid. Use nearest-neighbour scaling (`SKTexture.filteringMode = .nearest`), never bilinear.
 
-**SHOULD (pending §14 Q2):** the shipped CRT/scanline overlay (`SKEffectNode` + fragment shader, currently on the eye-screen) may stay as the one emissive element or give way to the LCD-no-bloom idiom (amendment §9). Resolve with Jamee's UI designs before changing it.
+**SHOULD (pending §14 Q2):** the shipped CRT/scanline overlay (`SKEffectNode` + fragment shader, currently on the eye-screen) may stay as the one emissive element or give way to the LCD-no-bloom idiom (amendment §9). Resolve with Hayden's UI designs before changing it.
 
-**Pixel-art assets are provided by the developer (Jamee)** — v1 chrome/organs from piiixl 1-bit packs (scaled up, runtime mask-tinted; amendment §10), the face as a single sprite-sheet unit. Claude Code does not generate assets; it integrates them.
+**Pixel-art assets are provided by the developer (Hayden)** — v1 chrome/organs from piiixl 1-bit packs (scaled up, runtime mask-tinted; amendment §10), the face as a single sprite-sheet unit. Claude Code does not generate assets; it integrates them.
 
 ### 5.5 b0tAudio (TTS pipeline)
 
@@ -567,7 +567,7 @@ These are explicitly open. Do not silently fill them in.
 | 4 | Pixel art assets. | Phase 4–6 | **Re-answered 2026-05-29; refined 2026-05-30** — chrome/organs/icons from piiixl 1-bit packs (scaled up + Aseprite, runtime mask-tinted); the **face is a Gamelabs-generated animation sprite-sheet** (mood states; grille = transparent cut-out lit by an emissive shape behind the sprite; eye-screen baked, no v1 emissive). The *modular per-part baked-palette* Gamelabs pipeline defers to v2 ([ADR-0013](decisions/0013-v1-single-non-modular-bot.md), [ADR-0016](decisions/0016-aesthetic-reconciliation.md), amendment §10). |
 | 5 | Curated palette count. | Phase 6 | **→ v2 (2026-05-29)** — b0t palettes belong to the modular Face Creator, deferred with it. v1 uses the three-colour semantic highlight system (§3.5), not per-b0t palettes. |
 | 12 | Downloadable model lineup + default. | Phase 2 | **Desk-half resolved (2026-06-02; `docs/specs/phase-2c-q6-model-lineup-validation.md`)** — FM + trio locked: Qwen3-1.7B default (Apache-2.0), Llama 3.2 1B opt-in ("Built with Llama"), Qwen2.5-1.5B-Instruct third (Apache-2.0); all Q4_K_M. Tool-calling via GBNF on the pure-C path (ADR-0018). **Device-half pending:** on-device validation on the 6GB iPhone 13 Pro (RAM fit, template gate, latency, tool-call reliability) before catalogue rows + pinned SHAs land. |
-| 13 | Face visual register: 1-bit vs painterly. | Phase 6 | **Open (§14 Q1)** — awaiting Jamee's UI layout designs; gates ADR-0016. |
+| 13 | Face visual register: 1-bit vs painterly. | Phase 6 | **Open (§14 Q1)** — awaiting Hayden's UI layout designs; gates ADR-0016. |
 | 14 | CRT eye-screen vs all-LCD. | Phase 4/6 | **Open (§14 Q2)** — awaiting UI designs; gates ADR-0016. |
 | 15 | Trial length (3 vs 7 days). | Phase 9 | **Open (§14 Q8)** — pre-launch; one-time $19.99/$29.99 either way. |
 | 6 | Type choices. | Phase 4 | **Resolved** — IoskeleyMono NL (brain, open-source), Söhne (chat). |
@@ -583,7 +583,7 @@ These are explicitly open. Do not silently fill them in.
 - **`identity/core.md` is split** into `core.md` (voice anchor, always loaded), `principles.md` (safety contract, always loaded), `about_b0t.md` (manual, loaded on demand). See PRD §3.4 and design doc §5.1.
 - **Default b0t name is `b0t-01`.** New b0ts created by the user follow `b0t-NN` numbering with randomised default faces. User can rename at any time.
 
-Each remaining open item has a placeholder default that the developer (Jamee) will resolve. Surface them in the relevant phase; do not silently choose.
+Each remaining open item has a placeholder default that the developer (Hayden) will resolve. Surface them in the relevant phase; do not silently choose.
 
 ---
 

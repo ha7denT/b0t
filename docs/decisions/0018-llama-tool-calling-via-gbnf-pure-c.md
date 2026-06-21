@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-06-02
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Relates to:** [ADR-0012](0012-inference-engine-agnostic.md) (engine-agnostic inference); `docs/specs/phase-2-inference-engine-abstraction.md` §6 (tool-calling on the llama path), §8 (staging), §9 Q5 (chat-template constraint).
 **Supersedes (in part):** the Phase-2 spec §8 Stage-B note "XCFramework integration (Swift/C++ interop)" — Stage B shipped **pure C, no C++ interop** (`b0tLlama/CLAUDE.md`); this ADR makes that boundary a deliberate, recorded choice rather than an as-built accident.
 

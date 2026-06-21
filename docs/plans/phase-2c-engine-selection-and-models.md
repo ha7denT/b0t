@@ -17,7 +17,7 @@
 
 **Tech Stack:** Swift 6, SwiftPM, Foundation `URLSession` (background download), b0tCore/b0tBrain/b0tLlama, XCTest.
 
-**Scope note — Stage C of the Phase 2 re-open** (`docs/specs/phase-2-inference-engine-abstraction.md`). Stages A (abstraction) + B (llama engine) are merged. **Stage D** (Processor inspector + token-metering UI) follows and is gated on Jamee's UI designs (§14 Q1/Q2).
+**Scope note — Stage C of the Phase 2 re-open** (`docs/specs/phase-2-inference-engine-abstraction.md`). Stages A (abstraction) + B (llama engine) are merged. **Stage D** (Processor inspector + token-metering UI) follows and is gated on Hayden's UI designs (§14 Q1/Q2).
 
 ### Q6 boundary (what's buildable now vs. what waits on the model-lineup validation)
 

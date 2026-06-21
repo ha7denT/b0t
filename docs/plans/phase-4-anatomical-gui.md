@@ -21,7 +21,7 @@
 **Conventions used in this plan:**
 - `**[CC]**` marks a Claude-Code-executable step.
 - `**[VERIFY]**` marks a verification step — run a command, check output, do not move on if it fails.
-- `**[JAMEE]**` marks a step that requires Jamee's input (asset delivery, design call) before the task can complete.
+- `**[JAMEE]**` marks a step that requires Hayden's input (asset delivery, design call) before the task can complete.
 - Tasks are TDD-shaped: failing test → minimal implementation → passing test → commit. Each task is a single atomic commit.
 - Walking-skeleton discipline: every slice ends with the package compiling, all unit tests green, and a `RenderPreview` available where applicable.
 
@@ -277,7 +277,7 @@ If no matches surfaced in Step 1, skip Step 2 and commit a no-op note in IMPLEME
 
 **Status:** Accepted
 **Date:** 2026-05-05
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Supersedes (in part):** ADR-0007's organ-as-module framing
 
 ## Context
@@ -346,7 +346,7 @@ git commit -m "docs(decisions): adr-0010 organs are anatomical subsystems"
 
 **Status:** Accepted
 **Date:** 2026-05-05
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Amends:** PRD §3 Phase 4, §5.4
 
 ## Context
@@ -697,7 +697,7 @@ In "Specs in flight," add:
 In "Open questions on the boil," add:
 
 ```markdown
-- Hilfer's three Part PNGs + 9 organ icons + 4 module sub-icons + 1 file icon — Jamee committed to deliver.
+- Hilfer's three Part PNGs + 9 organ icons + 4 module sub-icons + 1 file icon — Hayden committed to deliver.
 ```
 
 - [ ] **Step 2 [CC]: Commit**
@@ -773,7 +773,7 @@ import SwiftUI
 
 /// Hilfer's palette — the Wundercog tier-1 starter Model.
 ///
-/// Values are sRGB literals; tweak with Jamee's eye against the Hilfer PNGs.
+/// Values are sRGB literals; tweak with Hayden's eye against the Hilfer PNGs.
 public enum WundercogPalette {
     /// Off-white polymer shell — Hilfer's skull and jaw base.
     public static let shellOffwhite = Color(red: 0.93, green: 0.92, blue: 0.88)
@@ -1904,7 +1904,7 @@ Expected: build succeeds. Use Apple Xcode MCP `RenderPreview` against `AnatomyVi
 
 - [ ] **Step 3 [JAMEE]: Asset gate**
 
-If Jamee has delivered the three Hilfer PNGs (`HilferSkull`, `HilferEyes`, `HilferJaw`), drop them into `b0tApp/Resources/Assets.xcassets/` as `.imageset` directories at 1×/2×/3× per Apple convention. Otherwise, the preview shows the system's missing-image placeholder; the view-layer code is correct independent of asset delivery.
+If Hayden has delivered the three Hilfer PNGs (`HilferSkull`, `HilferEyes`, `HilferJaw`), drop them into `b0tApp/Resources/Assets.xcassets/` as `.imageset` directories at 1×/2×/3× per Apple convention. Otherwise, the preview shows the system's missing-image placeholder; the view-layer code is correct independent of asset delivery.
 
 - [ ] **Step 4 [CC]: Commit**
 
@@ -5392,7 +5392,7 @@ Capture screenshots; visually confirm aesthetic discipline per `aesthetic-refere
 
 - [ ] **Step 2 [JAMEE/MANUAL]: Adjust palettes / shader values if needed**
 
-Tune `WundercogPalette`, `LCDPalette`, and `CRTScanlineShader.make(intensity:lineCount:)` based on what Jamee sees. Iterate until the look is right; commit each tuning iteration as `tune(b0tDesign): <surface>`.
+Tune `WundercogPalette`, `LCDPalette`, and `CRTScanlineShader.make(intensity:lineCount:)` based on what Hayden sees. Iterate until the look is right; commit each tuning iteration as `tune(b0tDesign): <surface>`.
 
 ---
 
@@ -5429,10 +5429,10 @@ Add a "## Notes from Phase 4" section to IMPLEMENTATION.md following the Phase 1
 ```markdown
 ## Notes from Phase 4
 
-- Spec at `docs/specs/phase-4-anatomical-gui.md` settled on 2026-05-05 from a brainstorm pivoted by Jamee mid-stream (defer parts/animation to Phase 6, ship one static face first). Plan at `docs/plans/phase-4-anatomical-gui.md` decomposed the spec into N tasks across 11 slices. Implemented [start]–[end].
+- Spec at `docs/specs/phase-4-anatomical-gui.md` settled on 2026-05-05 from a brainstorm pivoted by Hayden mid-stream (defer parts/animation to Phase 6, ship one static face first). Plan at `docs/plans/phase-4-anatomical-gui.md` decomposed the spec into N tasks across 11 slices. Implemented [start]–[end].
 - ADRs landed: 0010 (organs are anatomical subsystems — supersedes part of 0007), 0011 (defer face rig to Phase 6).
 - New module: `b0tHome` — SwiftUI shell, LCD inspection panel, frontmatter-as-controls, chat default content. Depends on `b0tFace`, `b0tDesign`, `b0tBrain`, `b0tCore`.
-- New artefacts: `docs/references/face-roster.md` (15 Models, kc-oracle palette corrected), `b0tApp/Resources/manufacturers.json` (Wundercog + Hilfer), the three Hilfer Part PNGs delivered by Jamee from Gamelabs Studio (per amendment §2.2).
+- New artefacts: `docs/references/face-roster.md` (15 Models, kc-oracle palette corrected), `b0tApp/Resources/manufacturers.json` (Wundercog + Hilfer), the three Hilfer Part PNGs delivered by Hayden from Gamelabs Studio (per amendment §2.2).
 - Visual languages distinct: only Eye-screen carries CRT scanline overlay; LCD inspection panel is backlit warm-amber (no bloom, no scanlines); Skull / Jaw / organs / heart are flat pixel art with painterly lighting.
 - Mid-phase plan-vs-SDK adaptations [fill in during execution].
 
@@ -5491,12 +5491,12 @@ If the §14 checklist (Task 62) passes and any tuning iterations (Task 61) settl
    - §4 architecture → Slices 1–4.
    - §5 data flow → Slices 4 (heart round-trip), 8 (wiring pulse).
    - §6 visual languages → Slices 1 (palettes/shaders), 2 (eyes-only-CRT), 4 (LCD).
-   - §7 assets → Slice 0 deliverables list + Jamee gates in Slices 2/3/10.
+   - §7 assets → Slice 0 deliverables list + Hayden gates in Slices 2/3/10.
    - §8 manufacturers/Model integration → Slice 9.
    - §9 housekeeping → Slice 0 Task 1.
    - §10 doc updates → Slice 0 Tasks 2–9.
    - §11 testing → unit tests in every slice + manual smoke in 10.
-   - §13 dependencies on Jamee → Jamee gates marked [JAMEE].
+   - §13 dependencies on Hayden → Hayden gates marked [JAMEE].
    - §14 acceptance criteria → Slice 10 Task 62.
 2. **Placeholders** — three intentional callouts marked as `TODO (Slice N follow-up)` (the Phase 3 ConversationManager wiring touch in ChatView; the live ToolRegistry wiring in ToolsDirectoryView). All are deferred to specific later slices, not handwaved.
 3. **Type consistency** — `OrganID`, `FacePartKind`, `FrontmatterControlKind`, `BotFile`, `YAMLValue`, `BotStore.write` referenced consistently. Any drift between this plan's stubs and the actual b0tBrain / b0tCore signatures will surface at Step 2 (failing test) of each task — implementer is instructed to adjust.

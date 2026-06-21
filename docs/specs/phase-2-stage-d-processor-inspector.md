@@ -1,6 +1,6 @@
 # Phase 2 · Stage D — Processor inspector + token metering
 
-**Status:** Design of record. Approved 2026-06-05 (brainstorm with Jamee).
+**Status:** Design of record. Approved 2026-06-05 (brainstorm with Hayden).
 **Phase:** 2 (inference-engine re-open) — the final Stage-D surface of `docs/specs/phase-2-inference-engine-abstraction.md`.
 **Related:** [ADR-0012](../decisions/0012-inference-engine-agnostic.md) (engines), [ADR-0015](../decisions/0015-content-format-boundary-slot-assembly.md) (slots/token metering), [ADR-0016](../decisions/0016-aesthetic-reconciliation.md) (aesthetic), [ADR-0017](../decisions/0017-organ-ring-arrangement.md) (organ ring). Layout of record: `anatomical-gui-and-inspector.md` §3.
 

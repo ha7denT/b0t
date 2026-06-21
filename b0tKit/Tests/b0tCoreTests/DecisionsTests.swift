@@ -9,14 +9,14 @@ final class DecisionsTests: XCTestCase {
             text: "hello",
             mood: .delighted,
             memoryObservations: [
-                MemoryObservation(about: "Jamee", what: "likes coffee", importance: .medium)
+                MemoryObservation(about: "Hayden", what: "likes coffee", importance: .medium)
             ]
         )
         let b = ConversationResponse(
             text: "hello",
             mood: .delighted,
             memoryObservations: [
-                MemoryObservation(about: "Jamee", what: "likes coffee", importance: .medium)
+                MemoryObservation(about: "Hayden", what: "likes coffee", importance: .medium)
             ]
         )
         XCTAssertEqual(a, b)
