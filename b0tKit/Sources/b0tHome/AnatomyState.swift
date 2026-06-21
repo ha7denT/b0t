@@ -5,6 +5,14 @@ import b0tBrain
 import b0tCore
 import b0tFace
 
+/// The two top-level home-screen modes (ADR-0019). `chat` = talking to the
+/// b0t (small centred face, feed dominant); `workbench` = working on it
+/// (large face + organ ring + tabbed inspector).
+public enum HomeMode: Sendable, Hashable {
+    case chat
+    case workbench
+}
+
 /// The single @Observable source-of-truth that bridges SpriteKit scene events and
 /// SwiftUI views. Mutations here drive both directions:
 ///
@@ -32,6 +40,9 @@ public final class AnatomyState {
     public var processorController: (any ProcessorControlling)?
     public var downloadCoordinator: ModelDownloadCoordinator?
 
+    /// Current top-level mode. Default `.chat` (ADR-0019).
+    public var mode: HomeMode
+
     public init(bot: Bot, store: BotStore, initialHeartBPM: Int) {
         self.bot = bot
         self.store = store
@@ -42,5 +53,13 @@ public final class AnatomyState {
         self.latestUsage = nil
         self.processorController = nil
         self.downloadCoordinator = nil
+        self.mode = .chat
+    }
+
+    /// Flip chat ⇄ workbench. Clears any organ selection so workbench returns
+    /// to its recent-chat zero-state rather than a stale inspector.
+    public func toggleMode() {
+        mode = (mode == .chat) ? .workbench : .chat
+        selectedOrgan = nil
     }
 }

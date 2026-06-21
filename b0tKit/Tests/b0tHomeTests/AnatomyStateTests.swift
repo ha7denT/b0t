@@ -34,6 +34,31 @@ final class AnatomyStateTests: XCTestCase {
         XCTAssertEqual(state.heartBPM, 8)
     }
 
+    func test_initialState_defaultsToChatMode() {
+        let state = makeState()
+        XCTAssertEqual(state.mode, .chat)
+    }
+
+    func test_toggleMode_switchesChatToWorkbench() {
+        let state = makeState()
+        state.toggleMode()
+        XCTAssertEqual(state.mode, .workbench)
+    }
+
+    func test_toggleMode_switchesWorkbenchBackToChat() {
+        let state = makeState()
+        state.toggleMode()
+        state.toggleMode()
+        XCTAssertEqual(state.mode, .chat)
+    }
+
+    func test_toggleMode_clearsSelectedOrgan() {
+        let state = makeState()
+        state.selectedOrgan = .memory
+        state.toggleMode()
+        XCTAssertNil(state.selectedOrgan)
+    }
+
     private func makeState() -> AnatomyState {
         let bot = Bot.empty(at: URL(fileURLWithPath: "/tmp/test-bot"))
         let store = BotStore()
