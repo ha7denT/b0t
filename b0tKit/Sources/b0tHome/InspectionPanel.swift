@@ -20,7 +20,7 @@ public struct InspectionPanel: View {
             if let organ = state.selectedOrgan {
                 inspectionContent(for: organ)
             } else {
-                ChatView(state: state)
+                RecentChatView(state: state)
             }
         }
         .background(LCDPalette.bgWarm)
