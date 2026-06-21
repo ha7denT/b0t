@@ -29,4 +29,18 @@ final class SceneStateBridgeTests: XCTestCase {
         scene.tapHandler?(.memory)  // deselect
         XCTAssertNil(state.selectedOrgan)
     }
+
+    func test_bridge_faceTap_togglesMode() {
+        let bot = Bot.empty(at: URL(fileURLWithPath: "/tmp/test-bot"))
+        let store = BotStore()
+        let state = AnatomyState(bot: bot, store: store, initialHeartBPM: 4)
+        let scene = AnatomyScene(size: CGSize(width: 390, height: 480))
+        SceneStateBridge.connect(scene: scene, state: state)
+
+        XCTAssertEqual(state.mode, .chat)
+        scene.faceTapHandler?()
+        XCTAssertEqual(state.mode, .workbench)
+        scene.faceTapHandler?()
+        XCTAssertEqual(state.mode, .chat)
+    }
 }

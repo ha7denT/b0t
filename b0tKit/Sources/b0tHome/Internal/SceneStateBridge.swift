@@ -12,5 +12,8 @@ enum SceneStateBridge {
                 state.selectedOrgan = organ
             }
         }
+        scene.faceTapHandler = { [weak state] in
+            state?.toggleMode()
+        }
     }
 }
