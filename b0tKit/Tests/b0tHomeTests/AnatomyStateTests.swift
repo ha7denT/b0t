@@ -59,6 +59,19 @@ final class AnatomyStateTests: XCTestCase {
         XCTAssertNil(state.selectedOrgan)
     }
 
+    func test_initialTranscript_isSeededWithReadyLines() {
+        let state = makeState()
+        XCTAssertEqual(state.transcript.count, 2)
+        XCTAssertEqual(state.transcript.first?.role, .status)
+    }
+
+    func test_appendingTranscriptTurn_growsLog() {
+        let state = makeState()
+        state.transcript.append(ChatTurn(role: .user, text: "› hello"))
+        XCTAssertEqual(state.transcript.last?.role, .user)
+        XCTAssertEqual(state.transcript.last?.text, "› hello")
+    }
+
     private func makeState() -> AnatomyState {
         let bot = Bot.empty(at: URL(fileURLWithPath: "/tmp/test-bot"))
         let store = BotStore()

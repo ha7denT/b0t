@@ -5,6 +5,23 @@ import b0tBrain
 import b0tCore
 import b0tFace
 
+/// One entry in the shared chat scrollback. Lifted out of `ChatView`'s local
+/// state so both the full chat feed and the inspector's recent-chat zero-state
+/// (ADR-0019) read one source.
+public struct ChatTurn: Identifiable, Hashable, Sendable {
+    public let id: UUID
+    public let role: Role
+    public let text: String
+
+    public enum Role: Sendable, Hashable { case user, bot, status, toolCall }
+
+    public init(id: UUID = UUID(), role: Role, text: String) {
+        self.id = id
+        self.role = role
+        self.text = text
+    }
+}
+
 /// The two top-level home-screen modes (ADR-0019). `chat` = talking to the
 /// b0t (small centred face, feed dominant); `workbench` = working on it
 /// (large face + organ ring + tabbed inspector).
@@ -43,6 +60,9 @@ public final class AnatomyState {
     /// Current top-level mode. Default `.chat` (ADR-0019).
     public var mode: HomeMode
 
+    /// Shared chat scrollback (ADR-0019). Seeded with the device-ready banner.
+    public var transcript: [ChatTurn]
+
     public init(bot: Bot, store: BotStore, initialHeartBPM: Int) {
         self.bot = bot
         self.store = store
@@ -54,6 +74,10 @@ public final class AnatomyState {
         self.processorController = nil
         self.downloadCoordinator = nil
         self.mode = .chat
+        self.transcript = [
+            ChatTurn(role: .status, text: "› device ready."),
+            ChatTurn(role: .bot, text: "› hilfer here. ask me anything."),
+        ]
     }
 
     /// Flip chat ⇄ workbench. Clears any organ selection so workbench returns
