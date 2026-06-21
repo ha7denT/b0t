@@ -19,6 +19,7 @@ public struct HomeView: View {
     @State private var scene: AnatomyScene
     @State private var listener: ToolInvocationListener?
     @State private var usageListener: UsageListener?
+    @State private var showConfiguration = false
     private let bot: Bot
     private let store: BotStore
     private let injectedClient: (any LanguageModelClient)?
@@ -48,18 +49,16 @@ public struct HomeView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 0) {
-            SpriteView(scene: scene, options: [.allowsTransparency])
-                .frame(maxHeight: 540)
-                .background(Color(red: 0.045, green: 0.075, blue: 0.075))  // cool dark teal (ADR-0016)
-                .overlay(alignment: .top) {
-                    // Crown token meters — the glance view of input/output usage.
-                    // Final placement on the painterly crown awaits Hayden's visual pass.
-                    CrownTokenMetersView(usage: state.latestUsage)
-                        .padding(.top, 8)
+        ZStack(alignment: .topTrailing) {
+            Group {
+                switch state.mode {
+                case .chat:
+                    chatLayout
+                case .workbench:
+                    workbenchLayout
                 }
-            InspectionPanel(state: state)
-                .frame(maxHeight: .infinity)
+            }
+            gearButton
         }
         .ignoresSafeArea(.container, edges: .horizontal)
         .task { await initializeManager() }
@@ -79,6 +78,42 @@ public struct HomeView: View {
                 }
             }
         }
+        .sheet(isPresented: $showConfiguration) {
+            ConfigurationPlaceholderView()
+        }
+    }
+
+    private var workbenchLayout: some View {
+        VStack(spacing: 0) {
+            SpriteView(scene: scene, options: [.allowsTransparency])
+                .frame(maxHeight: 540)
+                .background(Color(red: 0.045, green: 0.075, blue: 0.075))  // cool dark teal (ADR-0016)
+                .overlay(alignment: .top) {
+                    CrownTokenMetersView(usage: state.latestUsage)
+                        .padding(.top, 8)
+                }
+            InspectionPanel(state: state)
+                .frame(maxHeight: .infinity)
+        }
+    }
+
+    private var chatLayout: some View {
+        VStack(spacing: 0) {
+            ChatFaceHeader(state: state)
+                .background(Color(red: 0.045, green: 0.075, blue: 0.075))
+            ChatView(state: state)
+                .frame(maxHeight: .infinity)
+        }
+    }
+
+    private var gearButton: some View {
+        Button(action: { showConfiguration = true }) {
+            Image(systemName: "gearshape")
+                .font(.system(size: 16))
+                .foregroundStyle(LCDPalette.textDim)
+                .padding(12)
+        }
+        .accessibilityLabel("configuration")
     }
 
     /// Mirrors DebugBrainView's pattern: pick a live or stub language-model
