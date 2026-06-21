@@ -86,7 +86,12 @@ extension EngineHost {
                 do {
                     let runtime = try await store.load(
                         modelId: entry.id, path: path, contextLength: entry.contextWindow)
-                    return (LlamaEngine(runtimeReusing: runtime), entry.contextWindow)
+                    return (
+                        LlamaEngine(
+                            runtimeReusing: runtime,
+                            supportsToolLoop: entry.supportsToolLoop),
+                        entry.contextWindow
+                    )
                 } catch {
                     EngineHost.logger.error(
                         "model '\(entry.id, privacy: .public)' is present but failed to load: \(error, privacy: .public)"
