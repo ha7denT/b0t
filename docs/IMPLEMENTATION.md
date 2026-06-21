@@ -21,8 +21,11 @@ Commits: `96fe566` import v01 assets → `f3ad5af` normalize organ icons to tran
 - **Tests:** b0tFaceTests 49, b0tHomeTests 38 — green. App builds (`xcodebuild -scheme b0t`).
 - Assets live in `b0tApp/Resources/Assets.xcassets/` (Hilfer*, Wunder Head, Organ* incl. OrganJournal). Raw source packs under `assets/icons/` + `assets/face-parts/` remain **untracked** (licensed working material; whether to commit them is Hayden's call).
 
-### ⛔ OPEN — needed to continue the GUI work
-- **Lower-section "tabs" — UNRESOLVED design question.** Hayden's feedback: the lower section "should have tabs and not be brown." Colour is done (cool dark). The **tabs structure is undecided** — I asked (persistent top-level tab bar vs restyle the inspector's 3 tabs vs chat↔inspector toggle vs other) and Hayden chose to **clarify first**. Open questions to settle: which views the tabs switch between (chat/journal/settings/inspector?), always-present vs contextual, the gear icon's role, and the visual style (backlit chip vs segmented). **Resume by settling this, then implementing.**
+### ✅ RESOLVED — lower-section navigation (2026-06-21)
+- The lower-section "tabs" question is settled: **two-mode home (chat / workbench)**, toggled by **tapping the face**, with a constant top-right configuration gear and an inspector whose zero-state shows the latest chat snippet. Design: `docs/specs/home-screen-two-mode-navigation.md`; decision: [ADR-0019](decisions/0019-two-mode-home-chat-and-workbench.md); plan: `docs/plans/home-two-mode-navigation.md`.
+- **IMPLEMENTED + tested 2026-06-21** (subagent-driven, 11 tasks, commits `07e3002`→`0a4a643`): `HomeMode` + `mode`/`toggleMode()` on `AnatomyState`, shared `transcript` (chat log lifted off `ChatView`), `faceTapHandler` in `b0tFace` wired through `SceneStateBridge`, `RecentChatView` inspector zero-state, `ChatFaceHeader` (chat-mode small face), `ConfigurationPlaceholderView` gear stub, and the mode-switched `HomeView` layout. b0tHome suite **54 green**; app build pending the final verification pass.
+- **Default launch mode = `.chat`** (Hayden's call, 2026-06-21).
+- **Parked (spec §6, not blocking):** configuration-surface contents, chat⇄workbench transition motion, chat-mode heart tappability, first-run entry.
 
 ### Pending tuning / follow-ups on the GUI branch (Hayden's visual call)
 - Grille is **static**; ADR-0014's design is brightness driven by the speech signal (token-emission rate, later TTS amplitude) — **dynamic grille drive is the follow-up**. Resting brightness/placement may want a nudge.

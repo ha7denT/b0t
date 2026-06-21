@@ -152,6 +152,8 @@ The in/out distinction by eye-line is preserved. See [ADR-0010](decisions/0010-o
 
 **Privacy shield.** A semi-transparent overlay can hide organ details — useful when handing the phone to someone, or when the user wants a calmer view. The b0t still functions; the shield is cosmetic.
 
+> **Superseded in part by [ADR-0019](decisions/0019-two-mode-home-chat-and-workbench.md) (2026-06-21):** the home screen is **two modes** — *chat* (small centred face, feed dominant) and *workbench* (large face + organ ring + tabbed inspector) — toggled by **tapping the face** (small ⇄ large). "Inspect" is workbench-with-an-organ-selected; full-screen `.md` edit is a workbench sub-state; the inspector's zero-state shows the latest chat snippet; a configuration gear is fixed top-right. The "tap face → focus mode (face zooms)" gesture and the three-register framing below are replaced. Full design: `docs/specs/home-screen-two-mode-navigation.md`.
+
 **Tap interactions:**
 - Tap face → focus mode (face zooms, chat compresses).
 - Tap organ → the organ's `.md` content appears in the lower half, replacing chat.

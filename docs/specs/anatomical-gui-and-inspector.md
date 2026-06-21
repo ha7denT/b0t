@@ -125,5 +125,5 @@ Paths relative to repo root (`assets/icons/`). `2000 Pixel Icons Pack` = the 16p
 ## 5. Open / feeds implementation
 
 - This design is **gated for implementation on Stage C** (engine selection + download manager + variable budgeting), which itself waits on the §14 Q6 model lineup.
-- Not yet designed: home-screen **focus/chat states** (tap-face zoom; chat ↔ inspect transitions) and the **first-run** view.
+- Home-screen **focus/chat states** are now designed — the two-mode model (chat/workbench, face-toggle, constant gear, recent-chat inspector zero-state) in [`home-screen-two-mode-navigation.md`](home-screen-two-mode-navigation.md) / [ADR-0019](../decisions/0019-two-mode-home-chat-and-workbench.md). The **first-run** view remains deferred (Phase 5).
 - The icon set is **v01**; final glyphs + the 16px legibility pass happen at wiring time.
