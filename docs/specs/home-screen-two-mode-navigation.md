@@ -5,7 +5,7 @@
 **Deciders:** Hayden
 **Source:** Brainstorm session 2026-06-21 (visual companion), resolving the "lower-section tabs" open question from `docs/IMPLEMENTATION.md`.
 **Related:** [`anatomical-gui-and-inspector.md`](anatomical-gui-and-inspector.md) (organ ring, inspector, asset mapping — this note supplies the navigation model that spec marked "not yet designed" in §5), [ADR-0017](../decisions/0017-organ-ring-arrangement.md) (ten organs), [ADR-0016](../decisions/0016-aesthetic-reconciliation.md) (aesthetic), [ADR-0014](../decisions/0014-speech-via-illuminated-grille.md) (grille).
-**Supersedes:** design document §2.3's three-register framing ("chat ↔ inspect ↔ edit" + "tap face → focus mode (face zooms, chat compresses)"). An ADR recording this supersession is a follow-up (see §7).
+**Supersedes:** design document §2.3's three-register framing ("chat ↔ inspect ↔ edit" + "tap face → focus mode (face zooms, chat compresses)"), recorded in [ADR-0019](../decisions/0019-two-mode-home-chat-and-workbench.md).
 
 Fidelity is ASCII/structural by intent; pixel-true rendering is deferred to implementation. The accepted wireframes live at `.superpowers/brainstorm/.../two-modes-v2.html`.
 
@@ -79,6 +79,6 @@ Full-screen edit remains a separate presentation (`.fullScreenCover`, as built) 
 
 - **Design document §2.3** — the "chat ↔ inspect ↔ edit" three-register prose and "tap face → focus mode (face zooms, chat compresses)" are **superseded** by the two-mode model (face is *small* in chat, *large* in workbench — the inverse). Update §2.3; the "tap organ → .md replaces chat" line is preserved but now reads as a workbench-internal action.
 - **`anatomical-gui-and-inspector.md` §5** — its "not yet designed: focus/chat states" line is now answered by this note; cross-link it.
-- **New ADR (follow-up)** — author an ADR ("two-mode home screen: chat & workbench, face-toggle, constant gear") recording the supersession of design §2.3, mirroring how ADR-0016/0017 captured the other GUI decisions.
+- **[ADR-0019](../decisions/0019-two-mode-home-chat-and-workbench.md)** records this navigation decision and the supersession of design §2.3 (authored 2026-06-21, alongside this spec).
 - **`docs/IMPLEMENTATION.md`** — the SESSION HANDOFF "lower-section tabs UNRESOLVED" blocker is now resolved by this note; update the handoff.
 - **Implementation is mostly additive** to the Phase-4 / GUI-revision code: workbench ≈ the existing `HomeView` anatomy + inspector; full-screen edit ≈ the existing `EditorView`. Net-new: chat-mode layout, the face-tap mode toggle, the inspector's `.recentChat` zero-state (wired from `ConversationManager`), and the constant top-right gear.
