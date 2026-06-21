@@ -59,4 +59,19 @@ final class AnatomySceneTests: XCTestCase {
         XCTAssertEqual(scene.grille?.zPosition ?? 0, -1)
         XCTAssertEqual(scene.headNode?.zPosition ?? -999, 0)
     }
+
+    func test_faceTapHandler_isInvokable() {
+        let scene = AnatomyScene(size: CGSize(width: 256, height: 256))
+        scene.installWunderFace()
+        var tapped = false
+        scene.faceTapHandler = { tapped = true }
+        scene.faceTapHandler?()
+        XCTAssertTrue(tapped)
+    }
+
+    func test_installWunderFace_namesFaceUnit() {
+        let scene = AnatomyScene(size: CGSize(width: 256, height: 256))
+        scene.installWunderFace()
+        XCTAssertEqual(scene.headNode?.name, "face_unit")
+    }
 }

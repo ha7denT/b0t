@@ -23,6 +23,10 @@ public final class AnatomyScene: SKScene {
     /// `SceneStateBridge` sets this to mutate `AnatomyState.selectedOrgan`.
     public var tapHandler: ((OrganID) -> Void)?
 
+    /// Closure invoked when the user taps the face unit (or its grille).
+    /// `SceneStateBridge` sets this to toggle `AnatomyState.mode` (ADR-0019).
+    public var faceTapHandler: (() -> Void)?
+
     public override init(size: CGSize) {
         super.init(size: size)
         scaleMode = .aspectFit
@@ -123,7 +127,12 @@ public final class AnatomyScene: SKScene {
             let location = touch.location(in: self)
             let hits = nodes(at: location)
             for node in hits {
-                if let name = node.name, let organ = OrganID(rawValue: name) {
+                guard let name = node.name else { continue }
+                if name == "face_unit" || name == "grille_emissive" {
+                    faceTapHandler?()
+                    return
+                }
+                if let organ = OrganID(rawValue: name) {
                     tapHandler?(organ)
                     return
                 }
