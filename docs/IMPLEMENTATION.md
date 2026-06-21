@@ -2,15 +2,14 @@
 
 A living document. Updated at the end of each phase, or when a blocker appears.
 
-## ⏯ SESSION HANDOFF — RESUME POINT (2026-06-11)
+## ⏯ SESSION HANDOFF — RESUME POINT (2026-06-21, reconciled)
 
-> This block is the current resume point and supersedes the dated section below where they conflict. Work is spread across **four feature branches off `main`** (none merged into each other yet — a batched merge/PR reconciliation is owed when Jamee is back from travel). The tracker is consequently **fragmented**: each branch updated its own copy of this file, so a `main` merge will conflict trivially in `IMPLEMENTATION.md` — reconcile by hand.
+> This block is the current resume point and supersedes the dated section below where they conflict. **Branch reconciliation DONE 2026-06-21:** the three finished Phase-2 branches (`stage-d-processor-inspector`, `llama-tool-call-loop`, `phase-2-closeouts`) are **all merged into `main`**; the GUI branch `import-anatomy-assets` has been **rebased onto the new `main`** and is the only live feature branch. Merged main: 365 SPM tests, 0 failures (8 gated). The `InferenceModelCatalogue` voice-pass × `supportsToolLoop` conflict and the per-branch `IMPLEMENTATION.md` forks were resolved by hand. **Still owed:** push `main` to origin (it was 29 commits ahead even before this reconciliation) and delete the merged branches.
 
 ### Branch map
-- **`main`** (`29c9ba8`) — Phase 2 **Stages A–D merged**. Processor inspector + token metering + engine selection/downloads all live here.
-- **`llama-tool-call-loop`** (`d2f1d35`, **pushed to origin/llama-tool-call-loop; PR NOT yet created**) — the llama **tool-call execute/iterate loop** (one-tool-then-answer; gate→execute→answer in `LlamaEngine.generate` via b0tCore `ToolExecutor` existential-opening; curated `supportsToolLoop`). Spec `docs/specs/phase-2-llama-tool-call-loop.md`, plan `docs/plans/phase-2-llama-tool-call-loop.md`. **To open the PR:** `gh` is installed but not authed — run `gh auth login` (GitHub.com → SSH), then `gh pr create`, or use the one-click URL `https://github.com/ha7denT/b0t/pull/new/llama-tool-call-loop`. 365 SPM tests, 0 failures.
-- **`phase-2-closeouts`** (`101a6d8`, local) — model **disclosure-copy voice pass** (system-voice lowercase; "Built with Llama" verbatim preserved) + **`DebugBrainView` resolver parity** (debug path now uses the shared `ProcessorRuntime`/`EngineHost`).
-- **`import-anatomy-assets`** (`a6b6b08`, local, **CURRENT / active GUI-revision branch**) — the GUI revision (see below). This is where to resume the design work.
+- **`main`** — Phase 2 **complete**: Stages A–D + the llama tool-call execute/iterate loop + the close-outs (voice pass, `DebugBrainView` resolver parity) all merged. Processor inspector + token metering + engine selection/downloads + tool loop all live here. **Local main is ahead of `origin/main`; push pending.**
+- **`import-anatomy-assets`** (**CURRENT / active GUI-revision branch**, rebased onto reconciled `main`) — the GUI revision (see below). This is where to resume the design work.
+- ~~`llama-tool-call-loop`~~, ~~`phase-2-closeouts`~~, ~~`stage-d-processor-inspector`~~ — merged into `main` 2026-06-21; safe to delete (local backups tagged `reconcile-backup-*`).
 
 ### Active branch: `import-anatomy-assets` — the GUI revision (in progress)
 Commits: `96fe566` import v01 assets → `f3ad5af` normalize organ icons to transparent + Journal icon → `346401f` ADR-0017 layout (left/right organ columns, **Journal = 10th organ**, semantic tint aqua/pink/yellow) → `9132964` single-unit **WunderB0t "Head 04" face** + ADR-0014 **emissive grille** (token-yellow shape behind the transparent grille cut-out; static) → `a6b6b08` polish (organ columns widened to x±170, **wiring = thicker aqua pipes behind the face in Z** `zPosition -3`, **cool LCD palette** replacing warm-amber per ADR-0016, **IoskeleyMono** `Typography.systemMono` in the Stage D processor views — they had slipped to system-mono).
