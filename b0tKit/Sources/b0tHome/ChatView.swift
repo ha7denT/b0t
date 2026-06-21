@@ -13,19 +13,7 @@ import b0tDesign
 public struct ChatView: View {
     @Bindable var state: AnatomyState
     @State private var input: String = ""
-    @State private var log: [LogEntry] = [
-        LogEntry(role: .status, text: "› device ready."),
-        LogEntry(role: .bot, text: "› hilfer here. ask me anything."),
-    ]
     @State private var isThinking: Bool = false
-
-    private struct LogEntry: Identifiable, Hashable {
-        let id = UUID()
-        let role: Role
-        let text: String
-
-        enum Role: Hashable { case user, bot, status, toolCall }
-    }
 
     public init(state: AnatomyState) {
         self.state = state
@@ -36,7 +24,7 @@ public struct ChatView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
-                        ForEach(log) { entry in
+                        ForEach(state.transcript) { entry in
                             entryView(for: entry)
                                 .id(entry.id)
                         }
@@ -50,8 +38,8 @@ public struct ChatView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(12)
                 }
-                .onChange(of: log.count) { _, _ in
-                    if let last = log.last {
+                .onChange(of: state.transcript.count) { _, _ in
+                    if let last = state.transcript.last {
                         withAnimation(.easeOut(duration: 0.15)) {
                             proxy.scrollTo(last.id, anchor: .bottom)
                         }
@@ -75,7 +63,7 @@ public struct ChatView: View {
     }
 
     @ViewBuilder
-    private func entryView(for entry: LogEntry) -> some View {
+    private func entryView(for entry: ChatTurn) -> some View {
         switch entry.role {
         case .user:
             Text(entry.text)
@@ -107,22 +95,22 @@ public struct ChatView: View {
         let prompt = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !prompt.isEmpty else { return }
         input = ""
-        log.append(LogEntry(role: .user, text: "› \(prompt)"))
+        state.transcript.append(ChatTurn(role: .user, text: "› \(prompt)"))
         isThinking = true
         defer { isThinking = false }
 
         do {
             let turn = try await manager.respond(to: prompt)
             for record in turn.toolCalls {
-                log.append(
-                    LogEntry(
+                state.transcript.append(
+                    ChatTurn(
                         role: .toolCall,
                         text: "  → \(record.toolName)"
                     ))
             }
-            log.append(LogEntry(role: .bot, text: turn.response.text))
+            state.transcript.append(ChatTurn(role: .bot, text: turn.response.text))
         } catch {
-            log.append(LogEntry(role: .status, text: "— error: \(error)"))
+            state.transcript.append(ChatTurn(role: .status, text: "— error: \(error)"))
         }
     }
 }
