@@ -928,7 +928,7 @@ Expected: all tests pass — Phase 1 (78), Slice 1 stub + manager (4 tests so fa
 
 - [ ] **Step 5.5 [VERIFY]: Manual smoke (slice 1 acceptance)**
 
-Document this in the PR description; the manual step is for the reviewer (or Jamee) to perform:
+Document this in the PR description; the manual step is for the reviewer (or Hayden) to perform:
 
 1. Open `b0t.xcodeproj` in Xcode.
 2. Run on iPhone 16 simulator (DEBUG configuration).
@@ -2067,14 +2067,14 @@ final class DecisionsTests: XCTestCase {
             text: "hello",
             mood: .delighted,
             memoryObservations: [
-                MemoryObservation(about: "Jamee", what: "likes coffee", importance: .medium)
+                MemoryObservation(about: "Hayden", what: "likes coffee", importance: .medium)
             ]
         )
         let b = ConversationResponse(
             text: "hello",
             mood: .delighted,
             memoryObservations: [
-                MemoryObservation(about: "Jamee", what: "likes coffee", importance: .medium)
+                MemoryObservation(about: "Hayden", what: "likes coffee", importance: .medium)
             ]
         )
         XCTAssertEqual(a, b)
@@ -2181,7 +2181,7 @@ final class ExecutorTests: XCTestCase {
         let response = ConversationResponse(
             text: "noted",
             memoryObservations: [
-                MemoryObservation(about: "Jamee", what: "vendor call at 4pm", importance: .high),
+                MemoryObservation(about: "Hayden", what: "vendor call at 4pm", importance: .high),
                 MemoryObservation(about: "weather", what: "looks like rain", importance: .low),
                 MemoryObservation(about: "work_tracker", what: "deadline tomorrow", importance: .medium),
             ]
@@ -2194,7 +2194,7 @@ final class ExecutorTests: XCTestCase {
 
         // Re-read memory/recent.md and confirm the medium and high observations are present.
         let recent = try await bot.memory.recent
-        XCTAssertTrue(recent.prose.contains("Jamee"))
+        XCTAssertTrue(recent.prose.contains("Hayden"))
         XCTAssertTrue(recent.prose.contains("vendor call at 4pm"))
         XCTAssertTrue(recent.prose.contains("work_tracker"))
         XCTAssertTrue(recent.prose.contains("deadline tomorrow"))
@@ -2384,7 +2384,7 @@ func test_respond_appliesMemoryObservations_persistsAcrossTurns() async throws {
                 text: "noted",
                 memoryObservations: [
                     MemoryObservation(
-                        about: "Jamee",
+                        about: "Hayden",
                         what: "has a vendor call at 4pm",
                         importance: .high
                     )
@@ -2769,7 +2769,7 @@ func test_appendConversationTurn_writesByteExactOpenClawEntry() async throws {
         mood: .attentive,
         memoryObservations: [
             MemoryObservation(
-                about: "Jamee",
+                about: "Hayden",
                 what: "vendor call at 4pm",
                 importance: .high
             )
@@ -2800,7 +2800,7 @@ func test_appendConversationTurn_writesByteExactOpenClawEntry() async throws {
     **decided:** noted — added to your memory
     **mood:** attentive
     **memory_observations:**
-    - (high) Jamee: vendor call at 4pm
+    - (high) Hayden: vendor call at 4pm
     **state_delta:** memory/recent.md
 
     """
@@ -6667,7 +6667,7 @@ final class GenerableRoundTripTests: XCTestCase {
             text: "hello",
             mood: .delighted,
             memoryObservations: [
-                MemoryObservation(about: "Jamee", what: "likes coffee", importance: .medium)
+                MemoryObservation(about: "Hayden", what: "likes coffee", importance: .medium)
             ]
         )
         let restored = try roundTrip(original)
@@ -7683,7 +7683,7 @@ If any step fails, do NOT close the phase. Investigate, file a follow-up issue, 
 
 ## End of Phase 2 — Final checks before merging the phase
 
-Open a single PR titled "Phase 2: Foundation Models loop" containing all 40 task commits (or one PR per slice if Jamee prefers smaller reviews). The PR description must include:
+Open a single PR titled "Phase 2: Foundation Models loop" containing all 40 task commits (or one PR per slice if Hayden prefers smaller reviews). The PR description must include:
 
 - Reference to PRD §4 Phase 2 + §5.2 + §5.6 + §3.3 + §3.4.
 - Reference to `docs/specs/phase-2-foundation-models-loop.md`.

@@ -54,7 +54,7 @@ public struct HomeView: View {
                 .background(Color(red: 0.09, green: 0.08, blue: 0.06))
                 .overlay(alignment: .top) {
                     // Crown token meters — the glance view of input/output usage.
-                    // Final placement on the painterly crown awaits Jamee's visual pass.
+                    // Final placement on the painterly crown awaits Hayden's visual pass.
                     CrownTokenMetersView(usage: state.latestUsage)
                         .padding(.top, 8)
                 }

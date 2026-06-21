@@ -4441,7 +4441,7 @@ Create `docs/decisions/0009-module-protocol-simplification.md`:
 
 **Status:** Accepted
 **Date:** 2026-05-04
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Supersedes:** PRD §5.3's original `Module` sketch where the protocol returned `[ToolHandle]`.
 
 ## Context

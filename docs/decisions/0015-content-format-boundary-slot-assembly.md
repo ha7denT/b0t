@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-05-30
-**Deciders:** Jamee
+**Deciders:** Hayden
 **Source:** amendment 2026-05-29 §3, §7; depends on ADR-0012 (multi-engine).
 
 ## Context

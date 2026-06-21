@@ -71,7 +71,7 @@ final class JournalWriterTests: XCTestCase {
             mood: .attentive,
             memoryObservations: [
                 MemoryObservation(
-                    about: "Jamee",
+                    about: "Hayden",
                     what: "vendor call at 4pm",
                     importance: .high
                 )
@@ -102,7 +102,7 @@ final class JournalWriterTests: XCTestCase {
             **decided:** noted \u{2014} added to your memory
             **mood:** attentive
             **memory_observations:**
-            - (high) Jamee: vendor call at 4pm
+            - (high) Hayden: vendor call at 4pm
             **state_delta:** memory/recent.md
 
             """

@@ -1,6 +1,6 @@
 # §14 Q6 — Downloadable model lineup: candidate matrix + on-device validation protocol
 
-**Status:** Desk research complete (2026-06-02); on-device validation pending Jamee (iPhone 13 Pro / 6GB / iOS 26).
+**Status:** Desk research complete (2026-06-02); on-device validation pending Hayden (iPhone 13 Pro / 6GB / iOS 26).
 **Resolves:** PRD §12 Q12; Phase-2 spec §9 Q2/Q5; the Q6 gate on Stage C3/C4 catalogue rows.
 **Decides alongside:** [ADR-0018](../decisions/0018-llama-tool-calling-via-gbnf-pure-c.md) (tool-calling via GBNF on the pure-C boundary).
 

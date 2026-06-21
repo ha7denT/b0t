@@ -42,7 +42,7 @@ final class ConversationManagerTests: XCTestCase {
                     text: "noted",
                     memoryObservations: [
                         MemoryObservation(
-                            about: "Jamee",
+                            about: "Hayden",
                             what: "has a vendor call at 4pm",
                             importance: .high
                         )

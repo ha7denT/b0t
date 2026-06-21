@@ -1,6 +1,6 @@
 # Phase 2 · Llama tool-call execute/iterate loop
 
-**Status:** Design of record. Approved 2026-06-05 (brainstorm with Jamee).
+**Status:** Design of record. Approved 2026-06-05 (brainstorm with Hayden).
 **Phase:** 2 (engine-agnostic inference). Completes the llama-path tool-calling that [ADR-0018](decisions/0018-llama-tool-calling-via-gbnf-pure-c.md) prescribes and that `phase-2-inference-engine-abstraction.md` §6 specified.
 **Builds on:** Stage B (`LlamaEngine`/`LlamaRuntime`, GBNF structured output), the single-shot `LlamaToolCallLoop.pickTool` (built), Stage D's `EngineHost`/catalogue wiring.
 

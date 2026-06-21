@@ -6,7 +6,7 @@ The user's b0t lives as a directory of plain markdown files in their Documents f
 
 ## What this repository contains
 
-The design corpus, content scaffold, and code for b0t v1. Code is written by Claude Code under the direction of Jamee, working from the documents here.
+The design corpus, content scaffold, and code for b0t v1. Code is written by Claude Code under the direction of Hayden Toppeross, working from the documents here.
 
 ```
 b0t/
@@ -53,7 +53,7 @@ v1 is in active development. Phases 0–4 have shipped (project setup, markdown 
 
 ## Contact
 
-Lead designer / product: Jamee
+Lead designer / product: Hayden Toppeross
 Implementation: Claude Code (Anthropic)
 
 This is a single-developer project. The repository may go public later; for now it's private.
