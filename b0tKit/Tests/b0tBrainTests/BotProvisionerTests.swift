@@ -78,4 +78,45 @@ final class BotProvisionerTests: XCTestCase {
         )
         XCTAssertEqual(active.lastPathComponent, "b0t-01")
     }
+
+    func test_existingInstall_gainsNewlyBundledFile() throws {
+        let source = bundleStubRoot.appendingPathComponent("default-bot")
+        // First provision creates b0t-01 (+ _active) from the stub bundle.
+        _ = try BotProvisioner.ensureDefaultBotProvisioned(
+            documentsURL: documents, defaultBotSourceURL: source)
+
+        // Simulate an app update that adds a new bundled module in a NEW subdir.
+        let newModule = source.appendingPathComponent("modules/weather.md")
+        try FileManager.default.createDirectory(
+            at: newModule.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try "---\nmodule_id: weather\n---\n".write(
+            to: newModule, atomically: true, encoding: .utf8)
+
+        // Second provision (active bot exists) must sync the new file in.
+        let active = try BotProvisioner.ensureDefaultBotProvisioned(
+            documentsURL: documents, defaultBotSourceURL: source)
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: active.appendingPathComponent("modules/weather.md").path),
+            "newly-bundled module should be synced into the existing install")
+    }
+
+    func test_sync_doesNotOverwriteUserEditedFile() throws {
+        let source = bundleStubRoot.appendingPathComponent("default-bot")
+        let active = try BotProvisioner.ensureDefaultBotProvisioned(
+            documentsURL: documents, defaultBotSourceURL: source)
+        // User edits an existing file.
+        let core = active.appendingPathComponent("identity/core.md")
+        try "user-edited\n".write(to: core, atomically: true, encoding: .utf8)
+        // Add a new bundled file too, so the sync pass definitely runs.
+        let newFile = source.appendingPathComponent("modules/weather.md")
+        try FileManager.default.createDirectory(
+            at: newFile.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try "x\n".write(to: newFile, atomically: true, encoding: .utf8)
+
+        _ = try BotProvisioner.ensureDefaultBotProvisioned(
+            documentsURL: documents, defaultBotSourceURL: source)
+
+        XCTAssertEqual(try String(contentsOf: core, encoding: .utf8), "user-edited\n")
+    }
 }

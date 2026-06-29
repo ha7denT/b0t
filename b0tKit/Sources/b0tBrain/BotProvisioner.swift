@@ -33,7 +33,7 @@ public enum BotProvisioner {
         let b0ts = documentsURL.appendingPathComponent("b0ts", isDirectory: true)
         let activePtr = b0ts.appendingPathComponent("_active")
 
-        // Step 1: existing _active pointing at an existing dir → return it.
+        // Step 1: existing _active pointing at an existing dir → sync + return it.
         if let name = (try? String(contentsOf: activePtr, encoding: .utf8))?
             .trimmingCharacters(in: .whitespacesAndNewlines),
             !name.isEmpty
@@ -41,6 +41,10 @@ public enum BotProvisioner {
             let candidate = b0ts.appendingPathComponent(name, isDirectory: true)
             var isDir: ObjCBool = false
             if fm.fileExists(atPath: candidate.path, isDirectory: &isDir), isDir.boolValue {
+                let added = try syncMissingFiles(from: defaultBotSourceURL, into: candidate)
+                #if DEBUG
+                    if added > 0 { print("[b0t] provisioner synced \(added) new bundled file(s)") }
+                #endif
                 return candidate
             }
             // Else fall through to fresh provision.
@@ -56,6 +60,49 @@ public enum BotProvisioner {
         // Step 3: write _active pointing at b0t-01.
         try "b0t-01\n".write(to: activePtr, atomically: true, encoding: .utf8)
         return target
+    }
+
+    /// Copies any bundled file missing from `botDir` into it, creating
+    /// intermediate directories. NEVER overwrites an existing file (preserves
+    /// user edits). Returns the number of files added. Hidden files are skipped.
+    ///
+    /// Additive only: a bundled file whose content changed upstream is not
+    /// re-copied if the user already has any version of it. A file the user
+    /// deleted will reappear (accepted trade-off — see the bundle-sync plan).
+    @discardableResult
+    static func syncMissingFiles(from bundledRoot: URL, into botDir: URL) throws -> Int {
+        let fm = FileManager.default
+        // Resolve symlinks on bundledRoot so its component count matches the
+        // fully-resolved URLs that the enumerator returns (on macOS /var is a
+        // symlink to /private/var; the enumerator always returns /private/var/…).
+        let resolvedRoot = bundledRoot.resolvingSymlinksInPath()
+        guard
+            let enumerator = fm.enumerator(
+                at: resolvedRoot,
+                includingPropertiesForKeys: [.isRegularFileKey],
+                options: [.skipsHiddenFiles])
+        else { return 0 }
+
+        let rootComponentCount = resolvedRoot.pathComponents.count
+        var added = 0
+        for case let fileURL as URL in enumerator {
+            let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey])
+            guard values.isRegularFile == true else { continue }
+            // Resolve the enumerated URL to the same symlink basis as resolvedRoot
+            // before computing the relative path components.
+            let resolvedFile = fileURL.resolvingSymlinksInPath()
+            let relativeComponents = Array(
+                resolvedFile.pathComponents.dropFirst(rootComponentCount))
+            let target = relativeComponents.reduce(botDir) { $0.appendingPathComponent($1) }
+            if !fm.fileExists(atPath: target.path) {
+                try fm.createDirectory(
+                    at: target.deletingLastPathComponent(),
+                    withIntermediateDirectories: true)
+                try fm.copyItem(at: fileURL, to: target)
+                added += 1
+            }
+        }
+        return added
     }
 
     /// Reads the starter `BotModel` from `manufacturers.json` in the given bundle,
