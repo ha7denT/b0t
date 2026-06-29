@@ -22,14 +22,16 @@ public final class ToolInvocationListener {
     }
 
     public func start() {
-        cancellable = source.sink { [weak self] toolName in
-            // PassthroughSubject delivers synchronously on the calling queue.
-            // In production HomeView wires the subscription on MainActor, so
-            // this fires on MainActor. Tests are @MainActor classes — same.
-            MainActor.assumeIsolated {
+        // The manager publishes from its `actor` executor (off-main). This type
+        // is `@MainActor`, so its `.sink` closure is main-actor-isolated and
+        // would TRAP if invoked off-main (the on-device "freeze"/kill, 2026-06-29).
+        // `.receive(on: .main)` guarantees delivery on the main run loop.
+        cancellable =
+            source
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] toolName in
                 self?.pulse(for: toolName)
             }
-        }
     }
 
     public func stop() {
