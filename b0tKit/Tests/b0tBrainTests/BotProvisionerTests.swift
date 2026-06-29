@@ -119,4 +119,26 @@ final class BotProvisionerTests: XCTestCase {
 
         XCTAssertEqual(try String(contentsOf: core, encoding: .utf8), "user-edited\n")
     }
+
+    func test_b01ExistsWithoutActivePointer_stillSyncsNewFiles() throws {
+        let source = bundleStubRoot.appendingPathComponent("default-bot")
+        _ = try BotProvisioner.ensureDefaultBotProvisioned(
+            documentsURL: documents, defaultBotSourceURL: source)
+        // Remove _active so Step 1 falls through to the b0t-01 path.
+        try FileManager.default.removeItem(
+            at: documents.appendingPathComponent("b0ts/_active"))
+        // Add a new bundled file.
+        let newFile = source.appendingPathComponent("memory/core.md")
+        try FileManager.default.createDirectory(
+            at: newFile.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try "facts\n".write(to: newFile, atomically: true, encoding: .utf8)
+
+        let active = try BotProvisioner.ensureDefaultBotProvisioned(
+            documentsURL: documents, defaultBotSourceURL: source)
+        XCTAssertEqual(active.lastPathComponent, "b0t-01")
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: active.appendingPathComponent("memory/core.md").path),
+            "new file should sync even when only _active was missing")
+    }
 }

@@ -1,11 +1,13 @@
 import Foundation
 
-/// First-launch bootstrap. Idempotent.
+/// First-launch bootstrap, plus an additive bundle-sync on every launch.
 ///
-/// Copies the bundled `default-bot/` content into `<documents>/b0ts/b0t-01/`
-/// the first time it runs, and writes the `_active` pointer file naming
-/// `b0t-01` as the active bot. Subsequent calls are no-ops as long as the
-/// pointed-at directory exists.
+/// On first run, copies the bundled `default-bot/` content into
+/// `<documents>/b0ts/b0t-01/` and writes the `_active` pointer. On every
+/// subsequent run it syncs *missing* bundled files into the active bot
+/// (so app updates that add files reach existing installs) but never
+/// overwrites files the user may have edited. See
+/// `docs/plans/botprovisioner-bundle-sync.md`.
 public enum BotProvisioner {
     /// Convenience overload that resolves `default-bot/` from the given
     /// bundle. The bundle must contain a folder reference named `default-bot`.
@@ -53,7 +55,10 @@ public enum BotProvisioner {
         // Step 2: provision b0t-01 from the bundled source.
         try fm.createDirectory(at: b0ts, withIntermediateDirectories: true)
         let target = b0ts.appendingPathComponent("b0t-01", isDirectory: true)
-        if !fm.fileExists(atPath: target.path) {
+        if fm.fileExists(atPath: target.path) {
+            // b0t-01 exists but _active was missing/invalid — sync new files in.
+            try syncMissingFiles(from: defaultBotSourceURL, into: target)
+        } else {
             try fm.copyItem(at: defaultBotSourceURL, to: target)
         }
 
