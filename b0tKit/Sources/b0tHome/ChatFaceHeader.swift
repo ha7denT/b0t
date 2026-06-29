@@ -29,9 +29,15 @@ public struct ChatFaceHeader: View {
 
     public var body: some View {
         VStack(spacing: 2) {
+            // The face toggles to workbench via a SwiftUI tap gesture — SpriteKit's
+            // own touch delivery doesn't reach this embedded SpriteView's scene
+            // (ADR-0019 debugging, 2026-06-29). `.contentShape` makes the whole
+            // frame (incl. transparent areas) tappable.
             SpriteView(scene: scene, options: [.allowsTransparency])
                 .frame(width: 72, height: 72)
                 .background(Color.clear)
+                .contentShape(Rectangle())
+                .onTapGesture { state.toggleMode() }
             Text("b0t-01 · ♥")
                 .font(Typography.systemMono(size: 11))
                 .foregroundStyle(LCDPalette.textDim)

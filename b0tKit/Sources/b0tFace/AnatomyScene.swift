@@ -124,21 +124,37 @@ public final class AnatomyScene: SKScene {
     #if canImport(UIKit)
         public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
             guard let touch = touches.first else { return }
-            let location = touch.location(in: self)
-            let hits = nodes(at: location)
-            for node in hits {
-                guard let name = node.name else { continue }
-                if name == "face_unit" || name == "grille_emissive" {
-                    faceTapHandler?()
-                    return
-                }
-                if let organ = OrganID(rawValue: name) {
-                    tapHandler?(organ)
-                    return
-                }
-            }
+            routeTap(atScenePoint: touch.location(in: self))
         }
     #endif
+
+    /// Routes a tap given in the presenting view's coordinate space (e.g. a
+    /// SwiftUI `.onTapGesture(coordinateSpace: .local)` location) to the
+    /// face/organ handlers. SwiftUI delivers these taps where the embedded
+    /// SKView's own `touchesBegan` does not in this composition (confirmed on
+    /// device 2026-06-29). `convertPoint(fromView:)` accounts for the scene's
+    /// `aspectFit` letterboxing, so taps in the empty side bars map to scene
+    /// points outside any node and no-op.
+    public func routeTap(atViewPoint viewPoint: CGPoint) {
+        guard view != nil else { return }
+        routeTap(atScenePoint: convertPoint(fromView: viewPoint))
+    }
+
+    /// Shared hit-test + dispatch for a point already in scene coordinates.
+    private func routeTap(atScenePoint scenePoint: CGPoint) {
+        let hits = nodes(at: scenePoint)
+        for node in hits {
+            guard let name = node.name else { continue }
+            if name == "face_unit" || name == "grille_emissive" {
+                faceTapHandler?()
+                return
+            }
+            if let organ = OrganID(rawValue: name) {
+                tapHandler?(organ)
+                return
+            }
+        }
+    }
 
     private func textureName(for organ: OrganID) -> String {
         switch organ {

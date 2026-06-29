@@ -88,6 +88,12 @@ public struct HomeView: View {
             SpriteView(scene: scene, options: [.allowsTransparency])
                 .frame(maxHeight: 540)
                 .background(Color(red: 0.045, green: 0.075, blue: 0.075))  // cool dark teal (ADR-0016)
+                // SpriteView's embedded SKView doesn't receive touches in this
+                // SwiftUI composition, so organ/face hit-testing is driven from
+                // the SwiftUI tap layer (ADR-0019 debugging, 2026-06-29).
+                .onTapGesture(coordinateSpace: .local) { location in
+                    scene.routeTap(atViewPoint: location)
+                }
                 .overlay(alignment: .top) {
                     CrownTokenMetersView(usage: state.latestUsage)
                         .padding(.top, 8)
