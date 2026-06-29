@@ -1131,6 +1131,11 @@ public final class UsageListener {
     }
 
     public func start() {
+        // ⚠️ DO NOT COPY — this as-planned pattern shipped a crash. The sink is
+        // main-actor-isolated but the manager (an actor) publishes off-main, so
+        // `MainActor.assumeIsolated` traps (SIGTRAP) on device. FIXED 2026-06-29
+        // (commit d40b71c) with `.receive(on: DispatchQueue.main)`. See ADR-0019
+        // debugging notes in IMPLEMENTATION.md and the as-built UsageListener.
         cancellable = source.sink { [weak self] usage in
             MainActor.assumeIsolated { self?.state.latestUsage = usage }
         }

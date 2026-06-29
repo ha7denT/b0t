@@ -31,7 +31,7 @@ The markdown layer. Reads, parses, and writes the user's b0t files.
 - `Frontmatter`, `YAMLValue` — ordered projection of frontmatter contents.
 - `BotFileError` — six-case error taxonomy (read-thrown, read-annotated, write-thrown).
 - `BotLink`, `BotLinkResolution`, `BacklinkIndex` — link parsing and reverse map.
-- `BotProvisioner` — first-launch bundle copy.
+- `BotProvisioner` — first-launch bundle copy **plus additive bundle-sync on every launch** (`syncMissingFiles(from:into:)` copies bundled `default-bot/` files missing from the active bot dir so app updates reach existing installs; never overwrites user edits — additive only). See `docs/plans/botprovisioner-bundle-sync.md`.
 - `KnownFiles.swift` — typed accessors for canonical frontmatter keys.
 
 Internals (not for direct use outside the module):

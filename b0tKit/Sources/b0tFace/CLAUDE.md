@@ -39,4 +39,10 @@ Bottom to top:
 
 - `AnatomyState` — the @Observable bridge between scene events and SwiftUI views.
 - `HomeView`, LCD inspection panel, chat — all SwiftUI, all in `b0tHome`.
-- Touch handling that mutates `AnatomyState` from this scene's `touchesBegan` (Slice 4).
+- Touch handling that mutates `AnatomyState`. NOTE (2026-06-29): the embedded
+  `SpriteView`'s `touchesBegan` does **not** receive touches in the SwiftUI
+  composition, so `b0tHome` drives taps from the SwiftUI gesture layer and calls
+  `AnatomyScene.routeTap(atViewPoint:)` (which `convertPoint(fromView:)` +
+  `nodes(at:)` then dispatches to `tapHandler`/`faceTapHandler`). `touchesBegan`
+  is kept but is effectively dead on iOS; `routeTap` is the live path. See
+  ADR-0019 / `docs/specs/home-screen-two-mode-navigation.md`.
